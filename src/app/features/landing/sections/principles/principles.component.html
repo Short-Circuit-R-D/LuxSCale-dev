@@ -1,0 +1,28 @@
+<section id="principles" class="bg-black py-32">
+  <div class="mx-auto max-w-[1440px] px-12">
+    <div class="mb-16 flex items-end justify-between">
+      <h2 class="font-[Anton] text-[3.5rem] leading-none text-white uppercase">Our Principles</h2>
+      <p class="max-w-md text-right text-sm text-muted">
+        The engineering foundations behind every LuxScale AI calculation.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      @for (principle of principles(); track principle.number) {
+        <article
+          class="rounded-xl border border-border bg-surface p-8 transition-colors duration-180 hover:border-[#3A3A3A]"
+        >
+          <div class="mb-6 flex items-center gap-3">
+            <span class="font-[JetBrains_Mono] text-xs text-primary">{{ principle.number }}</span>
+            <span class="text-primary">/</span>
+            <span class="font-[JetBrains_Mono] text-xs text-primary uppercase">{{
+              principle.tag
+            }}</span>
+          </div>
+          <h3 class="mb-4 font-[Anton] text-xl text-white uppercase">{{ principle.title }}</h3>
+          <p class="text-sm leading-relaxed text-muted">{{ principle.description }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>

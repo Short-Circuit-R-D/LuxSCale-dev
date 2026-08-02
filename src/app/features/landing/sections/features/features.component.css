@@ -1,0 +1,28 @@
+.step-card {
+  padding: 24px;
+  transition: all 180ms;
+}
+
+.step-card--active {
+  background-color: var(--color-surface);
+  border-left: 3px solid var(--color-primary);
+}
+
+.monitor-panel {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background-color: var(--color-surface);
+  padding: 32px;
+}
+
+.stat-box {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-elevated);
+  padding: 16px;
+}
+
+.stat-box--red {
+  border-color: rgba(235, 27, 38, 0.3);
+  background-color: rgba(235, 27, 38, 0.05);
+}

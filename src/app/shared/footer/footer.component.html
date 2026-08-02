@@ -1,0 +1,17 @@
+<footer class="border-t border-border bg-black">
+  <div class="mx-auto flex max-w-[1440px] items-center justify-between px-12 py-8">
+    <div class="flex flex-col gap-2">
+      <a routerLink="/" class="font-[Anton] text-xl tracking-wide text-white uppercase">
+        LuxScale AI
+      </a>
+      <p class="text-xs text-disabled">&copy; 2024 LuxScale AI. Engineered Precision.</p>
+    </div>
+    <nav class="flex items-center gap-8">
+      @for (link of footerLinks(); track link.href) {
+        <a [href]="link.href" class="text-sm text-muted transition-colors duration-180 hover:text-white">
+          {{ link.label }}
+        </a>
+      }
+    </nav>
+  </div>
+</footer>

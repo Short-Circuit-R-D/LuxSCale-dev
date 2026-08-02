@@ -1,0 +1,14 @@
+<section class="bg-black py-32">
+  <div class="mx-auto max-w-[1440px] px-12">
+    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+      @for (cap of capabilities(); track cap.label) {
+        <article
+          class="rounded-xl border border-border bg-surface p-8 transition-colors duration-180 hover:border-[#3A3A3A]"
+        >
+          <h3 class="mb-3 font-[Anton] text-xl text-white uppercase">{{ cap.title }}</h3>
+          <p class="text-sm leading-relaxed text-muted">{{ cap.description }}</p>
+        </article>
+      }
+    </div>
+  </div>
+</section>

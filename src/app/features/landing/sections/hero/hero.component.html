@@ -1,0 +1,42 @@
+<section class="relative flex h-screen items-center justify-center overflow-hidden">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+
+  <div class="relative z-10 mx-auto max-w-[1440px] px-12 text-center">
+    <div class="mb-8 inline-block rounded border border-primary/40 bg-primary/10 px-4 py-2">
+      <span class="font-[JetBrains_Mono] text-xs tracking-widest text-primary uppercase">
+        EN 12464-1 Compliant
+      </span>
+    </div>
+
+    <h1 class="font-[Anton] text-[5rem] leading-none tracking-tight text-white uppercase lg:text-[6.5rem]">
+      Lighting Design<br />At Scale
+    </h1>
+
+    <p class="mx-auto mt-6 max-w-2xl text-lg text-muted">
+      Next-generation AI engine for automated photometric layout engineering.
+      Architecting code-compliant lighting schemes in seconds.
+    </p>
+
+    <div class="mt-10 flex items-center justify-center gap-4">
+      @for (action of actions(); track action.href) {
+        <a
+          [href]="action.href"
+          class="rounded-xl px-8 py-3 text-sm font-medium transition-all duration-180"
+          [class]="action.primary
+            ? 'bg-primary text-white hover:bg-primary-dark'
+            : 'border border-[#3A3A3A] text-white hover:border-primary hover:text-primary'"
+        >
+          {{ action.label }}
+        </a>
+      }
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <span class="text-xs tracking-widest uppercase">Scroll</span>
+    <svg class="bounce-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 5v14M19 12l-7 7-7-7" />
+    </svg>
+  </div>
+</section>

@@ -1,0 +1,102 @@
+<section id="features" class="bg-black py-32">
+  <div class="mx-auto max-w-[1440px] px-12">
+    <h2 class="mb-16 font-[Anton] text-[3.5rem] leading-none text-white uppercase">
+      Built For Engineers
+    </h2>
+
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div class="flex flex-col gap-4">
+        @for (step of steps(); track step.id) {
+          <article class="step-card" [class.step-card--active]="step.active">
+            <div class="flex items-start justify-between">
+              <div>
+                <span class="font-[JetBrains_Mono] text-xs text-primary uppercase">{{
+                  step.id
+                }}</span>
+                <h3 class="mt-2 font-[Anton] text-2xl text-white uppercase leading-tight">
+                  {{ step.title }}
+                </h3>
+              </div>
+              @if (step.active) {
+                <div class="flex h-8 w-8 items-center justify-center rounded bg-primary/20">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="text-primary"
+                  >
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                  </svg>
+                </div>
+              } @else {
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="mt-1 text-disabled"
+                >
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              }
+            </div>
+          </article>
+        }
+      </div>
+
+      <div class="monitor-panel">
+        <div class="mb-6 flex items-center justify-between">
+          <span class="font-[JetBrains_Mono] text-xs text-primary uppercase"
+            >SYS_MONITOR: ACTIVE</span
+          >
+          <div class="flex gap-1">
+            <span class="h-2 w-2 rounded-full bg-primary"></span>
+            <span class="h-2 w-2 rounded-full bg-primary"></span>
+            <span class="h-2 w-2 rounded-full bg-primary"></span>
+          </div>
+        </div>
+
+        <div class="mb-8 h-px w-full bg-border"></div>
+
+        <div class="mb-8 flex flex-col gap-3">
+          <div class="h-px w-full bg-border"></div>
+          <div class="h-px w-3/4 bg-primary/60"></div>
+          <div class="h-px w-1/2 bg-primary/40"></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="stat-box">
+            <span class="font-[JetBrains_Mono] text-xs text-disabled uppercase"
+              >AVG. STUDY TIME</span
+            >
+            <p class="mt-2 font-[JetBrains_Mono] text-2xl text-white">
+              1 <span class="text-sm text-muted">min</span>
+            </p>
+          </div>
+          <div class="stat-box stat-box--red">
+            <span class="font-[JetBrains_Mono] text-xs text-disabled uppercase"
+              >STANDARD COMPLIANCE</span
+            >
+            <p class="mt-2 font-[JetBrains_Mono] text-xl text-primary leading-tight">
+              100% EN12464-1
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
