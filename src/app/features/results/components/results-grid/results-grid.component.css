@@ -1,5 +1,73 @@
+.view-slider {
+  display: flex;
+  justify-content: center;
+}
+
+.slider-container {
+  display: inline-flex;
+  position: relative;
+  background-color: #323131d1;
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.slider-track {
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+}
+
+.slider-indicator {
+  position: absolute;
+  width: calc(50% - 2px);
+  height: 100%;
+  background-color: var(--color-primary);
+  border-radius: 6px;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(0);
+}
+
+.slider-indicator.is-right {
+  transform: translateX(calc(100% + 4px));
+}
+
+.slider-label {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 100px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: color 0.25s ease;
+  color: var(--color-muted);
+}
+
+@media (min-width: 640px) {
+  .slider-label {
+    min-width: 140px;
+    padding: 8px 20px;
+    font-size: 0.6875rem;
+  }
+}
+
+.slider-label:hover {
+  color: #ffffff;
+}
+
+.slider-label.active {
+  color: #ffffff;
+}
+
 .solution-tabs::-webkit-scrollbar {
-  height: 4px;
+  height: 3px;
 }
 
 .solution-tabs::-webkit-scrollbar-track {
@@ -7,15 +75,15 @@
 }
 
 .solution-tabs::-webkit-scrollbar-thumb {
-  background: #3a3a3a;
+  background: #2a2a2a;
   border-radius: 2px;
 }
 
 .solution-tabs::-webkit-scrollbar-thumb:hover {
-  background: #4a4a4a;
+  background: #3a3a3a;
 }
 
 .solution-tabs {
   scrollbar-width: thin;
-  scrollbar-color: #3a3a3a transparent;
+  scrollbar-color: #2a2a2a transparent;
 }

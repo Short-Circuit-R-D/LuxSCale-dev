@@ -1,6 +1,12 @@
 .step-card {
-  padding: 24px;
+  padding: 16px;
   transition: all 180ms;
+}
+
+@media (min-width: 640px) {
+  .step-card {
+    padding: 24px;
+  }
 }
 
 .step-card--active {
@@ -12,14 +18,26 @@
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background-color: var(--color-surface);
-  padding: 32px;
+  padding: 20px;
+}
+
+@media (min-width: 640px) {
+  .monitor-panel {
+    padding: 32px;
+  }
 }
 
 .stat-box {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background-color: var(--color-elevated);
-  padding: 16px;
+  padding: 12px;
+}
+
+@media (min-width: 640px) {
+  .stat-box {
+    padding: 16px;
+  }
 }
 
 .stat-box--red {

@@ -1,64 +1,64 @@
-<div class="border border-border rounded-xl bg-surface p-8">
+<div class="border border-border rounded-xl bg-surface p-5 sm:p-8">
   <div class="flex items-center gap-2 mb-6 pl-3 border-l-2 border-primary">
     <span class="font-mono text-xs text-primary">IV.</span>
     <span class="font-mono text-xs text-primary tracking-widest uppercase">Calculation Metadata</span>
   </div>
 
-  <div class="grid grid-cols-4 gap-4 mb-6">
+  <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-3 md:grid-cols-4 sm:gap-4">
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Calc Mode</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Calc Mode</span>
       <span class="font-body text-sm text-white font-medium">{{ meta().calc_mode }}</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Total Solutions</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Total Solutions</span>
       <span class="font-body text-sm text-white font-medium">{{ meta().total_solutions_returned }}</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Max Cap</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Max Cap</span>
       <span class="font-body text-sm text-white font-medium">{{ meta().max_solutions_cap }}</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Interior Height Threshold</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Interior Height Threshold</span>
       <span class="font-body text-sm text-white font-medium">{{ meta().interior_height_threshold_m }}m</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Capped at Max</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Capped at Max</span>
       <span class="font-body text-sm font-medium" [class]="meta().capped_at_max ? 'text-green-500' : 'text-muted'">
         {{ meta().capped_at_max ? 'YES' : 'NO' }}
       </span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Compliant Cap Only</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Compliant Cap Only</span>
       <span class="font-body text-sm font-medium" [class]="meta().compliant_cap_only ? 'text-green-500' : 'text-muted'">
         {{ meta().compliant_cap_only ? 'YES' : 'NO' }}
       </span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">No Compliant Options</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">No Compliant Options</span>
       <span class="font-body text-sm font-medium" [class]="meta().no_compliant_options ? 'text-green-500' : 'text-muted'">
         {{ meta().no_compliant_options ? 'YES' : 'NO' }}
       </span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Had Non-Compliant Closest</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Had Non-Compliant Closest</span>
       <span class="font-body text-sm font-medium" [class]="meta().had_non_compliant_closest ? 'text-green-500' : 'text-muted'">
         {{ meta().had_non_compliant_closest ? 'YES' : 'NO' }}
       </span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Weatherproof Prioritized</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Weatherproof Prioritized</span>
       <span class="font-body text-sm font-medium" [class]="meta().prioritized_weatherproof_triproof ? 'text-green-500' : 'text-muted'">
         {{ meta().prioritized_weatherproof_triproof ? 'YES' : 'NO' }}
       </span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Non-Compliant Fallback</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Non-Compliant Fallback</span>
       <span class="font-body text-sm font-medium" [class]="meta().used_closest_non_compliant_fallback ? 'text-green-500' : 'text-muted'">
         {{ meta().used_closest_non_compliant_fallback ? 'YES' : 'NO' }}
       </span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Uniformity Sweep Fallback</span>
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Uniformity Sweep Fallback</span>
       <span class="font-body text-sm font-medium" [class]="meta().used_uniformity_sweep_fallback ? 'text-green-500' : 'text-muted'">
         {{ meta().used_uniformity_sweep_fallback ? 'YES' : 'NO' }}
       </span>
@@ -71,7 +71,7 @@
       <div class="flex flex-col gap-3">
         @for (item of meta().fixture_family_shortfall; track item.luminaire) {
           <div class="p-4 bg-elevated rounded-lg border-l-3 border-primary">
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:mb-2">
               <span class="font-body text-sm text-white font-medium">{{ item.luminaire }}</span>
               <span class="font-mono text-[0.6875rem] text-primary uppercase">{{ item.issue }}</span>
             </div>

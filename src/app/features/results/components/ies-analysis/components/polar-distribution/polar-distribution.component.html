@@ -1,0 +1,109 @@
+<div class="p-4 bg-surface border border-border rounded-xl">
+  <div class="flex items-center gap-2 mb-4">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+      <circle cx="12" cy="12" r="10"/>
+      <circle cx="12" cy="12" r="4"/>
+      <line x1="12" y1="2" x2="12" y2="6"/>
+      <line x1="12" y1="18" x2="12" y2="22"/>
+      <line x1="2" y1="12" x2="6" y2="12"/>
+      <line x1="18" y1="12" x2="22" y2="12"/>
+    </svg>
+    <div class="flex flex-col">
+      <span class="font-body text-sm text-white font-medium">Horizontal Candela Polar Distribution</span>
+      <span class="font-mono text-[0.5625rem] text-muted">Intensity curve for selected C-plane ({{ selectedAngle() }}°)</span>
+    </div>
+  </div>
+
+  <div class="flex justify-center">
+    <svg [attr.width]="svgSize" [attr.height]="svgSize + 60" [attr.viewBox]="'0 0 ' + svgSize + ' ' + (svgSize + 60)">
+      <!-- Dark background -->
+      <rect [attr.width]="svgSize" [attr.height]="svgSize + 60" fill="#111318"/>
+
+      <!-- Concentric circles -->
+      @for (step of scaleSteps(); track step) {
+        <circle
+          [attr.cx]="center"
+          [attr.cy]="center"
+          [attr.r]="(step / outerValue()) * maxRadius"
+          fill="none"
+          stroke="#2a2d35"
+          stroke-width="0.7"
+        />
+      }
+
+      <!-- Radial lines -->
+      @for (line of radialLines(); track $index) {
+        <line
+          [attr.x1]="line.x1"
+          [attr.y1]="line.y1"
+          [attr.x2]="line.x2"
+          [attr.y2]="line.y2"
+          stroke="#1e2028"
+          stroke-width="0.5"
+        />
+      }
+
+      <!-- Angle labels -->
+      @for (label of angleLabels(); track label.angle) {
+        <text
+          [attr.x]="label.x"
+          [attr.y]="label.y"
+          text-anchor="middle"
+          dominant-baseline="middle"
+          fill="#5a5e6a"
+          font-family="Helvetica, Arial, sans-serif"
+          font-size="10"
+        >
+          {{ label.label }}
+        </text>
+      }
+
+      <!-- Candela curve -->
+      @if (curvePath()) {
+        <path
+          [attr.d]="curvePath()"
+          fill="rgba(185, 35, 42, 0.15)"
+          stroke="#c4303a"
+          stroke-width="1.4"
+          stroke-linejoin="round"
+        />
+      }
+
+      <!-- Center dot -->
+      <circle [attr.cx]="center" [attr.cy]="center" r="2.5" fill="#c4303a"/>
+
+      <!-- Connecting lines from circles to labels -->
+      @for (line of connectingLines(); track line.x) {
+        <line
+          [attr.x1]="line.x"
+          [attr.y1]="line.y1"
+          [attr.x2]="line.x"
+          [attr.y2]="line.y2"
+          stroke="#2a2d35"
+          stroke-width="0.5"
+          stroke-dasharray="2,2"
+        />
+      }
+
+      <!-- Scale labels at bottom -->
+      @for (label of scaleLabels(); track label.value) {
+        <text
+          [attr.x]="label.x"
+          [attr.y]="center + maxRadius + 38"
+          text-anchor="middle"
+          fill="#7a7e8a"
+          font-family="Helvetica, Arial, sans-serif"
+          font-size="10"
+        >
+          {{ label.value }}
+        </text>
+      }
+
+      <!-- Legend -->
+      <circle [attr.cx]="center - 10" [attr.cy]="center + maxRadius + 52" r="4" fill="#c4303a"/>
+      <text [attr.x]="center + 2" [attr.y]="center + maxRadius + 55" fill="#7a7e8a" font-family="Helvetica, Arial, sans-serif" font-size="9">
+        C {{ selectedAngle() }}°
+      </text>
+    </svg>
+  </div>
+</div>

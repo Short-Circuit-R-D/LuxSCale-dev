@@ -1,25 +1,25 @@
-<div class="border border-border rounded-xl bg-surface p-8">
+<div class="border border-border rounded-xl bg-surface p-5 sm:p-8">
   <div class="flex items-center gap-2 mb-6 pl-3 border-l-2 border-primary">
     <span class="font-mono text-xs text-primary">I.</span>
     <span class="font-mono text-xs text-primary tracking-widest uppercase">Room Dimensions</span>
   </div>
 
-  <div class="grid grid-cols-4 gap-6">
+  <div class="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
     <div class="flex flex-col gap-2">
-      <span class="font-mono text-[0.6875rem] text-muted tracking-widest uppercase">Width</span>
-      <span class="font-display text-2xl text-white">{{ width() }}<span class="font-mono text-sm text-muted ml-1">m</span></span>
+      <span class="font-mono text-[0.625rem] text-muted tracking-widest uppercase sm:text-[0.6875rem]">Width</span>
+      <span class="font-display text-xl text-white sm:text-2xl">{{ width() }}<span class="font-mono text-sm text-muted ml-1">m</span></span>
     </div>
     <div class="flex flex-col gap-2">
-      <span class="font-mono text-[0.6875rem] text-muted tracking-widest uppercase">Length</span>
-      <span class="font-display text-2xl text-white">{{ length() }}<span class="font-mono text-sm text-muted ml-1">m</span></span>
+      <span class="font-mono text-[0.625rem] text-muted tracking-widest uppercase sm:text-[0.6875rem]">Length</span>
+      <span class="font-display text-xl text-white sm:text-2xl">{{ length() }}<span class="font-mono text-sm text-muted ml-1">m</span></span>
     </div>
     <div class="flex flex-col gap-2">
-      <span class="font-mono text-[0.6875rem] text-muted tracking-widest uppercase">Ceiling Height</span>
-      <span class="font-display text-2xl text-white">{{ ceilingHeight() }}<span class="font-mono text-sm text-muted ml-1">m</span></span>
+      <span class="font-mono text-[0.625rem] text-muted tracking-widest uppercase sm:text-[0.6875rem]">Ceiling Height</span>
+      <span class="font-display text-xl text-white sm:text-2xl">{{ ceilingHeight() }}<span class="font-mono text-sm text-muted ml-1">m</span></span>
     </div>
     <div class="flex flex-col gap-2">
-      <span class="font-mono text-[0.6875rem] text-muted tracking-widest uppercase">Area</span>
-      <span class="font-display text-2xl text-white">{{ (width() * length()) | number:'1.1-1' }}<span class="font-mono text-sm text-muted ml-1">m²</span></span>
+      <span class="font-mono text-[0.625rem] text-muted tracking-widest uppercase sm:text-[0.6875rem]">Area</span>
+      <span class="font-display text-xl text-white sm:text-2xl">{{ (width() * length()) | number:'1.1-1' }}<span class="font-mono text-sm text-muted ml-1">m²</span></span>
     </div>
   </div>
 </div>

@@ -1,0 +1,12 @@
+img.zoomed {
+  cursor: zoom-out;
+}
+
+img:not(.zoomed) {
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+
+img:not(.zoomed):hover {
+  transform: scale(1.02);
+}

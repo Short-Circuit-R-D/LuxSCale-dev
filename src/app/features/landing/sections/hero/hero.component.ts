@@ -16,6 +16,6 @@ interface HeroAction {
 export class HeroComponent {
   protected readonly actions = signal<HeroAction[]>([
     { label: 'Start New Study', href: '/create-study', primary: true },
-    { label: 'View Last Study', href: '#', primary: false },
+    { label: 'View Last Study', href: '/results', primary: false },
   ]);
 }

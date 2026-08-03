@@ -1,0 +1,312 @@
+@if (result(); as result) {
+  <div class="grid grid-cols-1 gap-4 mb-6 sm:gap-6 md:grid-cols-2">
+    <div class="p-4 bg-elevated rounded-lg">
+      <span class="block font-mono text-[0.625rem] text-disabled tracking-widest uppercase mb-3"
+        >Luminaire & Layout</span
+      >
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Luminaire Type</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['Luminaire']
+          }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Luminaire Power</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['Power (W)']
+            }}<span class="font-mono text-xs text-muted ml-0.5"> W</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Number of Fixtures</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['Fixtures']
+          }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Fixtures per m²</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['Fixtures per m²']
+          }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Layout Grid</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['Layout grid']
+          }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Spacing Width (X)</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['Spacing X (m)']
+            }}<span class="font-mono text-xs text-muted ml-0.5"> m</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Spacing Length (Y)</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['Spacing Y (m)']
+            }}<span class="font-mono text-xs text-muted ml-0.5"> m</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Beam Angle</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['Beam Angle (°)']
+            }}<span class="font-mono text-xs text-muted ml-0.5">°</span></span
+          >
+        </div>
+        @if (result['Beam angle max (°)'] !== undefined) {
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+              >Beam Angle Max</span
+            >
+            <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+              >{{ result['Beam angle max (°)']
+              }}<span class="font-mono text-xs text-muted ml-0.5">°</span></span
+            >
+          </div>
+        }
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Beam Angle Nominal</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['Beam Angle nominal (°)']
+            }}<span class="font-mono text-xs text-muted ml-0.5">°</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >IES File</span
+          >
+          <span class="font-mono text-[0.625rem] text-white font-medium sm:text-xs">{{ result['IES file'] }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 bg-elevated rounded-lg">
+      <span class="block font-mono text-[0.625rem] text-disabled tracking-widest uppercase mb-3"
+        >Performance</span
+      >
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Luminous Efficacy</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['Efficacy (lm/W)']
+            }}<span class="font-mono text-xs text-muted ml-0.5"> lm/W</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >IES Lumens</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['IES lumens (lm)'] | number: '1.0-0'
+            }}<span class="font-mono text-xs text-muted ml-0.5"> lm</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Total Installed Power</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['Total Power (W/H)'] | number: '1.0-0'
+            }}<span class="font-mono text-xs text-muted ml-0.5"> W</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Maintenance Factor</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['Maintenance factor']
+          }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 bg-elevated rounded-lg">
+      <span class="block font-mono text-[0.625rem] text-disabled tracking-widest uppercase mb-3"
+        >Illuminance</span
+      >
+      <div class="grid grid-cols-2 gap-3">
+        <div
+          class="col-span-2 p-3 bg-primary/5 rounded-md border-l-3 border-primary flex flex-col gap-0.5"
+        >
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Average (E_avg maintained)</span
+          >
+          <span class="font-display text-lg text-white sm:text-xl"
+            >{{ result['Average Lux'] | number: '1.0-0'
+            }}<span class="font-mono text-xs text-muted ml-1"> lx</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >E_avg on Grid</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['E_avg_grid_lx'] | number: '1.1-1'
+            }}<span class="font-mono text-xs text-muted ml-0.5"> lx</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >E_min on Grid</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['E_min_grid_lx'] | number: '1.1-1'
+            }}<span class="font-mono text-xs text-muted ml-0.5"> lx</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >E_max on Grid</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]"
+            >{{ result['E_max_grid_lx'] | number: '1.1-1'
+            }}<span class="font-mono text-xs text-muted ml-0.5"> lx</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Beam Source</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['Beam source']
+          }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 bg-elevated rounded-lg">
+      <span class="block font-mono text-[0.625rem] text-disabled tracking-widest uppercase mb-3"
+        >Uniformity & Compliance</span
+      >
+      <div class="grid grid-cols-2 gap-3">
+        <div
+          class="col-span-2 p-3 bg-primary/5 rounded-md border-l-3 border-primary flex flex-col gap-0.5"
+        >
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Calculated Uo (IES grid)</span
+          >
+          <span class="font-display text-lg text-white sm:text-xl"
+            >{{ result['U0_calculated'] | number: '1.4-4'
+            }}<span class="font-mono text-xs text-muted ml-1"> lx</span></span
+          >
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Standard Uo (required)</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['Uniformity']
+          }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Calculated U1 (E_min/E_max)</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['U1_calculated'] | number: '1.4-4'
+          }}</span>
+        </div>
+        @if (result['Standard margin (U0 %)'] !== undefined) {
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+              >U0 Margin</span
+            >
+            <span
+              class="font-body text-[0.8125rem] font-medium sm:text-[0.9375rem]"
+              [class]="result['Standard margin (U0 %)'] < 0 ? 'text-primary' : 'text-white'"
+            >
+              {{ result['Standard margin (U0 %)'] | number: '1.2-2' }}%
+            </span>
+          </div>
+        }
+        @if (result['Standard margin (lux %)'] !== undefined) {
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+              >Lux Margin</span
+            >
+            <span
+              class="font-body text-[0.8125rem] font-medium sm:text-[0.9375rem]"
+              [class]="result['Standard margin (lux %)'] < 0 ? 'text-primary' : 'text-white'"
+            >
+              {{ result['Standard margin (lux %)'] | number: '1.2-2' }}%
+            </span>
+          </div>
+        }
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >Lux Gap</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['Lux gap']
+          }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+            >U0 Gap</span
+          >
+          <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.9375rem]">{{
+            result['U0 gap']
+          }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4 pt-4 border-t border-border sm:grid-cols-2">
+    <div class="flex flex-col gap-1">
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+        >How This Option Was Chosen</span
+      >
+      <span class="font-body text-[0.75rem] text-muted sm:text-[0.8125rem]">{{ result['Selection'] }}</span>
+    </div>
+    <div class="flex flex-col gap-1">
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+        >Lux Compliance Basis</span
+      >
+      <span class="font-body text-[0.75rem] text-muted sm:text-[0.8125rem]">{{
+        result['Lux compliance basis']
+      }}</span>
+    </div>
+    <div class="flex flex-col gap-1">
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+        >Room Reflectance</span
+      >
+      <span class="font-body text-[0.75rem] text-muted sm:text-[0.8125rem]">{{
+        result['Room reflectance preset']
+      }}</span>
+    </div>
+    <div class="flex flex-col gap-1">
+      <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+        >Inter-Reflection Fraction</span
+      >
+      <span class="font-body text-[0.75rem] text-muted sm:text-[0.8125rem]">{{
+        result['Inter-reflection fraction (est.)']
+      }}</span>
+    </div>
+  </div>
+}

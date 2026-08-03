@@ -1,10 +1,8 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import {
-  CalculationResponse,
-  CalculationResultService,
-} from '../../services/calculation-result.service';
+import { CalculationResponse } from '../../services/calculation-result.service';
+import { ResultStoreService } from '../../services/result-store.service';
 import { LuxScaleService, StandardEntry } from '../../services/luxscale.service';
 import { createStudyStore } from './stores/study-form.store';
 
@@ -18,7 +16,7 @@ export class CreateStudyPage implements OnInit {
   protected readonly store = createStudyStore();
   private readonly luxscaleService = inject(LuxScaleService);
   private readonly router = inject(Router);
-  private readonly resultService = inject(CalculationResultService);
+  private readonly resultStore = inject(ResultStoreService);
 
   protected readonly standardCategories = signal<string[]>([]);
   protected readonly taskOrActivities = signal<string[]>([]);
@@ -154,13 +152,9 @@ export class CreateStudyPage implements OnInit {
     this.isSubmitting.set(true);
     this.luxscaleService.calculate(payload).subscribe({
       next: (res: unknown) => {
+        this.resultStore.setCalculationResult(res as CalculationResponse);
         this.isSubmitting.set(false);
-        try {
-          this.resultService.setResult(res as CalculationResponse);
-          this.router.navigate(['/results']);
-        } catch (e) {
-          console.error('Failed to store result or navigate:', e);
-        }
+        this.router.navigate(['/results']);
       },
       error: (err) => {
         this.isSubmitting.set(false);

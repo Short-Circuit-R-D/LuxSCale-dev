@@ -18,4 +18,14 @@ export class HeaderComponent {
     { label: 'Usage', href: '#usage' },
     { label: 'Principles', href: '#principles' },
   ]);
+
+  protected readonly mobileMenuOpen = signal(false);
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen.update((open) => !open);
+  }
+
+  closeMobileMenu(): void {
+    this.mobileMenuOpen.set(false);
+  }
 }

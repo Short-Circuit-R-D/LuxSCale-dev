@@ -1,36 +1,49 @@
-<section class="bg-black min-h-screen pt-[100px] pb-12">
-  <div class="w-full max-w-[1200px] px-6 mx-auto">
+<section class="bg-black min-h-screen pt-24 pb-8 sm:pt-[100px] sm:pb-12">
+  <div class="w-full max-w-[1200px] px-4 sm:px-6 mx-auto">
     @if (hasResult()) {
-      <div class="flex items-start justify-between mb-8">
+      <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div class="flex-1">
           <span class="inline-block px-3 py-1 bg-primary text-white font-mono text-[0.625rem] font-semibold tracking-[0.1em] rounded mb-3">RESULTS</span>
-          <h1 class="font-display text-3xl text-white m-0 mb-2 leading-tight">{{ result()!.project_info.project_name }}</h1>
-          <p class="font-body text-[0.9375rem] text-muted m-0">
+          <h1 class="font-display text-2xl text-white m-0 mb-2 leading-tight sm:text-3xl">{{ result()!.project_info.project_name }}</h1>
+          <p class="font-body text-[0.8125rem] text-muted m-0 sm:text-[0.9375rem]">
             {{ result()!.project_info.company }} — {{ result()!.project_info.standard_task_or_activity }}
           </p>
         </div>
-        <a routerLink="/create-study" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-transparent text-muted font-mono text-xs font-medium tracking-widest uppercase no-underline border border-border transition-all duration-180 whitespace-nowrap hover:text-white hover:border-muted">NEW STUDY</a>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            (click)="generateFullReport()"
+            class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-white font-mono text-[0.625rem] font-medium tracking-widest uppercase border-none cursor-pointer transition-all duration-180 whitespace-nowrap hover:bg-primary-dark sm:px-5 sm:text-xs"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+            Generate PDF Report
+          </button>
+          <a routerLink="/create-study" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-transparent text-muted font-mono text-[0.625rem] font-medium tracking-widest uppercase no-underline border border-border transition-all duration-180 whitespace-nowrap hover:text-white hover:border-muted sm:px-5 sm:text-xs">NEW STUDY</a>
+        </div>
       </div>
 
-      <div class="flex items-center gap-8 px-8 py-5 bg-surface border border-border rounded-xl mb-6">
-        <div class="flex flex-col gap-1">
-          <span class="font-mono text-[0.5625rem] text-disabled tracking-widest uppercase">Solutions</span>
-          <span class="font-display text-2xl text-white leading-none">{{ result()!.calculation_meta.total_solutions_returned }}</span>
+      <div class="grid grid-cols-2 gap-3 px-4 py-4 bg-surface border border-border rounded-xl mb-6 sm:grid-cols-4 sm:gap-6 sm:px-8 sm:py-5">
+        <div class="flex flex-col gap-1.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-widest uppercase sm:text-[0.5625rem]">Solutions</span>
+          <span class="font-display text-xl text-white leading-none sm:text-2xl">{{ result()!.calculation_meta.total_solutions_returned }}</span>
         </div>
-        <div class="w-px h-8 bg-border"></div>
-        <div class="flex flex-col gap-1">
-          <span class="font-mono text-[0.5625rem] text-disabled tracking-widest uppercase">Compliant</span>
-          <span class="font-display text-2xl text-green-500 leading-none">{{ compliantCount() }}</span>
+        <div class="flex flex-col gap-1.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-widest uppercase sm:text-[0.5625rem]">Compliant</span>
+          <span class="font-display text-xl text-green-500 leading-none sm:text-2xl">{{ compliantCount() }}</span>
         </div>
-        <div class="w-px h-8 bg-border"></div>
-        <div class="flex flex-col gap-1">
-          <span class="font-mono text-[0.5625rem] text-disabled tracking-widest uppercase">Room Area</span>
-          <span class="font-display text-2xl text-white leading-none">{{ result()!.width * result()!.length | number:'1.0-0' }}<span class="font-mono text-xs text-muted ml-0.5">m²</span></span>
+        <div class="flex flex-col gap-1.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-widest uppercase sm:text-[0.5625rem]">Room Area</span>
+          <span class="font-display text-xl text-white leading-none sm:text-2xl">{{ result()!.width * result()!.length | number:'1.0-0' }}<span class="font-mono text-xs text-muted ml-0.5">m²</span></span>
         </div>
-        <div class="w-px h-8 bg-border"></div>
-        <div class="flex flex-col gap-1">
-          <span class="font-mono text-[0.5625rem] text-disabled tracking-widest uppercase">Standard</span>
-          <span class="font-display text-2xl text-white leading-none">{{ result()!.standard_row.ref_no }}</span>
+        <div class="flex flex-col gap-1.5">
+          <span class="font-mono text-[0.5rem] text-disabled tracking-widest uppercase sm:text-[0.5625rem]">Standard</span>
+          <span class="font-display text-xl text-white leading-none sm:text-2xl">{{ result()!.standard_row.ref_no }}</span>
         </div>
       </div>
 
@@ -43,7 +56,7 @@
         <app-standard-row [standard]="result()!.standard_row" />
         <app-project-info [projectInfo]="result()!.project_info" />
         <app-calculation-meta [meta]="result()!.calculation_meta" />
-        <app-results-grid [results]="result()!.results" [uiSettings]="result()!.ui_settings" />
+        <app-results-grid [results]="result()!.results" [uiSettings]="result()!.ui_settings" [fixtureResults]="fixtureResults()" />
       </div>
     } @else {
       <div class="flex flex-col items-center justify-center min-h-[50vh] gap-6">

@@ -1,0 +1,38 @@
+@if (store.iesData(); as iesData) {
+  <div class="flex flex-col gap-6 lg:grid lg:grid-cols-[280px_1fr]">
+    <div class="flex flex-col gap-4">
+      <app-c-plane-selector
+        [horizontalAngles]="iesData.horizontalAngles"
+        [selectedIndex]="store.selectedCAngleIndex()"
+        (angleSelected)="onAngleSelect($event)"
+      />
+
+      <app-c-plane-metrics
+        [selectedAngle]="store.selectedCAngle()"
+        [peakCandela]="store.peakCandela()"
+        [beamAngle]="store.beamAngleData()"
+        [fieldAngle]="store.fieldAngleData()"
+      />
+
+      @if (store.symmetryData(); as symmetry) {
+        <app-symmetry-interpreter
+          [symmetryType]="symmetry.label"
+          [symmetryDescription]="symmetry.description"
+        />
+      }
+    </div>
+
+    @if (store.selectedCData(); as cData) {
+      <app-polar-distribution
+        [verticalAngles]="iesData.verticalAngles"
+        [candelaValues]="cData"
+        [maxCandela]="store.maxCandela()"
+        [selectedAngle]="store.selectedCAngle()"
+      />
+    }
+  </div>
+} @else {
+  <div class="flex items-center justify-center min-h-[200px]">
+    <span class="font-mono text-sm text-muted">No IES data available</span>
+  </div>
+}

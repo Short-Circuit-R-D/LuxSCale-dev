@@ -1,0 +1,26 @@
+<div class="p-4 bg-surface border border-border rounded-xl">
+  <div class="flex items-center gap-2 mb-4">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <span class="font-body text-sm text-white font-medium">Select Horizontal Angle (C-Plane)</span>
+  </div>
+
+  <span class="block font-mono text-[0.5625rem] text-disabled tracking-widest uppercase mb-2">Vertical Planes</span>
+
+  <div class="flex flex-wrap gap-2">
+    @for (angle of horizontalAngles(); track $index) {
+      <button
+        type="button"
+        class="px-3 py-1.5 rounded-lg font-mono text-xs border cursor-pointer transition-all duration-150"
+        [class]="selectedIndex() === $index
+          ? 'bg-primary text-white border-primary'
+          : 'bg-transparent text-muted border-border hover:border-muted hover:text-white'"
+        (click)="angleSelected.emit($index)"
+      >
+        {{ angle }}°
+      </button>
+    }
+  </div>
+</div>
