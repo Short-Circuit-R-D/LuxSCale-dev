@@ -8,4 +8,8 @@
   --color-border: #2B2B2B;
   --color-muted: #B8B8B8;
   --color-disabled: #7A7A7A;
+
+  --font-display: 'Anton', sans-serif;
+  --font-body: 'Poppins', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 }

@@ -1,0 +1,72 @@
+<div class="border border-border rounded-xl bg-surface p-8">
+  <div class="flex items-center gap-2 mb-6 pl-3 border-l-2 border-primary">
+    <span class="font-mono text-xs text-primary">III.</span>
+    <span class="font-mono text-xs text-primary tracking-widest uppercase">Compliance Standard</span>
+  </div>
+
+  <div class="grid grid-cols-4 gap-6 mb-6">
+    <div class="flex flex-col gap-1.5">
+      <span class="font-mono text-[0.6875rem] text-muted tracking-widest uppercase">Reference</span>
+      <span class="font-body text-[0.9375rem] text-white">{{ standard().ref_no }}</span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <span class="font-mono text-[0.6875rem] text-muted tracking-widest uppercase">Table</span>
+      <span class="font-body text-[0.9375rem] text-white">{{ standard().table }}</span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <span class="font-mono text-[0.6875rem] text-muted tracking-widest uppercase">Task / Activity</span>
+      <span class="font-body text-[0.9375rem] text-white">{{ standard().task_or_activity }}</span>
+    </div>
+    <div class="flex flex-col gap-1.5">
+      <span class="font-mono text-[0.6875rem] text-muted tracking-widest uppercase">Category</span>
+      <span class="font-body text-[0.9375rem] text-white">{{ standard().category_base }} — {{ standard().category_sub }}</span>
+    </div>
+  </div>
+
+  <div class="mb-5">
+    <span class="block font-mono text-[0.6875rem] text-muted tracking-widest uppercase mb-4">Requirements</span>
+    <div class="grid grid-cols-4 gap-4">
+      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+        <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Maintained illuminance (Em)</span>
+        <span class="font-body text-sm text-white font-medium">{{ standard().Em_r_lx }} lx</span>
+      </div>
+      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+        <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Uniformity (Uo)</span>
+        <span class="font-body text-sm text-white font-medium">{{ standard().Uo }}</span>
+      </div>
+      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+        <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Color Rendering (Ra)</span>
+        <span class="font-body text-sm text-white font-medium">{{ standard().Ra }}</span>
+      </div>
+      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+        <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Wall illuminance</span>
+        <span class="font-body text-sm text-white font-medium">{{ standard().Em_wall_lx }} lx</span>
+      </div>
+      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+        <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Ceiling illuminance</span>
+        <span class="font-body text-sm text-white font-medium">{{ standard().Em_ceiling_lx }} lx</span>
+      </div>
+      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+        <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">RUGL</span>
+        <span class="font-body text-sm text-white font-medium">{{ standard().RUGL }}</span>
+      </div>
+      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+        <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">Ez</span>
+        <span class="font-body text-sm text-white font-medium">{{ standard().Ez_lx }} lx</span>
+      </div>
+      @if (standard().tcp_min_K && standard().tcp_max_K) {
+        <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+          <span class="font-mono text-[0.5625rem] text-disabled tracking-tight uppercase">TCP Range</span>
+          <span class="font-body text-sm text-white font-medium">{{ standard().tcp_min_K }}K — {{ standard().tcp_max_K }}K</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (standard().specific_requirements) {
+    <div class="pt-5 border-t border-border">
+      <span class="block font-mono text-[0.6875rem] text-muted tracking-widest uppercase mb-2">Specific Requirements</span>
+      <p class="font-body text-sm text-muted leading-relaxed m-0">{{ standard().specific_requirements }}</p>
+    </div>
+  }
+</div>

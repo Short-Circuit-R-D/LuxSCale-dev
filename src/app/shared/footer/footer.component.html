@@ -1,14 +1,17 @@
 <footer class="border-t border-border bg-black">
   <div class="mx-auto flex max-w-[1440px] items-center justify-between px-12 py-8">
     <div class="flex flex-col gap-2">
-      <a routerLink="/" class="font-[Anton] text-xl tracking-wide text-white uppercase">
-        LuxScale AI
+      <a routerLink="/">
+        <img src="/sc-logo.png" alt="Short Circuit" class="h-10" />
       </a>
-      <p class="text-xs text-disabled">&copy; 2024 LuxScale AI. Engineered Precision.</p>
+      <p class="text-xs text-disabled">&copy; 2026 LuxScale AI. All rights reserved.</p>
     </div>
     <nav class="flex items-center gap-8">
-      @for (link of footerLinks(); track link.href) {
-        <a [href]="link.href" class="text-sm text-muted transition-colors duration-180 hover:text-white">
+      @for (link of footerLinks(); track $index) {
+        <a
+          [href]="link.href"
+          class="text-sm text-muted transition-colors duration-180 hover:text-white"
+        >
           {{ link.label }}
         </a>
       }

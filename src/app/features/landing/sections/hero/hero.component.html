@@ -21,7 +21,8 @@
     <div class="mt-10 flex items-center justify-center gap-4">
       @for (action of actions(); track action.href) {
         <a
-          [href]="action.href"
+          [routerLink]="action.primary ? action.href : null"
+          [href]="action.primary ? null : action.href"
           class="rounded-xl px-8 py-3 text-sm font-medium transition-all duration-180"
           [class]="action.primary
             ? 'bg-primary text-white hover:bg-primary-dark'
