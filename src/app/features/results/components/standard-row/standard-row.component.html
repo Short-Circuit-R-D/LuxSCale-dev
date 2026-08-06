@@ -8,58 +8,58 @@
 
   <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 sm:gap-6 md:grid-cols-4">
     <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-[0.625rem] text-muted tracking-widest uppercase sm:text-[0.6875rem]">Reference</span>
-      <span class="font-body text-[0.875rem] text-white sm:text-[0.9375rem]">{{ standard().ref_no }}</span>
+      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Reference</span>
+      <span class="font-body text-sm text-white sm:text-sm">{{ standard().ref_no }}</span>
     </div>
     <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-[0.625rem] text-muted tracking-widest uppercase sm:text-[0.6875rem]">Table</span>
-      <span class="font-body text-[0.875rem] text-white sm:text-[0.9375rem]">{{ standard().table }}</span>
+      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Table</span>
+      <span class="font-body text-sm text-white sm:text-sm">{{ standard().table }}</span>
     </div>
     <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-[0.625rem] text-muted tracking-widest uppercase sm:text-[0.6875rem]"
+      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm"
         >Task / Activity</span
       >
-      <span class="font-body text-[0.875rem] text-white sm:text-[0.9375rem]">{{ standard().task_or_activity }}</span>
+      <span class="font-body text-sm text-white sm:text-sm">{{ standard().task_or_activity }}</span>
     </div>
     <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-[0.625rem] text-muted tracking-widest uppercase sm:text-[0.6875rem]">Category</span>
-      <span class="font-body text-[0.875rem] text-white sm:text-[0.9375rem]"
+      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Category</span>
+      <span class="font-body text-sm text-white sm:text-sm"
         >{{ standard().category_base }} — {{ standard().category_sub }}</span
       >
     </div>
   </div>
 
   <div class="mb-5">
-    <span class="block font-mono text-[0.6875rem] text-muted tracking-widest uppercase mb-4"
+    <span class="block font-mono text-sm text-muted tracking-widest uppercase mb-4"
       >Requirements</span
     >
     <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
       <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
           >Maintained illuminance (Em)</span
         >
         <span class="font-body text-sm text-white font-medium">{{ standard().Em_r_lx }} lx</span>
       </div>
       <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
           >Uniformity (Uo)</span
         >
         <span class="font-body text-sm text-white font-medium">{{ standard().Uo }}</span>
       </div>
       <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
           >Color Rendering (Ra)</span
         >
         <span class="font-body text-sm text-white font-medium">{{ standard().Ra }}</span>
       </div>
       <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
           >Wall illuminance</span
         >
         <span class="font-body text-sm text-white font-medium">{{ standard().Em_wall_lx }} lx</span>
       </div>
       <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
           >Ceiling illuminance</span
         >
         <span class="font-body text-sm text-white font-medium"
@@ -67,16 +67,16 @@
         >
       </div>
       <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">RUGL</span>
+        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">RUGL</span>
         <span class="font-body text-sm text-white font-medium">{{ standard().RUGL }}</span>
       </div>
       <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]">Ez</span>
+        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Ez</span>
         <span class="font-body text-sm text-white font-medium">{{ standard().Ez_lx }} lx</span>
       </div>
       @if (standard().tcp_min_K && standard().tcp_max_K) {
         <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-          <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+          <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
             >TCP Range</span
           >
           <span class="font-body text-sm text-white font-medium"
@@ -89,7 +89,7 @@
 
   @if (standard().specific_requirements) {
     <div class="pt-5 border-t border-border">
-      <span class="block font-mono text-[0.6875rem] text-muted tracking-widest uppercase mb-2"
+      <span class="block font-mono text-sm text-muted tracking-widest uppercase mb-2"
         >Specific Requirements</span
       >
       <p class="font-body text-sm text-muted leading-relaxed m-0">

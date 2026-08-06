@@ -24,7 +24,7 @@
               />
             } @else {
               <div class="w-full h-full flex items-center justify-center">
-                <span class="font-mono text-sm text-disabled">No Image Available</span>
+                <span class="font-mono text-sm text-muted">No Image Available</span>
               </div>
             }
 
@@ -114,17 +114,17 @@
 
         <div class="flex flex-col gap-5">
           <div>
-            <span class="font-mono text-[0.625rem] text-primary tracking-widest uppercase sm:text-xs">{{
+            <span class="font-mono text-xs text-primary tracking-widest uppercase sm:text-xs">{{
               product.category
             }}</span>
             <h3 class="font-display text-xl text-white m-0 mt-1 sm:text-2xl">{{ product.title }}</h3>
-            <span class="font-mono text-[0.75rem] text-muted sm:text-[0.8125rem]">{{ product.series }} Series</span>
+            <span class="font-mono text-xs text-muted sm:text-sm">{{ product.series }} Series</span>
           </div>
 
           <div class="flex gap-3">
             <div class="flex-1 p-3 bg-elevated rounded-lg text-center">
               <span
-                class="block font-mono text-[0.5rem] text-disabled tracking-widest uppercase mb-1 sm:text-[0.5625rem]"
+                class="block font-mono text-xs text-muted tracking-widest uppercase mb-1 sm:text-xs"
                 >Power</span
               >
               <span class="font-display text-base text-white sm:text-lg"
@@ -134,14 +134,14 @@
             </div>
             <div class="flex-1 p-3 bg-elevated rounded-lg text-center">
               <span
-                class="block font-mono text-[0.5rem] text-disabled tracking-widest uppercase mb-1 sm:text-[0.5625rem]"
+                class="block font-mono text-xs text-muted tracking-widest uppercase mb-1 sm:text-xs"
                 >Beam Angle</span
               >
               <span class="font-display text-base text-white sm:text-lg">{{ product.specs.beam_angle }}</span>
             </div>
             <div class="flex-1 p-3 bg-elevated rounded-lg text-center">
               <span
-                class="block font-mono text-[0.5rem] text-disabled tracking-widest uppercase mb-1 sm:text-[0.5625rem]"
+                class="block font-mono text-xs text-muted tracking-widest uppercase mb-1 sm:text-xs"
                 >Efficacy</span
               >
               <span class="font-display text-base text-white sm:text-lg">{{
@@ -152,87 +152,87 @@
 
           <div class="p-4 bg-elevated rounded-lg">
             <span
-              class="block font-mono text-[0.625rem] text-disabled tracking-widest uppercase mb-3"
+              class="block font-mono text-xs text-muted tracking-widest uppercase mb-3"
               >Specifications</span
             >
             <div class="grid grid-cols-2 gap-3">
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >Chip</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.chip
                 }}</span>
               </div>
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >Driver</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.driver
                 }}</span>
               </div>
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >CCT</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.cct
                 }}</span>
               </div>
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >Power Factor</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.power_factor
                 }}</span>
               </div>
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >Input Voltage</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.input_voltage
                 }}</span>
               </div>
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >Frequency</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.frequency
                 }}</span>
               </div>
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >Protection</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.protection
                 }}</span>
               </div>
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >Lifetime</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.lifetime
                 }}</span>
               </div>
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >PCB</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.pcb
                 }}</span>
               </div>
               <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-[0.5rem] text-disabled tracking-tight uppercase sm:text-[0.5625rem]"
+                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
                   >Warranty</span
                 >
-                <span class="font-body text-[0.8125rem] text-white font-medium sm:text-[0.875rem]">{{
+                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
                   product.specs.warranty
                 }}</span>
               </div>
@@ -241,7 +241,7 @@
 
           <div class="p-4 bg-elevated rounded-lg">
             <span
-              class="block font-mono text-[0.625rem] text-disabled tracking-widest uppercase mb-3"
+              class="block font-mono text-xs text-muted tracking-widest uppercase mb-3"
               >Protections</span
             >
             <div class="flex flex-wrap gap-4">
@@ -250,21 +250,21 @@
                   class="w-2 h-2 rounded-full"
                   [class]="product.specs.oc_protection ? 'bg-green-500' : 'bg-disabled'"
                 ></span>
-                <span class="font-mono text-[0.625rem] text-muted sm:text-[0.6875rem]">Over-Current</span>
+                <span class="font-mono text-xs text-muted sm:text-sm">Over-Current</span>
               </div>
               <div class="flex items-center gap-2">
                 <span
                   class="w-2 h-2 rounded-full"
                   [class]="product.specs.ov_protection ? 'bg-green-500' : 'bg-disabled'"
                 ></span>
-                <span class="font-mono text-[0.625rem] text-muted sm:text-[0.6875rem]">Over-Voltage</span>
+                <span class="font-mono text-xs text-muted sm:text-sm">Over-Voltage</span>
               </div>
               <div class="flex items-center gap-2">
                 <span
                   class="w-2 h-2 rounded-full"
                   [class]="product.specs.ot_protection ? 'bg-green-500' : 'bg-disabled'"
                 ></span>
-                <span class="font-mono text-[0.625rem] text-muted sm:text-[0.6875rem]">Over-Temperature</span>
+                <span class="font-mono text-xs text-muted sm:text-sm">Over-Temperature</span>
               </div>
             </div>
           </div>
@@ -287,7 +287,7 @@
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                   <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
-                <span class="font-mono text-[0.6875rem] text-green-500 font-medium sm:text-[0.75rem]"
+                <span class="font-mono text-sm text-green-500 font-medium sm:text-xs"
                   >IES File Available</span
                 >
               </div>

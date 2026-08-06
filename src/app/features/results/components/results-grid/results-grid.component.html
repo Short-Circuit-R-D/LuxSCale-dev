@@ -20,14 +20,14 @@
           />
         }
         <span
-          class="font-mono text-[0.625rem] tracking-widest uppercase sm:text-[0.6875rem]"
+          class="font-mono text-xs tracking-widest uppercase sm:text-sm"
           [class]="selectedIndex() === $index ? 'text-white' : 'text-muted'"
         >
           Solution {{ $index + 1 }}
         </span>
         <span
-          class="font-mono text-[0.5rem] uppercase sm:text-[0.5625rem]"
-          [class]="result['is_compliant'] ? 'text-green-500' : 'text-disabled'"
+          class="font-mono text-xs uppercase sm:text-xs"
+          [class]="result['is_compliant'] ? 'text-green-500' : 'text-muted'"
         >
           {{ result['is_compliant'] ? 'COMPLIANT' : 'NON-COMPLIANT' }}
         </span>
@@ -42,7 +42,7 @@
       >
         <div class="flex flex-col gap-1">
           <span class="font-display text-lg text-white sm:text-xl">{{ result['Luminaire'] }}</span>
-          <span class="font-mono text-[0.625rem] text-muted uppercase sm:text-[0.6875rem]">{{
+          <span class="font-mono text-xs text-muted uppercase sm:text-sm">{{
             result['Selection']
           }}</span>
         </div>
@@ -50,7 +50,7 @@
           <button
             type="button"
             (click)="generateSolutionReport()"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-elevated text-muted font-mono text-[0.625rem] font-medium tracking-wider uppercase border border-border cursor-pointer transition-all duration-180 hover:text-primary hover:border-primary sm:px-4 sm:text-[0.6875rem]"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-elevated text-muted font-mono text-xs font-medium tracking-wider uppercase border border-border cursor-pointer transition-all duration-180 hover:text-primary hover:border-primary sm:px-4 sm:text-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +73,7 @@
             <span class="sm:hidden">PDF</span>
           </button>
           <span
-            class="px-2 py-1.5 rounded-md font-mono text-[0.625rem] font-semibold tracking-widest uppercase sm:px-3 sm:text-[0.6875rem]"
+            class="px-2 py-1.5 rounded-md font-mono text-xs font-semibold tracking-widest uppercase sm:px-3 sm:text-sm"
             [class]="
               result['is_compliant']
                 ? 'bg-green-500/15 text-green-500'

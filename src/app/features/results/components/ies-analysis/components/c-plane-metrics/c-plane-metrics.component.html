@@ -10,13 +10,13 @@
 
   <div class="flex flex-col gap-3">
     <div class="flex items-center justify-between py-2 border-b border-border">
-      <span class="font-mono text-[0.6875rem] text-muted">Selected Angle</span>
+      <span class="font-mono text-sm text-muted">Selected Angle</span>
       <span class="font-mono text-sm text-white font-medium">C {{ selectedAngle() }}°</span>
     </div>
 
     @if (peakCandela(); as peak) {
       <div class="flex items-center justify-between py-2 border-b border-border">
-        <span class="font-mono text-[0.6875rem] text-muted">Peak Candela</span>
+        <span class="font-mono text-sm text-muted">Peak Candela</span>
         <span class="font-mono text-sm text-primary font-medium">
           {{ peak.value | number:'1.0-0' }} cd @ {{ peak.angle | number:'1.1-1' }}°
         </span>
@@ -26,12 +26,12 @@
     @if (beamAngle(); as beam) {
       <div class="py-2 border-b border-border">
         <div class="flex items-center justify-between mb-1">
-          <span class="font-mono text-[0.6875rem] text-muted">Beam Angle (50%)</span>
+          <span class="font-mono text-sm text-muted">Beam Angle (50%)</span>
           <span class="font-mono text-sm text-white font-medium">{{ beam.beamAngle | number:'1.1-1' }}°</span>
         </div>
         <div class="flex gap-4">
-          <span class="font-mono text-[0.5625rem] text-disabled">Left: {{ beam.leftAngle | number:'1.1-1' }}°</span>
-          <span class="font-mono text-[0.5625rem] text-disabled">Right: {{ beam.rightAngle | number:'1.1-1' }}°</span>
+          <span class="font-mono text-xs text-muted">Left: {{ beam.leftAngle | number:'1.1-1' }}°</span>
+          <span class="font-mono text-xs text-muted">Right: {{ beam.rightAngle | number:'1.1-1' }}°</span>
         </div>
       </div>
     }
@@ -39,12 +39,12 @@
     @if (fieldAngle(); as field) {
       <div class="py-2">
         <div class="flex items-center justify-between mb-1">
-          <span class="font-mono text-[0.6875rem] text-muted">Field Angle (10%)</span>
+          <span class="font-mono text-sm text-muted">Field Angle (10%)</span>
           <span class="font-mono text-sm text-white font-medium">{{ field.fieldAngle | number:'1.1-1' }}°</span>
         </div>
         <div class="flex gap-4">
-          <span class="font-mono text-[0.5625rem] text-disabled">Left: {{ field.leftAngle | number:'1.1-1' }}°</span>
-          <span class="font-mono text-[0.5625rem] text-disabled">Right: {{ field.rightAngle | number:'1.1-1' }}°</span>
+          <span class="font-mono text-xs text-muted">Left: {{ field.leftAngle | number:'1.1-1' }}°</span>
+          <span class="font-mono text-xs text-muted">Right: {{ field.rightAngle | number:'1.1-1' }}°</span>
         </div>
       </div>
     }
