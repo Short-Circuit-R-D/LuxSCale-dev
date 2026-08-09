@@ -53,7 +53,7 @@
           [length]="result()!.length"
           [ceilingHeight]="result()!.project_info.mounting_height"
         />
-        <app-standard-row [standard]="result()!.standard_row" />
+        <app-standard-row [standard]="result()!.standard_row" [fallbackFields]="fallbackFields()" />
         <app-project-info [projectInfo]="result()!.project_info" />
         <app-calculation-meta [meta]="result()!.calculation_meta" />
         <app-results-grid [results]="result()!.results" [uiSettings]="result()!.ui_settings" [fixtureResults]="fixtureResults()" />

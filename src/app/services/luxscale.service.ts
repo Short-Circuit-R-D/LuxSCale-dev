@@ -10,14 +10,14 @@ export interface StandardEntry {
   category: string;
   task_or_activity: string;
   ref_no: string;
-  Em_r_lx: number;
-  Em_u_lx: number;
-  Uo: number;
-  Ra: number;
-  RUGL: number;
-  Ez_lx: number;
-  Em_wall_lx: number;
-  Em_ceiling_lx: number;
+  Em_r_lx: number | null;
+  Em_u_lx: number | null;
+  Uo: number | null;
+  Ra: number | null;
+  RUGL: number | null;
+  Ez_lx: number | null;
+  Em_wall_lx: number | null;
+  Em_ceiling_lx: number | null;
   specific_requirements: string;
   category_base: string;
   category_sub: string;
@@ -87,6 +87,47 @@ export class LuxScaleService {
           (e) => e.category_base === base && e.category_sub === sub && e.ref_no === refNo,
         ),
       ),
+    );
+  }
+
+  getStandardByCategoryAndTaskWithFallback(
+    category: string,
+    taskWithRef: string,
+  ): Observable<StandardEntry | undefined> {
+    const refNo = taskWithRef.match(/\(([^)]+)\)$/)?.[1];
+    const [base, sub] = category.split(' – ');
+    return this.getStandards().pipe(
+      map((entries) => {
+        const categoryEntries = entries.filter(
+          (e) => e.category_base === base && e.category_sub === sub,
+        );
+        const matched = categoryEntries.find((e) => e.ref_no === refNo);
+        if (!matched) return undefined;
+
+        const nullableParams = [
+          'Em_r_lx',
+          'Em_u_lx',
+          'Uo',
+          'Ra',
+          'RUGL',
+          'Ez_lx',
+          'Em_wall_lx',
+          'Em_ceiling_lx',
+        ] as const;
+
+        const result = { ...matched };
+        for (const param of nullableParams) {
+          if (result[param] == null) {
+            const minVal = categoryEntries.reduce<number | null>((min, entry) => {
+              const val = entry[param];
+              if (val == null) return min;
+              return min == null ? val : Math.min(min, val);
+            }, null);
+            result[param] = minVal;
+          }
+        }
+        return result;
+      }),
     );
   }
 

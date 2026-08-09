@@ -1,14 +1,14 @@
 import { Injectable, signal } from '@angular/core';
 
 export interface StandardLighting {
-  Em_ceiling_lx: number;
-  Em_r_lx: number;
-  Em_u_lx: number;
-  Em_wall_lx: number;
-  Ez_lx: number;
-  RUGL: number;
-  Ra: number;
-  Uo: number;
+  Em_ceiling_lx: number | null;
+  Em_r_lx: number | null;
+  Em_u_lx: number | null;
+  Em_wall_lx: number | null;
+  Ez_lx: number | null;
+  RUGL: number | null;
+  Ra: number | null;
+  Uo: number | null;
   category_base: string;
   category_sub: string;
   ref_no: string;

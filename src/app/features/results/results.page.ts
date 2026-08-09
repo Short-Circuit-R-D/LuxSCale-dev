@@ -29,6 +29,7 @@ export class ResultsPage implements OnInit {
 
   protected readonly result = this.resultStore.calculationResult;
   protected readonly fixtureResults = this.resultStore.fixtureResults;
+  protected readonly fallbackFields = this.resultStore.fallbackFields;
   protected readonly hasResult = computed(() => !!this.result());
   protected readonly compliantCount = computed(() => {
     const r = this.result();

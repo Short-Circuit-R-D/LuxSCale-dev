@@ -18,6 +18,7 @@ export interface FixtureResult {
 
 const STORAGE_KEY_CALC = 'luxscale_calculation_result';
 const STORAGE_KEY_FIXTURES = 'luxscale_fixtures_result';
+const STORAGE_KEY_FALLBACK = 'luxscale_fallback_fields';
 
 @Injectable({
   providedIn: 'root',
@@ -31,12 +32,15 @@ export class ResultStoreService {
   readonly fixtureResults = signal<FixtureResult[]>(
     this.loadFixturesFromStorage(),
   );
+  readonly fallbackFields = signal<Set<string>>(this.loadFallbackFromStorage());
 
-  setCalculationResult(data: CalculationResponse) {
+  setCalculationResult(data: CalculationResponse, fallbackFields?: Set<string>) {
     this.calculationResult.set(data);
     this.fixtureResults.set([]);
+    this.fallbackFields.set(fallbackFields ?? new Set());
     try {
       localStorage.setItem(STORAGE_KEY_CALC, JSON.stringify(data));
+      localStorage.setItem(STORAGE_KEY_FALLBACK, JSON.stringify([...(fallbackFields ?? [])]));
       localStorage.removeItem(STORAGE_KEY_FIXTURES);
     } catch {
       // ignore storage errors
@@ -55,9 +59,11 @@ export class ResultStoreService {
   clearAll() {
     this.calculationResult.set(null);
     this.fixtureResults.set([]);
+    this.fallbackFields.set(new Set());
     try {
       localStorage.removeItem(STORAGE_KEY_CALC);
       localStorage.removeItem(STORAGE_KEY_FIXTURES);
+      localStorage.removeItem(STORAGE_KEY_FALLBACK);
     } catch {
       // ignore
     }
@@ -126,6 +132,15 @@ export class ResultStoreService {
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];
+    }
+  }
+
+  private loadFallbackFromStorage(): Set<string> {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_FALLBACK);
+      return raw ? new Set(JSON.parse(raw)) : new Set();
+    } catch {
+      return new Set();
     }
   }
 }

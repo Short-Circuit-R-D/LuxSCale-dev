@@ -152,7 +152,29 @@ export class CreateStudyPage implements OnInit {
     this.isSubmitting.set(true);
     this.luxscaleService.calculate(payload).subscribe({
       next: (res: unknown) => {
-        this.resultStore.setCalculationResult(res as CalculationResponse);
+        const response = res as CalculationResponse;
+        const requestLighting = payload.project_info.standard_lighting;
+
+        const fallbackParams = [
+          'Em_r_lx',
+          'Em_u_lx',
+          'Uo',
+          'Ra',
+          'RUGL',
+          'Ez_lx',
+          'Em_wall_lx',
+          'Em_ceiling_lx',
+        ] as const;
+
+        const usedFallback = new Set<string>();
+        for (const param of fallbackParams) {
+          if (response.standard_row[param] == null) {
+            response.standard_row[param] = requestLighting[param];
+            usedFallback.add(param);
+          }
+        }
+
+        this.resultStore.setCalculationResult(response, usedFallback);
         this.isSubmitting.set(false);
         this.router.navigate(['/results']);
       },
@@ -172,7 +194,7 @@ export class CreateStudyPage implements OnInit {
 
   private loadStandardObject(taskWithRef: string) {
     const category = this.store.technical().standardCategory;
-    this.luxscaleService.getStandardByCategoryAndTask(category, taskWithRef).subscribe({
+    this.luxscaleService.getStandardByCategoryAndTaskWithFallback(category, taskWithRef).subscribe({
       next: (entry) => this.selectedStandard.set(entry ?? null),
       error: () => this.selectedStandard.set(null),
     });
