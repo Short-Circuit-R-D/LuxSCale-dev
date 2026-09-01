@@ -1,21 +1,26 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-
-interface HeroAction {
-  label: string;
-  href: string;
-  primary: boolean;
-}
 
 @Component({
   selector: 'app-hero',
   imports: [RouterLink],
   templateUrl: './hero.component.html',
   styleUrl: './hero.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(document:click)': 'closeStudyMenu()',
+    '(document:keydown.escape)': 'closeStudyMenu()',
+  },
 })
 export class HeroComponent {
-  protected readonly actions = signal<HeroAction[]>([
-    { label: 'Start New Study', href: '/create-study', primary: true },
-    { label: 'View Last Study', href: '/results', primary: false },
-  ]);
+  protected readonly studyMenuOpen = signal(false);
+
+  protected toggleStudyMenu(event: Event): void {
+    event.stopPropagation();
+    this.studyMenuOpen.update((open) => !open);
+  }
+
+  protected closeStudyMenu(): void {
+    this.studyMenuOpen.set(false);
+  }
 }

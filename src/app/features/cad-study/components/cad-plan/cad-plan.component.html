@@ -1,0 +1,230 @@
+@if (layout(); as plan) {
+  <svg
+    #planSvg
+    class="cad-plan-svg h-full w-full"
+    [class.cad-plan-svg--draw]="store.drawMode() === 'draw'"
+    [class.cad-plan-svg--pan]="store.drawMode() === 'pan'"
+    [attr.viewBox]="viewBox()"
+    preserveAspectRatio="xMidYMid meet"
+    role="img"
+    aria-label="CAD floor plan in meters"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp($event)"
+    (pointercancel)="onPointerUp($event)"
+  >
+    @if (store.layers().walls) {
+      @for (wall of plan.walls; track wall.id) {
+        @if (wall.polygon?.vertices?.length) {
+          <path
+            [attr.d]="polyPath(wall.polygon)"
+            fill="rgba(184,184,184,0.16)"
+            stroke="#B8B8B8"
+            stroke-width="1"
+            vector-effect="non-scaling-stroke"
+          />
+        } @else {
+          @if (wallLine(wall); as line) {
+            <line
+              [attr.x1]="line.start.x"
+              [attr.y1]="ty(line.start.y)"
+              [attr.x2]="line.end.x"
+              [attr.y2]="ty(line.end.y)"
+              stroke="#B8B8B8"
+              stroke-width="1.5"
+              vector-effect="non-scaling-stroke"
+            />
+          }
+        }
+      }
+    }
+
+    @if (store.layers().rooms) {
+      @for (room of contentRooms(plan); track room.id) {
+        <path
+          [attr.d]="roomPath(room)"
+          [attr.fill]="roomFill(room)"
+          [attr.stroke]="store.selectedRoomId() === room.id ? '#EB1B26' : '#3A3A3A'"
+          stroke-width="1"
+          vector-effect="non-scaling-stroke"
+          fill-rule="evenodd"
+          (click)="onRoomActivate(room.id)"
+        />
+      }
+    }
+
+    @for (room of contentRooms(plan); track room.id) {
+      @if (store.layers().objects) {
+        @for (object of room.objects; track object.id) {
+          @if (object.bounding_box) {
+            <rect
+              [attr.x]="object.bounding_box.min_x"
+              [attr.y]="boxTop(object.bounding_box)"
+              [attr.width]="object.bounding_box.max_x - object.bounding_box.min_x"
+              [attr.height]="boxHeight(object.bounding_box)"
+              [attr.transform]="objectRotate(object)"
+              fill="none"
+              stroke="#7A7A7A"
+              stroke-width="1"
+              vector-effect="non-scaling-stroke"
+            />
+          }
+        }
+      }
+      @if (store.layers().doors) {
+        @for (door of room.doors; track door.id) {
+          @if (openingLine(door); as mark) {
+            <line
+              [attr.x1]="mark.start.x"
+              [attr.y1]="ty(mark.start.y)"
+              [attr.x2]="mark.end.x"
+              [attr.y2]="ty(mark.end.y)"
+              stroke="#FFFFFF"
+              stroke-width="2"
+              vector-effect="non-scaling-stroke"
+            />
+          }
+        }
+        @for (window of room.windows; track window.id) {
+          @if (openingLine(window); as mark) {
+            <line
+              [attr.x1]="mark.start.x"
+              [attr.y1]="ty(mark.start.y)"
+              [attr.x2]="mark.end.x"
+              [attr.y2]="ty(mark.end.y)"
+              stroke="#B8B8B8"
+              stroke-width="2"
+              vector-effect="non-scaling-stroke"
+            />
+          }
+        }
+      }
+    }
+
+    @if (store.layers().warnings) {
+      @for (warning of plan.warnings; track $index) {
+        @if (warning.boundary) {
+          <path
+            [attr.d]="polyPath(warning.boundary)"
+            fill="none"
+            stroke="#F4B740"
+            stroke-width="1"
+            vector-effect="non-scaling-stroke"
+            [attr.stroke-dasharray]="dash()"
+          />
+        }
+      }
+    }
+
+    @for (divider of overlayDividers(); track $index) {
+      <line
+        [attr.x1]="divider.start.x"
+        [attr.y1]="ty(divider.start.y)"
+        [attr.x2]="divider.end.x"
+        [attr.y2]="ty(divider.end.y)"
+        stroke="#EB1B26"
+        stroke-width="1.5"
+        vector-effect="non-scaling-stroke"
+        [attr.stroke-dasharray]="dash()"
+      />
+    }
+
+    @if (store.pendingStart(); as start) {
+      @if (store.previewEnd(); as preview) {
+        <line
+          [attr.x1]="start.x"
+          [attr.y1]="ty(start.y)"
+          [attr.x2]="preview.x"
+          [attr.y2]="ty(preview.y)"
+          stroke="#EB1B26"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+          [attr.stroke-dasharray]="dash()"
+          opacity="0.85"
+        />
+      }
+    }
+
+    @if (store.drawMode() === 'draw' && snapHint(); as snap) {
+      <circle
+        [attr.cx]="snap.x"
+        [attr.cy]="ty(snap.y)"
+        [attr.r]="markerSize() / 2"
+        fill="none"
+        stroke="#EB1B26"
+        stroke-width="1.5"
+        vector-effect="non-scaling-stroke"
+      />
+    }
+
+    @if (store.layers().rooms) {
+      @for (room of contentRooms(plan); track room.id) {
+        @if (store.selectedRoomId() === room.id) {
+          @if (dimensionBox(room); as box) {
+            <rect
+              [attr.x]="box.x"
+              [attr.y]="box.y"
+              [attr.width]="box.width"
+              [attr.height]="box.height"
+              [attr.transform]="dimensionTransform(room)"
+              fill="none"
+              stroke="#EB1B26"
+              stroke-width="1"
+              vector-effect="non-scaling-stroke"
+              [attr.stroke-dasharray]="dash()"
+              opacity="0.7"
+            />
+          }
+        }
+        @if (room.center) {
+          <text
+            [attr.x]="room.center.x"
+            [attr.y]="ty(room.center.y)"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            fill="#FFFFFF"
+            [attr.font-size]="labelSize()"
+            font-family="Poppins, sans-serif"
+            style="pointer-events: none"
+          >
+            <tspan [attr.x]="room.center.x" dy="-0.7em">{{ room.name || room.id }}</tspan>
+            <tspan [attr.x]="room.center.x" dy="1.25em" fill="#B8B8B8">
+              {{ netArea(room) | number: '1.1-1' }} m²
+            </tspan>
+            @if (sizeLabel(room); as size) {
+              <tspan [attr.x]="room.center.x" dy="1.25em" fill="#B8B8B8">
+                {{ size }}{{ sizeFromDrawing(room) ? ' · drawing' : '' }}
+              </tspan>
+            }
+          </text>
+        }
+      }
+    }
+
+    @if (store.layers().texts) {
+      @for (label of plan.texts; track $index) {
+        @if (label.position) {
+          <text
+            [attr.x]="label.position.x"
+            [attr.y]="ty(label.position.y)"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            fill="#B8B8B8"
+            [attr.font-size]="textSize(label.height_m)"
+            font-family="JetBrains Mono, monospace"
+            style="pointer-events: none"
+          >
+            {{ label.text }}
+          </text>
+        }
+      }
+    }
+  </svg>
+  <p class="pointer-events-none absolute bottom-4 left-4 font-mono text-xs tracking-wide text-muted">
+    Scroll to zoom · Drag to pan
+  </p>
+} @else {
+  <div class="flex h-full min-h-[320px] items-center justify-center px-6">
+    <p class="font-body text-sm text-muted">Upload a DXF or DWG to render the plan.</p>
+  </div>
+}

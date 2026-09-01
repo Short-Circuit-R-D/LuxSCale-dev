@@ -1,0 +1,193 @@
+<section class="min-h-screen bg-black pt-24 pb-12 sm:pt-[100px] sm:pb-16">
+  <div class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 md:px-12">
+    <div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-[720px]">
+        <span class="mb-3 inline-block font-mono text-xs tracking-widest text-primary uppercase">CAD Study</span>
+        <h1 class="font-display text-4xl leading-none text-white uppercase sm:text-5xl">Analyze Drawing</h1>
+        <p class="mt-4 font-body text-base text-muted">
+          Upload a DXF or DWG, inspect rooms in meters, then draw virtual dividers that split spaces.
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        @if (store.engineStatus() === 'online') {
+          <span class="font-mono text-xs tracking-widest text-[#1FA971] uppercase">
+            Engine online{{ store.engineVersion() ? ' · ' + store.engineVersion() : '' }}
+          </span>
+        } @else if (store.engineStatus() === 'offline') {
+          <span class="font-mono text-xs tracking-widest text-primary uppercase">Engine unreachable</span>
+        }
+        <a
+          routerLink="/"
+          class="rounded-xl border border-[#3A3A3A] px-6 py-3 text-sm font-medium text-white no-underline transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
+          Back
+        </a>
+      </div>
+    </div>
+
+    @if (store.unitAssumed() && store.sourceUnit()) {
+      <div class="mb-6 rounded-xl border border-border border-l-2 border-l-[#F4B740] bg-surface px-5 py-5" role="status">
+        <p class="font-body text-base text-white">Source unit was assumed.</p>
+        <p class="mt-1 font-body text-sm text-muted">
+          Interpreted as {{ store.sourceUnit() }}. Override the unit on upload if the scale looks wrong.
+        </p>
+      </div>
+    }
+
+    @if (store.error(); as err) {
+      <div class="mb-6 flex items-start justify-between gap-4 rounded-xl border border-border border-l-2 border-l-primary bg-surface px-5 py-5" role="alert">
+        <div>
+          <p class="font-body text-base text-white">{{ err.message }}</p>
+          <p class="mt-1 font-mono text-xs tracking-widest text-muted uppercase">{{ err.code }}</p>
+        </div>
+        <button
+          type="button"
+          class="min-h-10 min-w-10 text-muted transition-colors duration-180 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          (click)="store.clearError()"
+          aria-label="Dismiss error"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    }
+
+    @if (!store.hasLayout()) {
+      <app-cad-upload />
+      @if (store.busy()) {
+        <div class="mt-8 overflow-hidden rounded-xl border border-border bg-surface">
+          <div class="h-[420px] animate-pulse bg-elevated"></div>
+        </div>
+      }
+    } @else {
+      <div class="mb-4 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="flex rounded-xl border border-border" role="tablist" aria-label="Pointer mode">
+            <button
+              type="button"
+              role="tab"
+              class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+              [class]="store.drawMode() === 'pan' ? 'text-white border-b-2 border-b-primary' : 'text-muted hover:text-white'"
+              [attr.aria-selected]="store.drawMode() === 'pan'"
+              (click)="store.setDrawMode('pan')"
+            >
+              Pan / select
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+              [class]="store.drawMode() === 'draw' ? 'text-white border-b-2 border-b-primary' : 'text-muted hover:text-white'"
+              [attr.aria-selected]="store.drawMode() === 'draw'"
+              (click)="store.setDrawMode('draw')"
+            >
+              Draw divider
+            </button>
+          </div>
+          <div class="flex rounded-xl border border-border">
+            <button
+              type="button"
+              class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+              [class]="store.fitMode() === 'all' ? 'text-white' : 'text-muted hover:text-white'"
+              (click)="store.setFitMode('all')"
+            >
+              Fit all
+            </button>
+            <button
+              type="button"
+              class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+              [class]="store.fitMode() === 'largest' ? 'text-white' : 'text-muted hover:text-white'"
+              (click)="store.setFitMode('largest')"
+            >
+              Fit largest
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          @if (store.fileName()) {
+            <span class="max-w-[200px] truncate font-body text-sm text-muted">{{ store.fileName() }}</span>
+          }
+          @if (store.jobId()) {
+            <span class="font-mono text-xs text-muted">JOB {{ store.jobId() }}</span>
+          }
+          @if (store.draftDividers().length > 0) {
+            <span class="font-mono text-xs text-muted">
+              {{ store.draftDividers().length }}
+              {{ store.draftDividers().length === 1 ? 'divider' : 'dividers' }}
+            </span>
+          }
+          <button
+            type="button"
+            class="h-12 rounded-xl border border-[#3A3A3A] px-6 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:bg-[rgba(235,27,38,0.05)] hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:border-border disabled:text-disabled"
+            [disabled]="!store.canUndo()"
+            (click)="store.undoLastDivider()"
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            class="h-12 rounded-xl border border-[#3A3A3A] px-6 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:bg-[rgba(235,27,38,0.05)] hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:border-border disabled:text-disabled"
+            [disabled]="!store.canRestore()"
+            (click)="store.restoreOriginalRooms()"
+          >
+            Restore rooms
+          </button>
+          <button
+            type="button"
+            class="h-12 rounded-xl bg-primary px-6 text-sm font-medium text-white transition-colors duration-180 hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:bg-border disabled:text-disabled"
+            [disabled]="!store.canApply()"
+            (click)="store.applyDrafts()"
+          >
+            @if (store.busy()) {
+              Applying
+            } @else {
+              Apply
+            }
+          </button>
+          <button
+            type="button"
+            class="h-12 rounded-xl px-4 text-sm font-medium text-muted transition-colors duration-180 hover:bg-white/5 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            (click)="store.reset()"
+          >
+            New drawing
+          </button>
+        </div>
+      </div>
+
+      @if (store.drawMode() === 'draw') {
+        <p class="mb-4 font-body text-sm text-muted">
+          Click two points across a room. Scroll to zoom first if the room is small. Snap is 0.25 m.
+        </p>
+      }
+
+      @if (store.layoutWarnings().length > 0) {
+        <div class="mb-4 flex flex-wrap gap-2">
+          @for (warning of store.layoutWarnings(); track $index) {
+            <span class="rounded-lg border border-border bg-elevated px-3 py-2 font-mono text-xs tracking-wide text-muted">
+              {{ warning.code || 'warning' }}
+              @if (warning.message || warning.detail) {
+                <span class="text-white"> · {{ warning.message || warning.detail }}</span>
+              }
+            </span>
+          }
+        </div>
+      }
+
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div class="relative min-h-[480px] overflow-hidden rounded-xl border border-border bg-surface">
+          @if (store.busy()) {
+            <div class="absolute inset-0 z-10 bg-black/50">
+              <div class="h-full w-full animate-pulse bg-elevated/40"></div>
+            </div>
+          }
+          <div class="h-[min(72vh,820px)]">
+            <app-cad-plan />
+          </div>
+        </div>
+        <app-cad-legend />
+      </div>
+    }
+  </div>
+</section>

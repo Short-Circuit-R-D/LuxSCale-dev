@@ -1,0 +1,84 @@
+<aside class="flex flex-col gap-6 rounded-xl border border-border bg-surface p-6">
+  <div>
+    <span class="mb-2 block font-mono text-xs tracking-widest text-primary uppercase">Layers</span>
+    <ul class="flex flex-col gap-1">
+      @for (item of layerItems; track item.key) {
+        <li>
+          <label class="flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-2 transition-colors duration-180 hover:bg-elevated">
+            <input
+              type="checkbox"
+              class="peer sr-only"
+              [checked]="store.layers()[item.key]"
+              (change)="store.toggleLayer(item.key)"
+            />
+            <span
+              class="flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 border-[#7A7A7A] transition-[border-color,background-color] duration-120 peer-checked:border-primary peer-checked:bg-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary"
+            >
+              @if (store.layers()[item.key]) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12l5 5L20 7" />
+                </svg>
+              }
+            </span>
+            <span class="font-body text-sm text-white">{{ item.label }}</span>
+          </label>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <div class="h-px bg-border"></div>
+
+  <div>
+    <span class="mb-2 block font-mono text-xs tracking-widest text-primary uppercase">Rooms</span>
+    @if (roomGroups().length === 0) {
+      <p class="font-body text-sm text-muted">Upload a drawing to list rooms.</p>
+    } @else {
+      <ul class="flex max-h-[320px] flex-col gap-3 overflow-y-auto">
+        @for (group of roomGroups(); track group.physicalId) {
+          <li>
+            @if (group.rooms.length > 1) {
+              <p class="mb-1 px-2 font-mono text-xs tracking-widest text-muted uppercase">{{ group.name }}</p>
+            }
+            <ul class="flex flex-col gap-1">
+              @for (room of group.rooms; track room.id) {
+                <li>
+                  <button
+                    type="button"
+                    class="flex min-h-10 w-full items-center justify-between gap-3 rounded-lg px-2 text-left transition-colors duration-180 hover:bg-elevated focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                    [class.bg-elevated]="store.selectedRoomId() === room.id"
+                    (click)="store.selectRoom(store.selectedRoomId() === room.id ? null : room.id)"
+                  >
+                    <span
+                      class="truncate font-body text-sm"
+                      [class.text-primary]="store.selectedRoomId() === room.id"
+                      [class.text-white]="store.selectedRoomId() !== room.id"
+                    >
+                      {{ room.name || room.id }}
+                      @if (room.kind === 'virtual') {
+                        <span class="text-muted"> · split</span>
+                      }
+                    </span>
+                    <span class="shrink-0 text-right font-mono text-xs text-muted">
+                      {{ netArea(room) | number: '1.1-1' }} m²
+                      @if (sizeLabel(room); as size) {
+                        <span class="block">{{ size }}</span>
+                      }
+                    </span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </li>
+        }
+      </ul>
+    }
+  </div>
+
+  @if (warningCount() > 0 && store.layers().warnings) {
+    <div>
+      <span class="mb-2 block font-mono text-xs tracking-widest text-primary uppercase">Warnings</span>
+      <p class="font-body text-sm text-muted">{{ warningCount() }} layout {{ warningCount() === 1 ? 'warning' : 'warnings' }} on the plan.</p>
+    </div>
+  }
+</aside>
