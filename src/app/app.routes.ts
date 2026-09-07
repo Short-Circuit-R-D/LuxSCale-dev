@@ -10,6 +10,12 @@ export const routes: Routes = [
       import('./features/create-study/create-study.page').then((m) => m.CreateStudyPage),
   },
   {
+    path: 'cad-study',
+    title: 'CAD Study | LuxSCale AI',
+    loadComponent: () =>
+      import('./features/cad-study/cad-study.page').then((m) => m.CadStudyPage),
+  },
+  {
     path: 'results',
     title: 'Results | LuxSCale AI',
     loadComponent: () => import('./features/results/results.page').then((m) => m.ResultsPage),

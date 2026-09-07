@@ -1,0 +1,36 @@
+@if (layout()) {
+  <canvas
+    #planCanvas
+    class="cad-plan-canvas h-full w-full"
+    [class.cad-plan-canvas--draw]="store.tool() !== 'pan'"
+    [class.cad-plan-canvas--pan]="store.tool() === 'pan'"
+    [class.cad-plan-canvas--dragging]="draggingCanvas()"
+    role="img"
+    aria-label="CAD floor plan in meters"
+    (pointerdown)="onPointerDown($event)"
+    (pointermove)="onPointerMove($event)"
+    (pointerup)="onPointerUp($event)"
+    (pointercancel)="onPointerUp($event)"
+    (pointerleave)="onPointerLeave()"
+  ></canvas>
+  <p class="pointer-events-none absolute bottom-4 left-4 font-mono text-xs tracking-wide text-muted">
+    @switch (store.tool()) {
+      @case ('split') {
+        Click two points to split
+      }
+      @case ('select') {
+        Click a room to select · Shift adds or removes
+      }
+      @case ('restore') {
+        Click a discarded face to restore it
+      }
+      @default {
+        Scroll to zoom · Drag to pan
+      }
+    }
+  </p>
+} @else {
+  <div class="flex h-full min-h-[320px] items-center justify-center px-6">
+    <p class="font-body text-sm text-muted">Upload a DXF or DWG to render the plan.</p>
+  </div>
+}

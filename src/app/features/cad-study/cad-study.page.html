@@ -1,0 +1,296 @@
+<section class="min-h-screen bg-black pt-24 pb-12 sm:pt-[100px] sm:pb-16">
+  <div
+    class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 md:px-12"
+    [attr.inert]="store.resetConfirmOpen() ? '' : null"
+  >
+    <div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-[720px]">
+        <span class="mb-3 inline-block font-mono text-xs tracking-widest text-primary uppercase">CAD Study</span>
+        <h1 class="font-display text-4xl leading-none text-white uppercase sm:text-5xl">Analyze Drawing</h1>
+        <p class="mt-4 font-body text-base text-muted">
+          Upload a DXF or DWG, then inspect physical and virtual rooms in meters.
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        @if (store.engineStatus() === 'online') {
+          <span class="font-mono text-xs tracking-widest text-[#1FA971] uppercase">
+            Engine online{{ store.engineVersion() ? ' · ' + store.engineVersion() : '' }}
+          </span>
+        } @else if (store.engineStatus() === 'offline') {
+          <span class="font-mono text-xs tracking-widest text-primary uppercase">Engine unreachable</span>
+        }
+        @if (store.jobId()) {
+          <button
+            #resetTrigger
+            type="button"
+            class="rounded-xl border border-[#3A3A3A] px-6 py-3 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:text-disabled"
+            [disabled]="!store.canResetJob()"
+            aria-haspopup="dialog"
+            [attr.aria-expanded]="store.resetConfirmOpen()"
+            (click)="openResetConfirm()"
+          >
+            Reset to original
+          </button>
+        }
+        <button
+          type="button"
+          class="rounded-xl border border-[#3A3A3A] px-6 py-3 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          (click)="store.reset()"
+        >
+          New study
+        </button>
+      </div>
+    </div>
+
+    @if (store.unitAssumed() && store.sourceUnit()) {
+      <div class="mb-6 rounded-xl border border-border border-l-2 border-l-[#F4B740] bg-surface px-5 py-5" role="status">
+        <p class="font-body text-base text-white">Source unit was assumed.</p>
+        <p class="mt-1 font-body text-sm text-muted">
+          Interpreted as {{ store.sourceUnit() }}. Override the unit on upload if the scale looks wrong.
+        </p>
+      </div>
+    }
+
+    @if (store.error(); as err) {
+      <div class="mb-6 flex items-start justify-between gap-4 rounded-xl border border-border border-l-2 border-l-primary bg-surface px-5 py-5" role="alert">
+        <div>
+          <p class="font-body text-base text-white">{{ err.message }}</p>
+          <p class="mt-1 font-mono text-xs tracking-widest text-muted uppercase">{{ err.code }}</p>
+        </div>
+        <button
+          type="button"
+          class="min-h-10 min-w-10 text-muted transition-colors duration-180 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          (click)="store.clearError()"
+          aria-label="Dismiss error"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    }
+
+    @if (!store.hasLayout()) {
+      <app-cad-upload />
+    } @else {
+      <div class="mb-4 flex flex-col gap-4">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div class="flex flex-wrap items-center gap-2" role="toolbar" aria-label="Plan tools">
+            <div class="flex rounded-xl border border-border">
+              <button
+                type="button"
+                class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+                [class]="store.tool() === 'pan' ? 'text-white border-b-2 border-b-primary' : 'text-muted hover:text-white'"
+                [attr.aria-pressed]="store.tool() === 'pan'"
+                (click)="store.setTool('pan')"
+              >
+                Pan
+              </button>
+              <button
+                type="button"
+                class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+                [class]="store.tool() === 'select' ? 'text-white border-b-2 border-b-primary' : 'text-muted hover:text-white'"
+                [attr.aria-pressed]="store.tool() === 'select'"
+                (click)="store.setTool('select')"
+              >
+                Select rooms
+              </button>
+              <button
+                type="button"
+                class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+                [class]="store.tool() === 'split' ? 'text-white border-b-2 border-b-primary' : 'text-muted hover:text-white'"
+                [attr.aria-pressed]="store.tool() === 'split'"
+                (click)="store.setTool('split')"
+              >
+                Split
+              </button>
+              <button
+                type="button"
+                class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+                [class]="store.tool() === 'restore' ? 'text-white border-b-2 border-b-primary' : 'text-muted hover:text-white'"
+                [attr.aria-pressed]="store.tool() === 'restore'"
+                (click)="store.setTool('restore')"
+              >
+                Restore face
+              </button>
+            </div>
+            <button
+              type="button"
+              class="h-12 rounded-xl border border-[#3A3A3A] px-4 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:text-disabled"
+              [disabled]="!store.canMerge()"
+              (click)="store.mergeSelectedRooms()"
+            >
+              Merge selected
+            </button>
+            <button
+              type="button"
+              class="h-12 rounded-xl border border-[#3A3A3A] px-4 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:text-disabled"
+              [disabled]="!store.canDelete()"
+              (click)="store.deleteSelectedRooms()"
+            >
+              Delete room
+            </button>
+            <button
+              type="button"
+              class="h-12 rounded-xl border border-[#3A3A3A] px-4 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:text-disabled"
+              [disabled]="!store.canRename()"
+              (click)="openRename()"
+            >
+              Rename
+            </button>
+            <button
+              type="button"
+              class="h-12 rounded-xl border border-[#3A3A3A] px-4 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:text-disabled"
+              [disabled]="!store.canUndo()"
+              (click)="store.undo()"
+            >
+              Undo
+            </button>
+            <button
+              type="button"
+              class="h-12 rounded-xl border border-[#3A3A3A] px-4 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:text-disabled"
+              [disabled]="!store.canClearDividers()"
+              (click)="store.clearDividers()"
+            >
+              Clear dividers
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex rounded-xl border border-border">
+              <button
+                type="button"
+                class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+                [class]="store.fitMode() === 'all' ? 'text-white' : 'text-muted hover:text-white'"
+                (click)="store.setFitMode('all')"
+              >
+                Fit all
+              </button>
+              <button
+                type="button"
+                class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+                [class]="store.fitMode() === 'largest' ? 'text-white' : 'text-muted hover:text-white'"
+                (click)="store.setFitMode('largest')"
+              >
+                Fit largest
+              </button>
+            </div>
+            @if (store.fileName()) {
+              <span class="max-w-[200px] truncate font-body text-sm text-muted">{{ store.fileName() }}</span>
+            }
+            @if (store.jobId()) {
+              <span class="font-mono text-xs text-muted">JOB {{ store.jobId() }}</span>
+            }
+          </div>
+        </div>
+
+        @if (store.tool() === 'split') {
+          <p class="font-body text-sm text-muted">
+            Click two points across a room to split it. Scroll to zoom first if the room is small.
+          </p>
+        }
+        @if (store.tool() === 'select') {
+          <p class="font-body text-sm text-muted">
+            Click a room to select it. Hold Shift to add or remove rooms for merge.
+          </p>
+        }
+        @if (store.tool() === 'restore') {
+          <p class="font-body text-sm text-muted">
+            Click a discarded face to restore it as a room. No room selection is required.
+          </p>
+        }
+      </div>
+
+      @if (store.renameOpen()) {
+        <div class="mb-4 flex flex-col gap-3 rounded-xl border border-border bg-surface px-5 py-4 sm:flex-row sm:items-end">
+          <div class="min-w-0 flex-1">
+            <label class="mb-2 block font-mono text-sm tracking-widest text-muted uppercase" for="cad-rename">
+              Room name
+            </label>
+            <input
+              id="cad-rename"
+              type="text"
+              class="h-12 w-full rounded-xl border border-border bg-black px-3.5 text-sm text-white focus:border-primary focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+              [value]="renameName()"
+              (input)="onRenameInput($event)"
+            />
+          </div>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="h-12 rounded-xl border border-[#3A3A3A] px-5 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary"
+              (click)="store.cancelRename()"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="h-12 rounded-xl bg-primary px-5 text-sm font-medium text-white transition-colors duration-180 hover:bg-primary-dark"
+              (click)="confirmRename()"
+            >
+              Save name
+            </button>
+          </div>
+        </div>
+      }
+
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div class="relative min-h-[480px] overflow-hidden rounded-xl border border-border bg-surface">
+          @if (store.busy()) {
+            <div class="absolute inset-0 z-10 flex items-center justify-center bg-black/50" role="status">
+              <div class="rounded-xl border border-border bg-surface px-5 py-4">
+                <p class="font-mono text-xs tracking-widest text-muted uppercase">{{ store.busyLabel() }}</p>
+              </div>
+            </div>
+          }
+          <div class="h-[min(72vh,820px)]">
+            <app-cad-plan />
+          </div>
+        </div>
+        <app-cad-legend />
+      </div>
+    }
+  </div>
+
+  @if (store.resetConfirmOpen()) {
+    <div
+      class="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 px-4"
+      (click)="cancelResetConfirm()"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cad-reset-title"
+        aria-describedby="cad-reset-desc"
+        class="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-lg"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="onResetDialogKeydown($event)"
+      >
+        <h2 id="cad-reset-title" class="font-display text-2xl text-white uppercase leading-tight">
+          Reset to original
+        </h2>
+        <p id="cad-reset-desc" class="mt-3 font-body text-sm text-muted sm:text-base">
+          This restores the job to revision 0 and discards splits, merges, deletes, and other edits.
+        </p>
+        <div class="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button
+            #resetCancel
+            type="button"
+            class="h-12 rounded-xl border border-[#3A3A3A] px-5 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            (click)="cancelResetConfirm()"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="h-12 rounded-xl bg-primary px-5 text-sm font-medium text-white transition-colors duration-180 hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            (click)="confirmResetJob()"
+          >
+            Reset job
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>
