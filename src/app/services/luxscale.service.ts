@@ -26,6 +26,15 @@ export interface StandardEntry {
   [key: string]: unknown;
 }
 
+export interface LayoutPayload {
+  spacing_x_m?: number;
+  spacing_y_m?: number;
+  offset_start_x_m?: number;
+  offset_start_y_m?: number;
+  offset_end_min_x_m?: number;
+  offset_end_min_y_m?: number;
+}
+
 export interface CalculatePayload {
   sides: number[];
   height: number;
@@ -43,6 +52,7 @@ export interface CalculatePayload {
     standard_lighting: StandardEntry;
   };
   standard_ref_no: string;
+  layout?: LayoutPayload;
 }
 
 @Injectable({
@@ -52,7 +62,7 @@ export class LuxScaleService {
   private readonly http = inject(HttpClient);
   private readonly standardsUrl =
     'https://web-production-8d09d.up.railway.app/api/standards/cleaned';
-  private readonly calculateUrl = 'https://web-production-8d09d.up.railway.app/calculate';
+  private readonly calculateUrl = 'http://localhost:5000/calculate';
 
   getStandardCategories(): Observable<string[]> {
     return this.http

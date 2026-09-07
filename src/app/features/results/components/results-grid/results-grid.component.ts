@@ -1,13 +1,15 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { CalculationResponse, CalculationResult, UiSettings } from '../../../../services/calculation-result.service';
+import { CalculationResult, UiSettings } from '../../../../services/calculation-result.service';
 import { PdfReportService } from '../../../../services/pdf-report.service';
 import { ResultStoreService, FixtureResult } from '../../../../services/result-store.service';
+import { selectionLabel } from '../../../../shared/room-plan/layout-copy';
+import { RoomPlanPreviewComponent } from '../../../../shared/room-plan/room-plan-preview.component';
 import { CalculationsComponent } from '../calculations/calculations.component';
 import { FixtureDetailsComponent } from '../fixture-details/fixture-details.component';
 
 @Component({
   selector: 'app-results-grid',
-  imports: [CalculationsComponent, FixtureDetailsComponent],
+  imports: [CalculationsComponent, FixtureDetailsComponent, RoomPlanPreviewComponent],
   templateUrl: './results-grid.component.html',
   styleUrl: './results-grid.component.css',
 })
@@ -21,6 +23,25 @@ export class ResultsGridComponent {
 
   protected readonly selectedIndex = signal(0);
   protected readonly activeView = signal<'calculations' | 'fixtures'>('calculations');
+  protected readonly selectionLabel = selectionLabel;
+
+  protected readonly calc = this.resultStore.calculationResult;
+  protected readonly requestSides = computed(() => {
+    const sides = this.resultStore.calculationRequest()?.sides;
+    if (!sides || sides.length < 4) {
+      return { width1: null, length1: null, width2: null, length2: null };
+    }
+    return {
+      width1: sides[0],
+      length1: sides[1],
+      width2: sides[2],
+      length2: sides[3],
+    };
+  });
+  protected readonly layoutMode = computed((): 'auto' | 'user_grid' | null => {
+    const mode = this.calc()?.calculation_meta.layout_mode;
+    return mode === 'user_grid' || mode === 'auto' ? mode : null;
+  });
 
   protected readonly selectedResult = computed(() => this.results()[this.selectedIndex()]);
 

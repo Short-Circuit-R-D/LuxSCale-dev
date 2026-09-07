@@ -1,5 +1,8 @@
 <section class="bg-black min-h-screen flex items-center justify-center py-24 sm:py-[80px]">
-  <div class="w-full max-w-[800px] px-4 sm:px-6 mx-auto">
+  <div
+    class="w-full px-4 sm:px-6 mx-auto"
+    [class]="store.currentStep() === 1 ? 'max-w-[800px]' : 'max-w-[1100px]'"
+  >
     <div class="mb-8">
       <div class="h-0.5 bg-border rounded overflow-hidden mb-3">
         <div class="h-full bg-primary transition-[width] duration-300" [style.width]="store.currentStep() === 1 ? '50%' : '100%'"></div>
@@ -107,180 +110,334 @@
       }
 
       @if (store.currentStep() === 2) {
-        <div class="mb-8 last:mb-0">
-          <div class="flex items-center gap-2 mb-5 pl-3 border-l-2 border-primary">
-            <span class="font-mono text-xs text-primary">I.</span>
-            <span class="font-mono text-xs text-primary tracking-widest uppercase">Room Dimensions</span>
-          </div>
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
+          <div class="lg:col-start-1 lg:row-start-1">
+            <div class="flex items-center gap-2 mb-5 pl-3 border-l-2 border-primary">
+              <span class="font-mono text-xs text-primary">I.</span>
+              <span class="font-mono text-xs text-primary tracking-widest uppercase">Room Dimensions</span>
+            </div>
 
-          <div class="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-3">
-            <div>
-              <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="width1">Width 1 (M) *</label>
-              <input
-                id="width1"
-                type="number"
-                class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
-                placeholder="0.00"
-                [ngModel]="store.technical().width1"
-                (ngModelChange)="store.updateTechnical({ width1: $event })"
-                required
-              />
-            </div>
-            <div>
-              <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="length1">Length 1 (M) *</label>
-              <input
-                id="length1"
-                type="number"
-                class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
-                placeholder="0.00"
-                [ngModel]="store.technical().length1"
-                (ngModelChange)="store.updateTechnical({ length1: $event })"
-                required
-              />
-            </div>
-            <div>
-              <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="ceilingHeight">Ceiling Height (M) *</label>
-              <input
-                id="ceilingHeight"
-                type="number"
-                class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
-                placeholder="0.00"
-                [ngModel]="store.technical().ceilingHeight"
-                (ngModelChange)="store.updateTechnical({ ceilingHeight: $event })"
-                required
-              />
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div>
-              <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="width2">Width 2 (M) *</label>
-              <input
-                id="width2"
-                type="number"
-                class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
-                placeholder="0.00"
-                [ngModel]="store.technical().width2"
-                (ngModelChange)="store.updateTechnical({ width2: $event })"
-                required
-              />
-            </div>
-            <div>
-              <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="length2">Length 2 (M) *</label>
-              <input
-                id="length2"
-                type="number"
-                class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
-                placeholder="0.00"
-                [ngModel]="store.technical().length2"
-                (ngModelChange)="store.updateTechnical({ length2: $event })"
-                required
-              />
-            </div>
-            <div>
-              <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="mountingHeight">Mounting Height (M) *</label>
-              <input
-                id="mountingHeight"
-                type="number"
-                class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
-                placeholder="0.00"
-                [ngModel]="store.technical().mountingHeight"
-                (ngModelChange)="store.updateTechnical({ mountingHeight: $event })"
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="mb-8 last:mb-0">
-          <div class="flex items-center gap-2 mb-5 pl-3 border-l-2 border-primary">
-            <span class="font-mono text-xs text-primary">II.</span>
-            <span class="font-mono text-xs text-primary tracking-widest uppercase">Compliance Parameters</span>
-          </div>
-
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2">Standard Category *</label>
-              <div class="relative">
-                <button
-                  type="button"
-                  class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-left font-body text-sm cursor-pointer transition-[border-color] duration-150 text-muted focus:outline-none focus:border-primary focus:text-white"
-                  (click)="toggleStandardDropdown()"
-                >
-                  {{ store.technical().standardCategory || 'Select standard' }}
-                </button>
-                @if (showStandardDropdown()) {
-                  <div class="absolute top-full left-0 right-0 border border-border rounded-lg bg-surface z-20 overflow-hidden mt-1">
-                    <input
-                      type="text"
-                      class="w-full px-3.5 py-2.5 bg-transparent border-b border-border text-white font-body text-sm box-border focus:outline-none placeholder:text-muted"
-                      placeholder="Search..."
-                      [ngModel]="standardSearch()"
-                      (ngModelChange)="standardSearch.set($event)"
-                      (click)="$event.stopPropagation()"
-                    />
-                    <div class="max-h-[200px] overflow-y-auto">
-                      @for (cat of filteredStandards(); track cat) {
-                        <button
-                          type="button"
-                          class="block w-full px-3.5 py-2.5 bg-transparent border-none text-muted font-body text-sm text-left cursor-pointer transition-[background-color,color] duration-150 hover:bg-elevated hover:text-white"
-                          [class]="store.technical().standardCategory === cat ? 'text-primary' : ''"
-                          (click)="onStandardSelect(cat)"
-                        >
-                          {{ cat }}
-                        </button>
-                      }
-                      @if (filteredStandards().length === 0) {
-                        <div class="px-3.5 py-4 text-muted text-sm text-center">No results found</div>
-                      }
-                    </div>
-                  </div>
-                }
+            <div class="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-3">
+              <div>
+                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="width1">Width 1 (M) *</label>
+                <input
+                  id="width1"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                  placeholder="0.00"
+                  [ngModel]="store.technical().width1"
+                  (ngModelChange)="onMetricInput('width1', $event)"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="length1">Length 1 (M) *</label>
+                <input
+                  id="length1"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                  placeholder="0.00"
+                  [ngModel]="store.technical().length1"
+                  (ngModelChange)="onMetricInput('length1', $event)"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="ceilingHeight">Ceiling Height (M) *</label>
+                <input
+                  id="ceilingHeight"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                  placeholder="0.00"
+                  [ngModel]="store.technical().ceilingHeight"
+                  (ngModelChange)="onMetricInput('ceilingHeight', $event)"
+                  required
+                />
               </div>
             </div>
-            <div>
-              <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2">Task or Activity *</label>
-              <div class="relative">
-                <button
-                  type="button"
-                  class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-left font-body text-sm cursor-pointer transition-[border-color] duration-150 text-muted focus:outline-none focus:border-primary focus:text-white"
-                  (click)="toggleTaskDropdown()"
-                >
-                  {{ store.technical().taskOrActivity || 'Select task' }}
-                </button>
-                @if (showTaskDropdown()) {
-                  <div class="absolute top-full left-0 right-0 border border-border rounded-lg bg-surface z-20 overflow-hidden mt-1">
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div>
+                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="width2">Width 2 (M) *</label>
+                <input
+                  id="width2"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                  placeholder="0.00"
+                  [ngModel]="store.technical().width2"
+                  (ngModelChange)="onMetricInput('width2', $event)"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="length2">Length 2 (M) *</label>
+                <input
+                  id="length2"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                  placeholder="0.00"
+                  [ngModel]="store.technical().length2"
+                  (ngModelChange)="onMetricInput('length2', $event)"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="mountingHeight">Mounting Height (M) *</label>
+                <input
+                  id="mountingHeight"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                  placeholder="0.00"
+                  [ngModel]="store.technical().mountingHeight"
+                  (ngModelChange)="onMetricInput('mountingHeight', $event)"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-start-2 lg:row-start-1 lg:row-span-3 lg:sticky lg:top-24">
+            <app-room-plan-preview
+              [width1]="store.technical().width1"
+              [length1]="store.technical().length1"
+              [width2]="store.technical().width2"
+              [length2]="store.technical().length2"
+              [customInstall]="store.technical().customInstall"
+              [spacingX]="store.technical().spacingX"
+              [spacingY]="store.technical().spacingY"
+              [offsetStartX]="store.technical().offsetStartX"
+              [offsetStartY]="store.technical().offsetStartY"
+              [offsetEndMinX]="store.technical().offsetEndMinX"
+              [offsetEndMinY]="store.technical().offsetEndMinY"
+            />
+          </div>
+
+          <div class="lg:col-start-1 lg:row-start-2">
+            <button
+              type="button"
+              class="flex w-full items-center justify-between gap-3 mb-5 pl-3 border-l-2 border-primary bg-transparent p-0 text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+              [attr.aria-expanded]="store.technical().customInstall"
+              aria-controls="custom-install-fields"
+              (click)="toggleCustomInstall()"
+            >
+              <span class="flex items-center gap-2">
+                <span class="font-mono text-xs text-primary">II.</span>
+                <span class="font-mono text-xs text-primary tracking-widest uppercase">Advanced Options</span>
+              </span>
+              <span class="font-mono text-xs tracking-widest uppercase" [class]="store.technical().customInstall ? 'text-white' : 'text-muted'">
+                {{ store.technical().customInstall ? 'Custom install' : 'Automatic layout' }}
+              </span>
+            </button>
+
+            <div id="custom-install-fields">
+            @if (store.technical().customInstall) {
+              <div>
+                <p class="font-body text-sm text-muted m-0 mb-4 leading-relaxed">
+                  Packed axes keep extra clearance on the far wall. Leave one spacing empty to auto-space that axis for uniformity.
+                </p>
+
+                <div class="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-2">
+                  <div>
+                    <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="spacingX">Spacing X — Width (M)</label>
                     <input
-                      type="text"
-                      class="w-full px-3.5 py-2.5 bg-transparent border-b border-border text-white font-body text-sm box-border focus:outline-none placeholder:text-muted"
-                      placeholder="Search..."
-                      [ngModel]="taskSearch()"
-                      (ngModelChange)="taskSearch.set($event)"
-                      (click)="$event.stopPropagation()"
+                      id="spacingX"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                      placeholder="Centre-to-centre"
+                      [ngModel]="store.technical().spacingX"
+                      (ngModelChange)="onMetricInput('spacingX', $event)"
                     />
-                    <div class="max-h-[200px] overflow-y-auto">
-                      @for (task of filteredTasks(); track task) {
-                        <button
-                          type="button"
-                          class="block w-full px-3.5 py-2.5 bg-transparent border-none text-muted font-body text-sm text-left cursor-pointer transition-[background-color,color] duration-150 hover:bg-elevated hover:text-white"
-                          [class]="store.technical().taskOrActivity === task ? 'text-primary' : ''"
-                          (click)="onTaskSelect(task)"
-                        >
-                          {{ task }}
-                        </button>
-                      }
-                      @if (filteredTasks().length === 0) {
-                        <div class="px-3.5 py-4 text-muted text-sm text-center">No results found</div>
-                      }
-                    </div>
                   </div>
+                  <div>
+                    <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="spacingY">Spacing Y — Length (M)</label>
+                    <input
+                      id="spacingY"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                      placeholder="Auto for uniformity"
+                      [ngModel]="store.technical().spacingY"
+                      (ngModelChange)="onMetricInput('spacingY', $event)"
+                    />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-2">
+                  <div>
+                    <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="offsetStartX">Offset start X (M)</label>
+                    <input
+                      id="offsetStartX"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                      placeholder="0.5"
+                      [ngModel]="store.technical().offsetStartX"
+                      (ngModelChange)="onMetricInput('offsetStartX', $event)"
+                    />
+                  </div>
+                  <div>
+                    <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="offsetStartY">Offset start Y (M)</label>
+                    <input
+                      id="offsetStartY"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                      placeholder="0.5"
+                      [ngModel]="store.technical().offsetStartY"
+                      (ngModelChange)="onMetricInput('offsetStartY', $event)"
+                    />
+                  </div>
+                  <div>
+                    <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="offsetEndMinX">Min far offset X (M)</label>
+                    <input
+                      id="offsetEndMinX"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                      placeholder="0.5"
+                      [ngModel]="store.technical().offsetEndMinX"
+                      (ngModelChange)="onMetricInput('offsetEndMinX', $event)"
+                    />
+                  </div>
+                  <div>
+                    <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2" for="offsetEndMinY">Min far offset Y (M)</label>
+                    <input
+                      id="offsetEndMinY"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm transition-[border-color] duration-150 box-border placeholder:text-muted focus:outline-none focus:border-primary"
+                      placeholder="0.5"
+                      [ngModel]="store.technical().offsetEndMinY"
+                      (ngModelChange)="onMetricInput('offsetEndMinY', $event)"
+                    />
+                  </div>
+                </div>
+
+                @for (error of layoutErrors(); track error) {
+                  <span class="block mb-2 font-mono text-sm text-primary">{{ error }}</span>
                 }
+              </div>
+            } @else {
+              <p class="font-body text-sm text-muted m-0 leading-relaxed">
+                Fixtures will be placed automatically. Expand for custom spacing and wall offsets.
+              </p>
+            }
+            </div>
+          </div>
+
+          <div class="lg:col-start-1 lg:row-start-3">
+            <div class="flex items-center gap-2 mb-5 pl-3 border-l-2 border-primary">
+              <span class="font-mono text-xs text-primary">III.</span>
+              <span class="font-mono text-xs text-primary tracking-widest uppercase">Compliance Parameters</span>
+            </div>
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2">Standard Category *</label>
+                <div class="relative">
+                  <button
+                    type="button"
+                    class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-left font-body text-sm cursor-pointer transition-[border-color] duration-150 text-muted focus:outline-none focus:border-primary focus:text-white"
+                    (click)="toggleStandardDropdown()"
+                  >
+                    {{ store.technical().standardCategory || 'Select standard' }}
+                  </button>
+                  @if (showStandardDropdown()) {
+                    <div class="absolute top-full left-0 right-0 border border-border rounded-lg bg-surface z-20 overflow-hidden mt-1">
+                      <input
+                        type="text"
+                        class="w-full px-3.5 py-2.5 bg-transparent border-b border-border text-white font-body text-sm box-border focus:outline-none placeholder:text-muted"
+                        placeholder="Search..."
+                        [ngModel]="standardSearch()"
+                        (ngModelChange)="standardSearch.set($event)"
+                        (click)="$event.stopPropagation()"
+                      />
+                      <div class="max-h-[200px] overflow-y-auto">
+                        @for (cat of filteredStandards(); track cat) {
+                          <button
+                            type="button"
+                            class="block w-full px-3.5 py-2.5 bg-transparent border-none text-muted font-body text-sm text-left cursor-pointer transition-[background-color,color] duration-150 hover:bg-elevated hover:text-white"
+                            [class]="store.technical().standardCategory === cat ? 'text-primary' : ''"
+                            (click)="onStandardSelect(cat)"
+                          >
+                            {{ cat }}
+                          </button>
+                        }
+                        @if (filteredStandards().length === 0) {
+                          <div class="px-3.5 py-4 text-muted text-sm text-center">No results found</div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div>
+                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2">Task or Activity *</label>
+                <div class="relative">
+                  <button
+                    type="button"
+                    class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-left font-body text-sm cursor-pointer transition-[border-color] duration-150 text-muted focus:outline-none focus:border-primary focus:text-white"
+                    (click)="toggleTaskDropdown()"
+                  >
+                    {{ store.technical().taskOrActivity || 'Select task' }}
+                  </button>
+                  @if (showTaskDropdown()) {
+                    <div class="absolute top-full left-0 right-0 border border-border rounded-lg bg-surface z-20 overflow-hidden mt-1">
+                      <input
+                        type="text"
+                        class="w-full px-3.5 py-2.5 bg-transparent border-b border-border text-white font-body text-sm box-border focus:outline-none placeholder:text-muted"
+                        placeholder="Search..."
+                        [ngModel]="taskSearch()"
+                        (ngModelChange)="taskSearch.set($event)"
+                        (click)="$event.stopPropagation()"
+                      />
+                      <div class="max-h-[200px] overflow-y-auto">
+                        @for (task of filteredTasks(); track task) {
+                          <button
+                            type="button"
+                            class="block w-full px-3.5 py-2.5 bg-transparent border-none text-muted font-body text-sm text-left cursor-pointer transition-[background-color,color] duration-150 hover:bg-elevated hover:text-white"
+                            [class]="store.technical().taskOrActivity === task ? 'text-primary' : ''"
+                            (click)="onTaskSelect(task)"
+                          >
+                            {{ task }}
+                          </button>
+                        }
+                        @if (filteredTasks().length === 0) {
+                          <div class="px-3.5 py-4 text-muted text-sm text-center">No results found</div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
               </div>
             </div>
           </div>
         </div>
       }
     </div>
+
+    @if (submitError()) {
+      <p class="mb-4 font-mono text-sm text-primary" role="alert">{{ submitError() }}</p>
+    }
 
     <div class="flex items-center justify-between">
       @if (store.currentStep() === 1) {

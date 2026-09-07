@@ -64,6 +64,78 @@
             }}<span class="font-mono text-xs text-muted ml-0.5"> m</span></span
           >
         </div>
+        @if (result['offset_start_x_m'] != null) {
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+              >Offset start X</span
+            >
+            <span class="font-body text-sm text-white font-medium sm:text-sm"
+              >{{ result['offset_start_x_m']
+              }}<span class="font-mono text-xs text-muted ml-0.5"> m</span></span
+            >
+          </div>
+        }
+        @if (result['offset_start_y_m'] != null) {
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+              >Offset start Y</span
+            >
+            <span class="font-body text-sm text-white font-medium sm:text-sm"
+              >{{ result['offset_start_y_m']
+              }}<span class="font-mono text-xs text-muted ml-0.5"> m</span></span
+            >
+          </div>
+        }
+        @if (result['offset_end_min_x_m'] != null) {
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+              >Min far offset X</span
+            >
+            <span class="font-body text-sm text-white font-medium sm:text-sm"
+              >{{ result['offset_end_min_x_m']
+              }}<span class="font-mono text-xs text-muted ml-0.5"> m</span></span
+            >
+          </div>
+        }
+        @if (result['offset_end_min_y_m'] != null) {
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+              >Min far offset Y</span
+            >
+            <span class="font-body text-sm text-white font-medium sm:text-sm"
+              >{{ result['offset_end_min_y_m']
+              }}<span class="font-mono text-xs text-muted ml-0.5"> m</span></span
+            >
+          </div>
+        }
+        @if (result['offset_end_actual_x_m'] != null) {
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+              >Actual far gap X</span
+            >
+            <span class="font-body text-sm text-white font-medium sm:text-sm"
+              >{{ result['offset_end_actual_x_m']
+              }}<span class="font-mono text-xs text-muted ml-0.5"> m</span></span
+            >
+            @if (extraClearanceNote(result['offset_end_actual_x_m'], result['offset_end_min_x_m']); as note) {
+              <span class="font-mono text-xs text-muted">{{ note }}</span>
+            }
+          </div>
+        }
+        @if (result['offset_end_actual_y_m'] != null) {
+          <div class="flex flex-col gap-0.5">
+            <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+              >Actual far gap Y</span
+            >
+            <span class="font-body text-sm text-white font-medium sm:text-sm"
+              >{{ result['offset_end_actual_y_m']
+              }}<span class="font-mono text-xs text-muted ml-0.5"> m</span></span
+            >
+            @if (extraClearanceNote(result['offset_end_actual_y_m'], result['offset_end_min_y_m']); as note) {
+              <span class="font-mono text-xs text-muted">{{ note }}</span>
+            }
+          </div>
+        }
         <div class="flex flex-col gap-0.5">
           <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
             >Beam Angle</span
@@ -282,7 +354,9 @@
       <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
         >How This Option Was Chosen</span
       >
-      <span class="font-body text-xs text-muted sm:text-sm">{{ result['Selection'] }}</span>
+      <span class="font-body text-xs text-muted sm:text-sm">{{
+        selectionLabel(result['Selection'])
+      }}</span>
     </div>
     <div class="flex flex-col gap-1">
       <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
@@ -308,5 +382,13 @@
         result['Inter-reflection fraction (est.)']
       }}</span>
     </div>
+    @if (result['Compliance note']) {
+      <div class="flex flex-col gap-1 sm:col-span-2">
+        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+          >Compliance Note</span
+        >
+        <span class="font-body text-xs text-muted sm:text-sm">{{ result['Compliance note'] }}</span>
+      </div>
+    }
   </div>
 }

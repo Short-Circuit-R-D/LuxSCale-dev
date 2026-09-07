@@ -48,6 +48,16 @@ export interface FixtureFamilyShortfall {
   summary: string;
 }
 
+export interface UserGridMeta {
+  spacing_x_m: number | null;
+  spacing_y_m: number | null;
+  offset_start_x_m: number;
+  offset_start_y_m: number;
+  offset_end_min_x_m: number;
+  offset_end_min_y_m: number;
+  free_axis: 'x' | 'y' | null;
+}
+
 export interface CalculationMeta {
   calc_mode: string;
   capped_at_max: boolean;
@@ -62,6 +72,8 @@ export interface CalculationMeta {
   total_solutions_returned: number;
   used_closest_non_compliant_fallback: boolean;
   used_uniformity_sweep_fallback: boolean;
+  layout_mode?: 'auto' | 'user_grid';
+  user_grid?: UserGridMeta;
 }
 
 export interface CeilingHeightBounds {
