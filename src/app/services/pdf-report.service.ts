@@ -4,6 +4,7 @@ import 'svg2pdf.js';
 import autoTable from 'jspdf-autotable';
 import { CalculationResponse, CalculationResult } from './calculation-result.service';
 import { FixtureResult } from './result-store.service';
+import { extraClearanceNote, freeAxisLabel, layoutModeLabel, selectionLabel } from '../shared/room-plan/layout-copy';
 import {
   parseIesFile,
   getBeamAngle,
@@ -292,15 +293,29 @@ export class PdfReportService {
     y += 4;
     y = this.sectionHeader(doc, 'Calculation Details', y);
     const m = response.calculation_meta;
-    return this.table(doc, y, [
+    const rows: string[][] = [
       ['Mode', m.calc_mode],
+      ['Layout Mode', layoutModeLabel(m.layout_mode)],
       ['Total Solutions', `${m.total_solutions_returned}`],
       ['Fixture Count Step', `${m.fixture_count_step}`],
       ['Max Solutions Cap', `${m.max_solutions_cap}`],
       ['Compliant Cap Only', m.compliant_cap_only ? 'Yes' : 'No'],
       ['Capped at Max', m.capped_at_max ? 'Yes' : 'No'],
       ['No Compliant Options', m.no_compliant_options ? 'Yes' : 'No'],
-    ]);
+    ];
+    if (m.user_grid) {
+      const g = m.user_grid;
+      rows.push(
+        ['User Spacing X', g.spacing_x_m == null ? 'Auto' : `${g.spacing_x_m} m`],
+        ['User Spacing Y', g.spacing_y_m == null ? 'Auto' : `${g.spacing_y_m} m`],
+        ['Free Axis', freeAxisLabel(g.free_axis)],
+        ['Start Offset X', `${g.offset_start_x_m} m`],
+        ['Start Offset Y', `${g.offset_start_y_m} m`],
+        ['Min Far Offset X', `${g.offset_end_min_x_m} m`],
+        ['Min Far Offset Y', `${g.offset_end_min_y_m} m`],
+      );
+    }
+    return this.table(doc, y, rows);
   }
 
   private addSolutionHeader(doc: jsPDF, w: number, y: number, num: number, result: CalculationResult): number {
@@ -355,7 +370,7 @@ export class PdfReportService {
     y = this.sectionHeader(doc, 'Calculations', y, 10);
 
     y = this.subHeader(doc, 'Luminaire & Layout', y);
-    y = this.table(doc, y, [
+    const layoutRows: string[][] = [
       ['Luminaire', `${result['Luminaire']}`],
       ['Power', `${result['Power (W)']} W`],
       ['Number of Fixtures', `${result['Fixtures']}`],
@@ -363,10 +378,39 @@ export class PdfReportService {
       ['Layout Grid', `${result['Layout grid']}`],
       ['Spacing X', `${result['Spacing X (m)']} m`],
       ['Spacing Y', `${result['Spacing Y (m)']} m`],
+    ];
+    if (result['offset_start_x_m'] != null) {
+      layoutRows.push(['Offset start X', `${result['offset_start_x_m']} m`]);
+    }
+    if (result['offset_start_y_m'] != null) {
+      layoutRows.push(['Offset start Y', `${result['offset_start_y_m']} m`]);
+    }
+    if (result['offset_end_min_x_m'] != null) {
+      layoutRows.push(['Min far offset X', `${result['offset_end_min_x_m']} m`]);
+    }
+    if (result['offset_end_min_y_m'] != null) {
+      layoutRows.push(['Min far offset Y', `${result['offset_end_min_y_m']} m`]);
+    }
+    if (result['offset_end_actual_x_m'] != null) {
+      const note = extraClearanceNote(result['offset_end_actual_x_m'], result['offset_end_min_x_m']);
+      layoutRows.push([
+        'Actual far gap X',
+        `${result['offset_end_actual_x_m']} m${note ? ` (${note})` : ''}`,
+      ]);
+    }
+    if (result['offset_end_actual_y_m'] != null) {
+      const note = extraClearanceNote(result['offset_end_actual_y_m'], result['offset_end_min_y_m']);
+      layoutRows.push([
+        'Actual far gap Y',
+        `${result['offset_end_actual_y_m']} m${note ? ` (${note})` : ''}`,
+      ]);
+    }
+    layoutRows.push(
       ['Beam Angle', `${result['Beam Angle (°)']}°`],
       ['Beam Angle Nominal', `${result['Beam Angle nominal (°)']}°`],
       ['IES File', `${result['IES file']}`],
-    ]);
+    );
+    y = this.table(doc, y, layoutRows);
 
     y += 4;
     y = this.subHeader(doc, 'Performance', y);
@@ -404,12 +448,16 @@ export class PdfReportService {
 
     y += 4;
     y = this.subHeader(doc, 'Selection Details', y);
-    return this.table(doc, y, [
-      ['How Chosen', `${result['Selection']}`],
+    const selectionRows: string[][] = [
+      ['How Chosen', selectionLabel(result['Selection'])],
       ['Lux Compliance Basis', `${result['Lux compliance basis']}`],
       ['Room Reflectance', `${result['Room reflectance preset']}`],
       ['Inter-reflection Fraction', `${result['Inter-reflection fraction (est.)']}`],
-    ]);
+    ];
+    if (result['Compliance note']) {
+      selectionRows.push(['Compliance Note', `${result['Compliance note']}`]);
+    }
+    return this.table(doc, y, selectionRows);
   }
 
   // ─── Layout Helpers ────────────────────────────────────────────────

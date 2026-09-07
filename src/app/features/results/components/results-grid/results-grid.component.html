@@ -43,7 +43,7 @@
         <div class="flex flex-col gap-1">
           <span class="font-display text-lg text-white sm:text-xl">{{ result['Luminaire'] }}</span>
           <span class="font-mono text-xs text-muted uppercase sm:text-sm">{{
-            result['Selection']
+            selectionLabel(result['Selection'])
           }}</span>
         </div>
         <div class="flex items-center gap-3">
@@ -83,6 +83,26 @@
             {{ result['is_compliant'] ? 'COMPLIANT' : 'NON-COMPLIANT' }}
           </span>
         </div>
+      </div>
+
+      <div class="mb-6">
+        <app-room-plan-preview
+          [width1]="requestSides().width1"
+          [length1]="requestSides().length1"
+          [width2]="requestSides().width2"
+          [length2]="requestSides().length2"
+          [engineLength]="calc()?.length ?? null"
+          [engineWidth]="calc()?.width ?? null"
+          [layoutNx]="result['layout_nx'] ?? null"
+          [layoutNy]="result['layout_ny'] ?? null"
+          [usedSpacingX]="result['Spacing X (m)'] ?? null"
+          [usedSpacingY]="result['Spacing Y (m)'] ?? null"
+          [offsetStartX]="result['offset_start_x_m'] ?? null"
+          [offsetStartY]="result['offset_start_y_m'] ?? null"
+          [offsetEndMinX]="result['offset_end_min_x_m'] ?? null"
+          [offsetEndMinY]="result['offset_end_min_y_m'] ?? null"
+          [layoutMode]="layoutMode()"
+        />
       </div>
 
       <div class="view-slider mb-6">

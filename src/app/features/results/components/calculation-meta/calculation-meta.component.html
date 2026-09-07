@@ -5,6 +5,12 @@
   </div>
 
   <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-3 md:grid-cols-4 sm:gap-4">
+    @if (meta().layout_mode) {
+      <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
+        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Layout Mode</span>
+        <span class="font-body text-sm text-white font-medium">{{ layoutModeLabel(meta().layout_mode) }}</span>
+      </div>
+    }
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
       <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Calc Mode</span>
       <span class="font-body text-sm text-white font-medium">{{ meta().calc_mode }}</span>
@@ -64,6 +70,45 @@
       </span>
     </div>
   </div>
+
+  @if (meta().user_grid; as grid) {
+    <div class="mb-6 p-4 bg-elevated rounded-lg">
+      <span class="block font-mono text-xs text-muted tracking-widest uppercase mb-3">User-specified install</span>
+      <p class="font-body text-sm text-muted m-0 mb-4 leading-relaxed">
+        @if (grid.free_axis) {
+          Grid was user-specified. The other spacing was chosen for uniformity.
+        } @else {
+          Grid was user-specified.
+        }
+      </p>
+      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase">Spacing X</span>
+          <span class="font-body text-sm text-white">{{ grid.spacing_x_m ?? 'Auto' }}@if (grid.spacing_x_m != null) { m }</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase">Spacing Y</span>
+          <span class="font-body text-sm text-white">{{ grid.spacing_y_m ?? 'Auto' }}@if (grid.spacing_y_m != null) { m }</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase">Free Axis</span>
+          <span class="font-body text-sm text-white">{{ freeAxisLabel(grid.free_axis) }}</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase">Start offset X</span>
+          <span class="font-body text-sm text-white">{{ grid.offset_start_x_m }} m</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase">Start offset Y</span>
+          <span class="font-body text-sm text-white">{{ grid.offset_start_y_m }} m</span>
+        </div>
+        <div class="flex flex-col gap-0.5">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase">Min far X / Y</span>
+          <span class="font-body text-sm text-white">{{ grid.offset_end_min_x_m }} m / {{ grid.offset_end_min_y_m }} m</span>
+        </div>
+      </div>
+    </div>
+  }
 
   @if (meta().fixture_family_shortfall.length > 0) {
     <div class="pt-5 border-t border-border">

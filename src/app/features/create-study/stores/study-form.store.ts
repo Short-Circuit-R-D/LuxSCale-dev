@@ -17,6 +17,13 @@ export interface TechnicalSpecs {
   mountingHeight: number | null;
   standardCategory: string;
   taskOrActivity: string;
+  customInstall: boolean;
+  spacingX: number | null;
+  spacingY: number | null;
+  offsetStartX: number | null;
+  offsetStartY: number | null;
+  offsetEndMinX: number | null;
+  offsetEndMinY: number | null;
 }
 
 export interface StudyFormState {
@@ -42,6 +49,13 @@ const INITIAL_TECHNICAL: TechnicalSpecs = {
   mountingHeight: null,
   standardCategory: '',
   taskOrActivity: '',
+  customInstall: false,
+  spacingX: null,
+  spacingY: null,
+  offsetStartX: null,
+  offsetStartY: null,
+  offsetEndMinX: null,
+  offsetEndMinY: null,
 };
 
 export function createStudyStore() {

@@ -5,6 +5,7 @@ import {
   CalculationResult,
 } from './calculation-result.service';
 import { FixturesService, Fixture } from './fixtures.service';
+import { CalculatePayload } from './luxscale.service';
 
 export interface FixtureKey {
   luminaire: string;
@@ -19,6 +20,7 @@ export interface FixtureResult {
 const STORAGE_KEY_CALC = 'luxscale_calculation_result';
 const STORAGE_KEY_FIXTURES = 'luxscale_fixtures_result';
 const STORAGE_KEY_FALLBACK = 'luxscale_fallback_fields';
+const STORAGE_KEY_REQUEST = 'luxscale_calculation_request';
 
 @Injectable({
   providedIn: 'root',
@@ -29,18 +31,31 @@ export class ResultStoreService {
   readonly calculationResult = signal<CalculationResponse | null>(
     this.loadCalcFromStorage(),
   );
+  readonly calculationRequest = signal<CalculatePayload | null>(
+    this.loadRequestFromStorage(),
+  );
   readonly fixtureResults = signal<FixtureResult[]>(
     this.loadFixturesFromStorage(),
   );
   readonly fallbackFields = signal<Set<string>>(this.loadFallbackFromStorage());
 
-  setCalculationResult(data: CalculationResponse, fallbackFields?: Set<string>) {
+  setCalculationResult(
+    data: CalculationResponse,
+    fallbackFields?: Set<string>,
+    request?: CalculatePayload | null,
+  ) {
     this.calculationResult.set(data);
+    this.calculationRequest.set(request ?? null);
     this.fixtureResults.set([]);
     this.fallbackFields.set(fallbackFields ?? new Set());
     try {
       localStorage.setItem(STORAGE_KEY_CALC, JSON.stringify(data));
       localStorage.setItem(STORAGE_KEY_FALLBACK, JSON.stringify([...(fallbackFields ?? [])]));
+      if (request) {
+        localStorage.setItem(STORAGE_KEY_REQUEST, JSON.stringify(request));
+      } else {
+        localStorage.removeItem(STORAGE_KEY_REQUEST);
+      }
       localStorage.removeItem(STORAGE_KEY_FIXTURES);
     } catch {
       // ignore storage errors
@@ -58,10 +73,12 @@ export class ResultStoreService {
 
   clearAll() {
     this.calculationResult.set(null);
+    this.calculationRequest.set(null);
     this.fixtureResults.set([]);
     this.fallbackFields.set(new Set());
     try {
       localStorage.removeItem(STORAGE_KEY_CALC);
+      localStorage.removeItem(STORAGE_KEY_REQUEST);
       localStorage.removeItem(STORAGE_KEY_FIXTURES);
       localStorage.removeItem(STORAGE_KEY_FALLBACK);
     } catch {
@@ -120,6 +137,15 @@ export class ResultStoreService {
   private loadCalcFromStorage(): CalculationResponse | null {
     try {
       const raw = localStorage.getItem(STORAGE_KEY_CALC);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private loadRequestFromStorage(): CalculatePayload | null {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_REQUEST);
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
