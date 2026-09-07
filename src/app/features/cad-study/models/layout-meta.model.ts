@@ -1,9 +1,12 @@
+export type UnitSource = 'explicit' | 'cad_metadata' | 'fallback';
+
 export interface LayoutMeta {
-  source_file: string;
-  source_unit: string;
-  to_meters_factor: number;
-  unit_assumed: boolean;
-  room_count: number;
-  wall_count: number;
-  object_count: number;
+  job_id: string;
+  unit: string;
+  unit_source: UnitSource;
+  scale_factor: number;
+  layout_rev: number;
+  engine_sha: string;
+  pipeline_version: string;
+  created_at: string;
 }

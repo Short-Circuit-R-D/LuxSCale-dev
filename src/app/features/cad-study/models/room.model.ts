@@ -12,11 +12,11 @@ export interface Room {
   name: string | null;
   kind: RoomKind;
   selectable: boolean;
+  confidence: number;
   physical_room_id: string;
   parent_room_id: string | null;
-  is_from_virtual_divider: boolean;
   polygon: Polygon;
-  boundary: Polygon;
+  boundary?: Polygon;
   center: Point;
   area_m2: number;
   area_net_m2: number;
@@ -28,10 +28,6 @@ export interface Room {
   objects: CadObject[];
   doors: Opening[];
   windows: Opening[];
-  fixture_count: number;
-  door_count: number;
-  window_count: number;
-  wall_length_m: number;
   object_ids: string[];
   door_ids: string[];
   window_ids: string[];

@@ -2,7 +2,6 @@ import { BoundingBox } from './models/bounding-box.model';
 import { CadObject } from './models/cad-object.model';
 import { Layout } from './models/layout.model';
 import { Opening } from './models/opening.model';
-import { PhysicalRoom } from './models/physical-room.model';
 import { Point } from './models/point.model';
 import { Polygon } from './models/polygon.model';
 import { Room } from './models/room.model';
@@ -29,12 +28,10 @@ export function roomPolygon(room: Pick<Room, 'polygon' | 'boundary'>): Polygon {
 }
 
 export function wallSegment(wall: Wall): Segment | null {
-  const start = wall.start ?? wall.centerline?.start;
-  const end = wall.end ?? wall.centerline?.end;
-  if (!start || !end) {
+  if (!wall.start || !wall.end) {
     return null;
   }
-  return { start, end };
+  return { start: wall.start, end: wall.end };
 }
 
 export function bboxFromPoints(points: Point[]): BoundingBox | null {
@@ -102,19 +99,25 @@ export function layoutBounds(layout: Layout): BoundingBox | null {
   for (const room of layout.rooms ?? []) {
     include(room.bbox ?? bboxFromPoints(roomPolygon(room).vertices));
   }
+  if (!bounds) {
+    for (const room of layout.physical_rooms ?? []) {
+      include(room.bbox ?? bboxFromPoints(roomPolygon(room).vertices));
+    }
+  }
   return bounds;
 }
 
 export function largestRoom(layout: Layout): Room | null {
-  if (!layout.rooms.length) {
+  const rooms = layout.rooms.length ? layout.rooms : layout.physical_rooms;
+  if (!rooms.length) {
     return null;
   }
-  return layout.rooms.reduce((best, room) => (netArea(room) > netArea(best) ? room : best));
+  return rooms.reduce((best, room) => (netArea(room) > netArea(best) ? room : best));
 }
 
 export function collectRoomVertices(layout: Layout): Point[] {
   const vertices: Point[] = [];
-  for (const room of layout.rooms) {
+  for (const room of [...layout.rooms, ...layout.physical_rooms]) {
     vertices.push(...roomPolygon(room).vertices);
   }
   return vertices;
@@ -131,31 +134,6 @@ export function snapToVertices(point: Point, vertices: Point[], radiusM = VERTEX
     }
   }
   return nearest ?? point;
-}
-
-export function mapY(y: number, worldMaxY: number): number {
-  return worldMaxY - y;
-}
-
-export function unmapY(svgY: number, worldMaxY: number): number {
-  return worldMaxY - svgY;
-}
-
-export function mappedPolygonPath(polygon: Polygon | null | undefined, worldMaxY: number): string {
-  const vertices = polygon?.vertices ?? [];
-  if (vertices.length === 0) {
-    return '';
-  }
-  const rings = [vertices, ...(polygon?.holes ?? [])];
-  return rings
-    .filter((ring) => ring.length > 0)
-    .map((ring) => {
-      const [first, ...rest] = ring;
-      const head = `M ${first.x} ${mapY(first.y, worldMaxY)}`;
-      const lines = rest.map((point) => `L ${point.x} ${mapY(point.y, worldMaxY)}`).join(' ');
-      return `${head} ${lines} Z`;
-    })
-    .join(' ');
 }
 
 export function netArea(room: Pick<Room, 'area_net_m2' | 'area_m2'>): number {
@@ -205,6 +183,41 @@ export function hashIndex(value: string, modulo: number): number {
   return modulo === 0 ? 0 : hash % modulo;
 }
 
+export function pointInBbox(point: Point, bbox: BoundingBox): boolean {
+  return (
+    point.x >= bbox.min_x &&
+    point.x <= bbox.max_x &&
+    point.y >= bbox.min_y &&
+    point.y <= bbox.max_y
+  );
+}
+
+export function pointInPolygon(point: Point, polygon: Polygon): boolean {
+  const rings = [polygon.vertices, ...(polygon.holes ?? [])];
+  let inside = false;
+  for (const ring of rings) {
+    if (ring.length >= 3 && pointInRing(point, ring)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function pointInRing(point: Point, ring: Point[]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[i];
+    const b = ring[j];
+    if ((a.y > point.y) !== (b.y > point.y)) {
+      const atX = ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x;
+      if (point.x < atX) {
+        inside = !inside;
+      }
+    }
+  }
+  return inside;
+}
+
 export function dividerPayload(dividers: Array<{ start: Point; end: Point }>): Segment[] {
   return dividers.map((divider) => ({
     start: { x: divider.start.x, y: divider.start.y },
@@ -217,17 +230,18 @@ export function normalizeLayout(raw: Layout): Layout {
   return {
     unit: 'm',
     meta: {
-      source_file: raw.meta?.source_file ?? '',
-      source_unit: raw.meta?.source_unit ?? 'm',
-      to_meters_factor: raw.meta?.to_meters_factor ?? 1,
-      unit_assumed: !!raw.meta?.unit_assumed,
-      room_count: raw.meta?.room_count ?? rooms.length,
-      wall_count: raw.meta?.wall_count ?? (raw.walls ?? []).length,
-      object_count: raw.meta?.object_count ?? (raw.objects ?? []).length,
+      job_id: raw.meta?.job_id ?? '',
+      unit: raw.meta?.unit ?? 'm',
+      unit_source: raw.meta?.unit_source ?? 'fallback',
+      scale_factor: raw.meta?.scale_factor ?? 1,
+      layout_rev: raw.meta?.layout_rev ?? 0,
+      engine_sha: raw.meta?.engine_sha ?? '',
+      pipeline_version: raw.meta?.pipeline_version ?? '',
+      created_at: raw.meta?.created_at ?? '',
     },
     walls: (raw.walls ?? []).map((wall, index) => normalizeWall(wall, index)),
     rooms,
-    physical_rooms: (raw.physical_rooms ?? []).map((room, index) => normalizePhysicalRoom(room, index)),
+    physical_rooms: (raw.physical_rooms ?? []).map((room, index) => normalizeRoom(room, index)),
     virtual_dividers: (raw.virtual_dividers ?? []).map((divider, index) => normalizeDivider(divider, index)),
     objects: (raw.objects ?? []).map((object, index) => normalizeObject(object, index)),
     unassigned_objects: (raw.unassigned_objects ?? []).map((object, index) =>
@@ -268,29 +282,14 @@ function normalizeRoom(room: Room, index: number): Room {
     perimeter_m: room.perimeter_m ?? 0,
     bbox,
     neighbor_ids: room.neighbor_ids ?? [],
-    is_from_virtual_divider: !!room.is_from_virtual_divider || room.kind === 'virtual',
     objects: (room.objects ?? []).map((object, objectIndex) =>
       normalizeObject(object, `${id}-obj-${objectIndex}`),
     ),
     doors: room.doors ?? [],
     windows: room.windows ?? [],
-    fixture_count: room.fixture_count ?? (room.objects ?? []).length,
-    door_count: room.door_count ?? (room.doors ?? []).length,
-    window_count: room.window_count ?? (room.windows ?? []).length,
-    wall_length_m: room.wall_length_m ?? 0,
     object_ids: room.object_ids ?? [],
     door_ids: room.door_ids ?? [],
     window_ids: room.window_ids ?? [],
-  };
-}
-
-function normalizePhysicalRoom(room: PhysicalRoom, index: number): PhysicalRoom {
-  return {
-    id: room.id || `physical-${index + 1}`,
-    name: room.name ?? null,
-    polygon: room.polygon ?? { vertices: [] },
-    area_m2: room.area_m2 ?? 0,
-    kind: 'physical',
   };
 }
 
@@ -303,8 +302,6 @@ function normalizeWall(wall: Wall, index: number): Wall {
     id: wall.id || `wall-${index + 1}`,
     start: segment.start,
     end: segment.end,
-    centerline: wall.centerline ?? segment,
-    thickness_m: wall.thickness_m ?? 0,
     polygon: wall.polygon ?? null,
   };
 }
@@ -314,7 +311,6 @@ function normalizeDivider(divider: VirtualDivider, index: number): VirtualDivide
     id: divider.id || `divider-${index + 1}`,
     start: divider.start,
     end: divider.end,
-    created_by: divider.created_by ?? 'user',
     active: divider.active !== false,
   };
 }
@@ -337,15 +333,8 @@ function normalizeObject(object: CadObject, fallbackId: string | number): CadObj
 }
 
 export function openingMark(opening: Opening): Segment | null {
-  if (opening.portal?.start && opening.portal?.end) {
-    return { start: opening.portal.start, end: opening.portal.end };
-  }
-  if (!opening.position) {
+  if (!opening.start || !opening.end) {
     return null;
   }
-  const half = Math.max(opening.width_m || 0.4, 0.2) / 2;
-  return {
-    start: { x: opening.position.x - half, y: opening.position.y },
-    end: { x: opening.position.x + half, y: opening.position.y },
-  };
+  return { start: opening.start, end: opening.end };
 }

@@ -5,8 +5,8 @@ export interface CadObject {
   id: string;
   category: string | null;
   position: Point;
-  rotation_deg: number;
   bounding_box: BoundingBox;
   block_name: string | null;
   room_id: string | null;
+  rotation_deg?: number;
 }

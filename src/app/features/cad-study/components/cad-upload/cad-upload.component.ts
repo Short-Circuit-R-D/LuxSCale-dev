@@ -4,6 +4,8 @@ import { CadUnit } from '../../models/cad-unit.model';
 
 const ACCEPTED_EXTENSIONS = new Set(['.dxf', '.dwg']);
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
+const JOB_UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 @Component({
   selector: 'app-cad-upload',
@@ -14,7 +16,8 @@ export class CadUploadComponent {
   protected readonly store = inject(CadViewerStore);
   protected readonly unit = signal<CadUnit | ''>('');
   protected readonly dragging = signal(false);
-  protected readonly r2Url = signal('');
+  protected readonly existingJobId = signal('');
+  protected readonly selectedFile = signal<File | null>(null);
 
   protected readonly units: { value: CadUnit | ''; label: string }[] = [
     { value: '', label: 'File default' },
@@ -25,21 +28,27 @@ export class CadUploadComponent {
     { value: 'ft', label: 'Feet (ft)' },
   ];
 
-  onR2Input(event: Event): void {
-    this.r2Url.set((event.target as HTMLInputElement).value.trim());
+  onJobIdInput(event: Event): void {
+    this.existingJobId.set((event.target as HTMLInputElement).value.trim());
   }
 
-  submitR2(): void {
-    const url = this.r2Url();
-    if (!url) {
+  submitJobId(): void {
+    const jobId = this.existingJobId();
+    if (!jobId) {
       this.store.setClientError({
         code: 'VALIDATION_ERROR',
-        message: 'Paste an R2 URL before analyzing.',
+        message: 'Enter a job ID before loading.',
       });
       return;
     }
-    const unit = this.unit();
-    this.store.uploadFromR2(url, unit || undefined);
+    if (!JOB_UUID_PATTERN.test(jobId)) {
+      this.store.setClientError({
+        code: 'VALIDATION_ERROR',
+        message: 'Enter a valid job ID (UUID).',
+      });
+      return;
+    }
+    this.store.openJob(jobId);
   }
 
   onFileInput(event: Event): void {
@@ -47,21 +56,40 @@ export class CadUploadComponent {
     const file = input.files?.[0];
     input.value = '';
     if (file) {
-      this.submitFile(file);
+      this.selectFile(file);
     }
   }
 
   onDrop(event: DragEvent): void {
     event.preventDefault();
     this.dragging.set(false);
+    if (this.store.busy()) {
+      return;
+    }
     const file = event.dataTransfer?.files?.[0];
     if (file) {
-      this.submitFile(file);
+      this.selectFile(file);
     }
+  }
+
+  startUpload(): void {
+    const file = this.selectedFile();
+    if (!file) {
+      this.store.setClientError({
+        code: 'VALIDATION_ERROR',
+        message: 'Choose a DXF or DWG drawing before analyzing.',
+      });
+      return;
+    }
+    const unit = this.unit();
+    this.store.upload(file, unit || undefined);
   }
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
+    if (this.store.busy()) {
+      return;
+    }
     this.dragging.set(true);
   }
 
@@ -74,9 +102,10 @@ export class CadUploadComponent {
     this.unit.set((value || '') as CadUnit | '');
   }
 
-  private submitFile(file: File): void {
+  private selectFile(file: File): void {
     const ext = this.extension(file.name);
     if (!ACCEPTED_EXTENSIONS.has(ext)) {
+      this.selectedFile.set(null);
       this.store.setClientError({
         code: 'UNSUPPORTED_FORMAT',
         message: 'This file type is not supported. Upload a DXF or DWG drawing.',
@@ -84,14 +113,15 @@ export class CadUploadComponent {
       return;
     }
     if (file.size > MAX_FILE_BYTES) {
+      this.selectedFile.set(null);
       this.store.setClientError({
         code: 'FILE_TOO_LARGE',
         message: 'The file exceeds the 50 MB limit. Choose a smaller drawing.',
       });
       return;
     }
-    const unit = this.unit();
-    this.store.upload(file, unit || undefined);
+    this.store.clearError();
+    this.selectedFile.set(file);
   }
 
   private extension(name: string): string {

@@ -1,8 +1,8 @@
-import { Polygon } from './polygon.model';
+export type WarningSeverity = 'info' | 'warning' | 'error';
 
 export interface Warning {
-  code?: string;
-  message?: string;
-  detail?: string;
-  boundary?: Polygon;
+  code: string;
+  severity: WarningSeverity;
+  message: string;
+  target_ids: string[];
 }

@@ -7,75 +7,114 @@
     </p>
   </div>
 
-  <div
-    class="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center transition-[border-color,background-color] duration-180 hover:border-[#3A3A3A]"
-    [class.border-primary]="dragging()"
-    [class.bg-primary/5]="dragging()"
-    [class.border-border]="!dragging()"
-    [class.bg-black]="!dragging()"
-    (dragover)="onDragOver($event)"
-    (dragleave)="onDragLeave()"
-    (drop)="onDrop($event)"
-  >
-    <p class="font-body text-base text-white">Drop a drawing here</p>
-    <p class="mt-1 font-body text-sm text-muted">DXF or DWG · 50 MB maximum</p>
-    <label class="mt-6 inline-flex h-12 cursor-pointer items-center rounded-xl bg-primary px-6 text-sm font-medium text-white transition-colors duration-180 hover:bg-primary-dark focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-white">
-      Browse files
-      <input
-        class="sr-only"
-        type="file"
-        accept=".dxf,.dwg"
-        [disabled]="store.busy()"
-        (change)="onFileInput($event)"
-      />
-    </label>
-  </div>
-
-  <div class="mt-6 max-w-xs">
-    <label class="mb-2 block font-mono text-sm tracking-widest text-muted uppercase" for="cad-unit">
-      Source unit
-    </label>
-    <select
-      id="cad-unit"
-      class="h-12 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-white focus:border-primary focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-      [value]="unit()"
-      (change)="onUnitChange($event)"
-    >
-      @for (option of units; track option.value) {
-        <option [value]="option.value">{{ option.label }}</option>
+  @if (store.busy()) {
+    <div class="mb-6 rounded-xl border border-border bg-elevated px-5 py-4" role="status" aria-live="polite">
+      @if (store.fileName()) {
+        <p class="font-body text-sm text-white">{{ store.fileName() }}</p>
       }
-    </select>
-    <p class="mt-2 font-body text-sm text-muted">Omit the override unless the CAD unit is wrong.</p>
-  </div>
-
-  <div class="mt-8 max-w-xl">
-    <label class="mb-2 block font-mono text-sm tracking-widest text-muted uppercase" for="cad-r2">
-      Or R2 URL
-    </label>
-    <div class="flex flex-col gap-3 sm:flex-row">
-      <input
-        id="cad-r2"
-        type="url"
-        class="h-12 flex-1 rounded-xl border border-border bg-surface px-3.5 text-sm text-white placeholder:text-disabled focus:border-primary focus:outline-2 focus:outline-offset-2 focus:outline-primary"
-        placeholder="https://…"
-        [value]="r2Url()"
-        (input)="onR2Input($event)"
-      />
-      <button
-        type="button"
-        class="h-12 rounded-xl border border-[#3A3A3A] px-6 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:text-disabled"
-        [disabled]="store.busy() || !r2Url()"
-        (click)="submitR2()"
-      >
-        Analyze URL
-      </button>
-    </div>
-  </div>
-
-  @if (store.fileName() && store.busy()) {
-    <div class="mt-6 rounded-xl border border-border bg-elevated px-5 py-4">
-      <p class="font-body text-sm text-white">{{ store.fileName() }}</p>
-      <p class="mt-1 font-mono text-xs tracking-widest text-muted uppercase">Analyzing drawing</p>
+      <p class="mt-1 font-mono text-xs tracking-widest text-muted uppercase">{{ store.busyLabel() }}</p>
+      <p class="mt-2 font-body text-sm text-muted">
+        This can take 5 to 10 minutes. Keep this page open; the plan will load when the analysis is ready.
+      </p>
+      @if (store.jobId()) {
+        <p class="mt-2 font-mono text-xs text-muted">JOB {{ store.jobId() }}</p>
+      }
     </div>
   }
+
+  <fieldset
+    class="m-0 min-w-0 border-0 p-0 transition-opacity duration-180"
+    [disabled]="store.busy()"
+    [class.pointer-events-none]="store.busy()"
+    [class.opacity-40]="store.busy()"
+  >
+    <legend class="sr-only">Upload a drawing or open an existing job</legend>
+
+    <div
+      class="flex min-h-[180px] flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center transition-[border-color,background-color] duration-180 hover:border-[#3A3A3A]"
+      [class.border-primary]="dragging() && !store.busy()"
+      [class.bg-primary/5]="dragging() && !store.busy()"
+      [class.border-border]="!dragging() || store.busy()"
+      [class.bg-black]="!dragging() || store.busy()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+    >
+      <p class="font-body text-base text-white">Drop a drawing here</p>
+      <p class="mt-1 font-body text-sm text-muted">DXF or DWG · 50 MB maximum</p>
+      <label class="mt-6 inline-flex h-12 cursor-pointer items-center rounded-xl border border-[#3A3A3A] px-6 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-white">
+        Browse files
+        <input
+          class="sr-only"
+          type="file"
+          accept=".dxf,.dwg"
+          [disabled]="store.busy()"
+          (change)="onFileInput($event)"
+        />
+      </label>
+      @if (selectedFile(); as file) {
+        <p class="mt-4 font-body text-sm text-white">{{ file.name }}</p>
+      }
+    </div>
+
+    <div class="mt-6 max-w-xs">
+      <label class="mb-2 block font-mono text-sm tracking-widest text-muted uppercase" for="cad-unit">
+        Source unit
+      </label>
+      <select
+        id="cad-unit"
+        class="h-12 w-full rounded-xl border border-border bg-surface px-3.5 text-sm text-white focus:border-primary focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+        [value]="unit()"
+        (change)="onUnitChange($event)"
+      >
+        @for (option of units; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+      <p class="mt-2 font-body text-sm text-muted">Omit the override unless the CAD unit is wrong.</p>
+    </div>
+
+    <button
+      type="button"
+      class="mt-6 h-12 rounded-xl bg-primary px-6 text-sm font-medium text-white transition-colors duration-180 hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:bg-border disabled:text-disabled"
+      [disabled]="store.busy() || !selectedFile()"
+      (click)="startUpload()"
+    >
+      Analyze drawing
+    </button>
+
+    <div class="my-8 flex items-center gap-4">
+      <span class="h-px flex-1 bg-border" aria-hidden="true"></span>
+      <span class="font-mono text-xs tracking-widest text-muted uppercase">or</span>
+      <span class="h-px flex-1 bg-border" aria-hidden="true"></span>
+    </div>
+
+    <div class="max-w-xl">
+      <label class="mb-2 block font-mono text-sm tracking-widest text-muted uppercase" for="cad-job-id">
+        Existing job ID
+      </label>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <input
+          id="cad-job-id"
+          type="text"
+          class="h-12 flex-1 rounded-xl border border-border bg-surface px-3.5 text-sm text-white placeholder:text-disabled focus:border-primary focus:outline-2 focus:outline-offset-2 focus:outline-primary"
+          placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+          autocomplete="off"
+          spellcheck="false"
+          [value]="existingJobId()"
+          [disabled]="store.busy()"
+          (input)="onJobIdInput($event)"
+          (keydown.enter)="submitJobId()"
+        />
+        <button
+          type="button"
+          class="h-12 rounded-xl border border-[#3A3A3A] px-6 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:text-disabled"
+          [disabled]="store.busy() || !existingJobId()"
+          (click)="submitJobId()"
+        >
+          Open job
+        </button>
+      </div>
+    </div>
+  </fieldset>
 </div>

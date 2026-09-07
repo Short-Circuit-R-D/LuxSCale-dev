@@ -4,6 +4,5 @@ export interface VirtualDivider {
   id: string;
   start: Point;
   end: Point;
-  created_by: string;
-  active: boolean;
+  active?: boolean;
 }

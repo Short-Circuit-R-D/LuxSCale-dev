@@ -1,18 +1,18 @@
-.cad-plan-svg {
+.cad-plan-canvas {
   display: block;
   touch-action: none;
   user-select: none;
   background: #0a0a0a;
 }
 
-.cad-plan-svg--pan {
+.cad-plan-canvas--pan {
   cursor: grab;
 }
 
-.cad-plan-svg--pan:active {
+.cad-plan-canvas--pan.cad-plan-canvas--dragging {
   cursor: grabbing;
 }
 
-.cad-plan-svg--draw {
+.cad-plan-canvas--draw {
   cursor: crosshair;
 }

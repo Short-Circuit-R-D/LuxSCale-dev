@@ -1,7 +1,6 @@
 import { CadObject } from './cad-object.model';
 import { LayoutMeta } from './layout-meta.model';
 import { Opening } from './opening.model';
-import { PhysicalRoom } from './physical-room.model';
 import { Room } from './room.model';
 import { TextLabel } from './text-label.model';
 import { VirtualDivider } from './virtual-divider.model';
@@ -13,7 +12,7 @@ export interface Layout {
   meta: LayoutMeta;
   walls: Wall[];
   rooms: Room[];
-  physical_rooms: PhysicalRoom[];
+  physical_rooms: Room[];
   virtual_dividers: VirtualDivider[];
   objects: CadObject[];
   unassigned_objects: CadObject[];

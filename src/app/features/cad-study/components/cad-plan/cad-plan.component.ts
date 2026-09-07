@@ -1,7 +1,7 @@
-import { DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   computed,
   effect,
@@ -10,52 +10,30 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import {
-  bboxFromPoints,
-  collectRoomVertices,
-  hasParsedDimensions,
-  hashIndex,
-  isApproximateFootprint,
-  largestRoom,
-  layoutBounds,
-  mappedPolygonPath,
-  netArea as roomNetArea,
-  openingMark,
-  padBbox,
-  roomPolygon,
-  snapToVertices,
-  unmapY,
-  wallSegment,
-} from '../../cad-geometry';
+import { bboxFromPoints, largestRoom, layoutBounds, roomPolygon } from '../../cad-geometry';
 import { CadFitMode, CadViewerStore } from '../../cad-viewer.store';
 import { BoundingBox } from '../../models/bounding-box.model';
-import { CadObject } from '../../models/cad-object.model';
 import { Layout } from '../../models/layout.model';
-import { Opening } from '../../models/opening.model';
 import { Point } from '../../models/point.model';
-import { Room } from '../../models/room.model';
-import { Segment } from '../../models/segment.model';
-import { Wall } from '../../models/wall.model';
+import {
+  CadCamera,
+  drawCadScene,
+  fitCamera,
+  hitTestFaces,
+  hitTestRooms,
+  panCamera,
+  prepareCadScene,
+  recenterCamera,
+  screenToWorld,
+  zoomCamera,
+} from './cad-plan.renderer';
 
-const ROOM_FILLS = [
-  'rgba(255,255,255,0.07)',
-  'rgba(255,255,255,0.10)',
-  'rgba(255,255,255,0.13)',
-  'rgba(255,255,255,0.16)',
-  'rgba(184,184,184,0.10)',
-];
-
-interface CadCamera {
-  worldMaxY: number;
-  minX: number;
-  minY: number;
-  width: number;
-  height: number;
-}
+const MAX_DPR = 2;
+const ZOOM_IN = 1.12;
+const ZOOM_OUT = 1 / 1.12;
 
 @Component({
   selector: 'app-cad-plan',
-  imports: [DecimalPipe],
   templateUrl: './cad-plan.component.html',
   styleUrl: './cad-plan.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,374 +44,381 @@ interface CadCamera {
 })
 export class CadPlanComponent {
   protected readonly store = inject(CadViewerStore);
+  private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly destroyRef = inject(DestroyRef);
 
-  private readonly svg = viewChild<SVGSVGElement>('planSvg');
+  private readonly canvasRef = viewChild<HTMLCanvasElement>('planCanvas');
 
-  private readonly panOrigin = signal<{
-    point: Point;
-    camera: CadCamera;
-    inv: DOMMatrix;
-  } | null>(null);
-  private didPan = false;
-  private fitCamera: CadCamera | null = null;
+  private panOrigin: { x: number; y: number; camera: CadCamera } | null = null;
+  private fitBounds: BoundingBox | null = null;
+  private fittedJobId: string | null = null;
+  private fittedMode: CadFitMode | null = null;
+  private userAdjusted = false;
+  private ctx: CanvasRenderingContext2D | null = null;
+  private cssWidth = 0;
+  private cssHeight = 0;
+  private dpr = 1;
+  private drawFrame = 0;
+  private hoverFrame = 0;
+  private pendingHover: { clientX: number; clientY: number } | null = null;
 
   protected readonly camera = signal<CadCamera | null>(null);
-  protected readonly snapHint = signal<Point | null>(null);
+  protected readonly hoverFaceId = signal<string | null>(null);
+  protected readonly hoverRoomId = signal<string | null>(null);
+  protected readonly draggingCanvas = signal(false);
 
   protected readonly layout = computed(() => this.store.currentLayout());
 
-  protected readonly viewBox = computed(() => {
-    const cam = this.camera();
-    if (!cam) {
-      return '0 0 1 1';
-    }
-    return `${cam.minX} ${cam.minY} ${cam.width} ${cam.height}`;
-  });
-
-  protected readonly markerSize = computed(() => {
-    const cam = this.camera();
-    if (!cam) {
-      return 0.2;
-    }
-    return Math.min(cam.width, cam.height) * 0.012;
-  });
-
-  protected readonly labelSize = computed(() => {
-    const cam = this.camera();
-    if (!cam) {
-      return 0.4;
-    }
-    return Math.min(cam.width, cam.height) * 0.022;
-  });
-
-  protected readonly dash = computed(() => {
-    const cam = this.camera();
-    if (!cam) {
-      return '0.2 0.15';
-    }
-    const on = Math.min(cam.width, cam.height) * 0.012;
-    return `${on} ${on * 0.7}`;
-  });
-
-  protected readonly vertices = computed(() => {
-    const layout = this.layout();
-    return layout ? collectRoomVertices(layout) : [];
-  });
-
-  protected readonly overlayDividers = computed((): Segment[] => {
-    const drafts = this.store.draftDividers();
-    if (drafts.length > 0) {
-      return drafts;
-    }
-    return (this.layout()?.virtual_dividers ?? [])
-      .filter((divider) => divider.active)
-      .map((divider) => ({ start: divider.start, end: divider.end }));
-  });
-
-  protected readonly selectedPhysicalId = computed(() => {
-    const id = this.store.selectedRoomId();
-    const room = this.layout()?.rooms.find((item) => item.id === id);
-    return room?.physical_room_id ?? null;
-  });
+  protected readonly scene = computed(() =>
+    prepareCadScene({
+      layout: this.layout(),
+      faces: this.store.faces(),
+      layers: this.store.layers(),
+      physicalRoomsOnly: this.store.physicalRoomsOnly(),
+      showAllFaces: this.store.showAllFaces(),
+      tool: this.store.tool(),
+    }),
+  );
 
   constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.drawFrame) {
+        cancelAnimationFrame(this.drawFrame);
+      }
+      if (this.hoverFrame) {
+        cancelAnimationFrame(this.hoverFrame);
+      }
+    });
+
     effect((onCleanup) => {
-      const el = unwrapElement(this.svg());
-      if (!el) {
+      const canvas = this.canvasEl();
+      if (!canvas) {
+        this.ctx = null;
         return;
       }
-      const handler = (event: WheelEvent) => this.onWheel(event);
-      el.addEventListener('wheel', handler, { passive: false });
-      onCleanup(() => el.removeEventListener('wheel', handler));
+      this.ctx =
+        canvas.getContext('2d', { alpha: false, desynchronized: true }) ??
+        canvas.getContext('2d', { alpha: false });
+      this.syncCanvasSize(canvas);
+      const onWheel = (event: WheelEvent) => this.onWheel(event);
+      canvas.addEventListener('wheel', onWheel, { passive: false });
+      const observer = new ResizeObserver(() => {
+        this.syncCanvasSize(canvas);
+        this.scheduleDraw();
+      });
+      observer.observe(this.host.nativeElement);
+      observer.observe(canvas);
+      const frame = requestAnimationFrame(() => {
+        this.syncCanvasSize(canvas);
+        this.scheduleDraw();
+      });
+      this.scheduleDraw();
+      onCleanup(() => {
+        cancelAnimationFrame(frame);
+        canvas.removeEventListener('wheel', onWheel);
+        observer.disconnect();
+      });
     });
 
     effect(() => {
       const fit = this.store.fitMode();
-      this.store.jobId();
-      const layout = untracked(() => this.store.currentLayout());
-      const next = this.buildFitCamera(layout, fit);
-      this.fitCamera = next;
-      this.camera.set(next);
+      const jobId = this.store.jobId();
+      const layout = this.store.currentLayout();
+      if (!layout || !jobId) {
+        this.fittedJobId = null;
+        this.fittedMode = null;
+        this.fitBounds = null;
+        this.userAdjusted = false;
+        this.camera.set(null);
+        return;
+      }
+      const shouldRefit =
+        this.fittedJobId !== jobId || this.fittedMode !== fit || untracked(() => this.camera()) === null;
+      if (!shouldRefit) {
+        return;
+      }
+      this.fittedJobId = jobId;
+      this.fittedMode = fit;
+      this.userAdjusted = false;
+      this.fitBounds = this.boundsForFit(layout, fit);
+      this.applyFit();
     });
-  }
 
-  ty(y: number): number {
-    const cam = this.camera();
-    return cam ? cam.worldMaxY - y : y;
-  }
-
-  boxTop(bbox: BoundingBox): number {
-    return this.ty(bbox.max_y);
-  }
-
-  boxHeight(bbox: BoundingBox): number {
-    return Math.max(bbox.max_y - bbox.min_y, 0);
-  }
-
-  roomFill(room: Room): string {
-    if (this.store.selectedRoomId() === room.id) {
-      return 'rgba(235,27,38,0.22)';
-    }
-    if (
-      this.selectedPhysicalId() &&
-      room.physical_room_id === this.selectedPhysicalId() &&
-      room.kind === 'virtual'
-    ) {
-      return 'rgba(235,27,38,0.10)';
-    }
-    if (room.kind === 'virtual') {
-      return 'rgba(235,27,38,0.08)';
-    }
-    return ROOM_FILLS[hashIndex(room.id, ROOM_FILLS.length)];
-  }
-
-  roomPath(room: Room): string {
-    const cam = this.camera();
-    return mappedPolygonPath(roomPolygon(room), cam?.worldMaxY ?? 0);
-  }
-
-  netArea(room: Room): number {
-    return roomNetArea(room);
-  }
-
-  sizeLabel(room: Room): string | null {
-    const dimensions = room.dimensions;
-    if (!dimensions) {
-      return null;
-    }
-    const length = dimensions.length_m.toFixed(2);
-    const width = dimensions.width_m.toFixed(2);
-    const prefix = isApproximateFootprint(room) ? '≈ ' : '';
-    return `${prefix}${length} × ${width} m`;
-  }
-
-  sizeFromDrawing(room: Room): boolean {
-    return hasParsedDimensions(room);
-  }
-
-  dimensionTransform(room: Room): string | null {
-    const dimensions = room.dimensions;
-    if (!dimensions || !room.center) {
-      return null;
-    }
-    return `rotate(${-dimensions.orientation_deg} ${room.center.x} ${this.ty(room.center.y)})`;
-  }
-
-  dimensionBox(room: Room): { x: number; y: number; width: number; height: number } | null {
-    const dimensions = room.dimensions;
-    if (!dimensions || !room.center) {
-      return null;
-    }
-    return {
-      x: room.center.x - dimensions.length_m / 2,
-      y: this.ty(room.center.y) - dimensions.width_m / 2,
-      width: dimensions.length_m,
-      height: dimensions.width_m,
-    };
-  }
-
-  wallLine(wall: Wall): Segment | null {
-    return wallSegment(wall);
-  }
-
-  openingLine(opening: Opening): Segment | null {
-    return openingMark(opening);
-  }
-
-  objectRotate(object: CadObject): string {
-    const deg = -(object.rotation_deg ?? 0);
-    return `rotate(${deg} ${object.position.x} ${this.ty(object.position.y)})`;
-  }
-
-  contentRooms(plan: Layout): Room[] {
-    return plan.rooms.filter((room) => room.selectable !== false);
-  }
-
-  polyPath(polygon: { vertices: Point[] } | null | undefined): string {
-    const cam = this.camera();
-    return mappedPolygonPath(polygon, cam?.worldMaxY ?? 0);
-  }
-
-  textSize(heightM?: number): number {
-    const base = this.labelSize();
-    if (!heightM || heightM <= 0) {
-      return base;
-    }
-    return Math.min(heightM, base * 1.4);
+    effect(() => {
+      this.scene();
+      this.camera();
+      this.store.selectedRoomIds();
+      this.hoverFaceId();
+      this.hoverRoomId();
+      this.store.pendingStart();
+      this.store.previewEnd();
+      this.store.tool();
+      this.scheduleDraw();
+    });
   }
 
   onPointerDown(event: PointerEvent): void {
     if (event.button !== 0) {
       return;
     }
-    const svg = this.svgEl();
-    svg?.setPointerCapture(event.pointerId);
+    const canvas = this.canvasEl();
+    canvas?.setPointerCapture(event.pointerId);
+    this.hoverFaceId.set(null);
+    this.hoverRoomId.set(null);
 
-    if (this.store.drawMode() === 'draw') {
+    const tool = this.store.tool();
+    if (tool === 'split') {
       const world = this.clientToWorld(event);
       if (!world) {
         return;
       }
-      const snapped = snapToVertices(world, this.vertices());
       const start = this.store.pendingStart();
       if (!start) {
-        this.store.setPendingStart(snapped);
-        this.store.setPreviewEnd(snapped);
-        this.snapHint.set(snapped);
-        console.debug('CAD world point (m)', snapped);
+        this.store.setPendingStart(world);
+        this.store.setPreviewEnd(world);
         return;
       }
-      this.store.addDraftDivider(start, snapped);
-      this.snapHint.set(null);
-      console.debug('CAD world point (m)', snapped);
+      this.store.splitWithDivider(start, world);
       return;
     }
 
-    const cam = this.camera();
-    const inv = this.inverseCtm();
-    const point = this.clientToSvg(event, inv);
-    if (!cam || !inv || !point) {
+    if (tool === 'select' || tool === 'restore') {
+      this.activateAt(event);
       return;
     }
-    this.didPan = false;
-    this.panOrigin.set({ point, camera: cam, inv });
+
+    const camera = this.camera();
+    if (!camera) {
+      return;
+    }
+    this.panOrigin = { x: event.clientX, y: event.clientY, camera };
   }
 
   onPointerMove(event: PointerEvent): void {
-    if (this.store.drawMode() === 'draw') {
+    const tool = this.store.tool();
+    if (tool === 'split') {
       const world = this.clientToWorld(event);
       if (!world) {
         return;
       }
-      const snapped = snapToVertices(world, this.vertices());
-      this.snapHint.set(snapped);
       if (this.store.pendingStart()) {
-        this.store.setPreviewEnd(snapped);
+        this.store.setPreviewEnd(world);
       }
       return;
     }
 
-    const origin = this.panOrigin();
-    if (!origin) {
+    const origin = this.panOrigin;
+    if (origin && tool === 'pan') {
+      const dx = event.clientX - origin.x;
+      const dy = event.clientY - origin.y;
+      if (Math.hypot(dx, dy) > 2) {
+        this.userAdjusted = true;
+        this.draggingCanvas.set(true);
+      }
+      this.camera.set(panCamera(origin.camera, dx, dy));
       return;
     }
-    const now = this.clientToSvg(event, origin.inv);
-    if (!now) {
-      return;
-    }
-    const dx = now.x - origin.point.x;
-    const dy = now.y - origin.point.y;
-    if (Math.hypot(dx, dy) > origin.camera.width * 0.002) {
-      this.didPan = true;
-    }
-    this.camera.set({
-      ...origin.camera,
-      minX: origin.camera.minX - dx,
-      minY: origin.camera.minY - dy,
-    });
+
+    this.queueHover(event);
   }
 
   onPointerUp(event: PointerEvent): void {
-    const svg = this.svgEl();
-    if (svg?.hasPointerCapture(event.pointerId)) {
-      svg.releasePointerCapture(event.pointerId);
+    const canvas = this.canvasEl();
+    if (canvas?.hasPointerCapture(event.pointerId)) {
+      canvas.releasePointerCapture(event.pointerId);
     }
-    this.panOrigin.set(null);
+    this.panOrigin = null;
+    this.draggingCanvas.set(false);
   }
 
-  onRoomActivate(roomId: string): void {
-    if (this.store.drawMode() !== 'pan' || this.didPan) {
-      return;
+  onPointerLeave(): void {
+    if (!this.panOrigin) {
+      this.hoverFaceId.set(null);
+      this.hoverRoomId.set(null);
     }
-    this.store.selectRoom(this.store.selectedRoomId() === roomId ? null : roomId);
   }
 
   onEscape(): void {
+    if (this.store.resetConfirmOpen()) {
+      return;
+    }
     this.store.clearPreview();
-    this.snapHint.set(null);
+    if (this.store.tool() === 'select') {
+      this.store.selectRoom(null);
+      this.store.selectFace(null);
+    }
+  }
+
+  private activateAt(event: PointerEvent): void {
+    const world = this.clientToWorld(event);
+    const scene = this.scene();
+    if (!world || !scene) {
+      return;
+    }
+    const tool = this.store.tool();
+    if (tool === 'restore') {
+      const faceId = hitTestFaces(scene, world);
+      if (faceId) {
+        this.store.restoreFace(faceId);
+      }
+      return;
+    }
+    if (tool !== 'select') {
+      return;
+    }
+    const roomId = hitTestRooms(scene, world);
+    if (event.shiftKey && roomId) {
+      this.store.selectRoom(roomId, { additive: true });
+      return;
+    }
+    this.store.selectRoom(roomId);
+  }
+
+  private queueHover(event: PointerEvent): void {
+    this.pendingHover = { clientX: event.clientX, clientY: event.clientY };
+    if (this.hoverFrame) {
+      return;
+    }
+    this.hoverFrame = requestAnimationFrame(() => {
+      this.hoverFrame = 0;
+      const pending = this.pendingHover;
+      this.pendingHover = null;
+      if (!pending || this.panOrigin) {
+        return;
+      }
+      const world = this.clientToWorld(pending);
+      const scene = this.scene();
+      if (!world || !scene) {
+        this.hoverFaceId.set(null);
+        this.hoverRoomId.set(null);
+        return;
+      }
+      if (this.store.tool() === 'restore') {
+        this.hoverFaceId.set(hitTestFaces(scene, world));
+        this.hoverRoomId.set(null);
+        return;
+      }
+      const roomId = hitTestRooms(scene, world);
+      this.hoverRoomId.set(roomId);
+      this.hoverFaceId.set(roomId ? null : hitTestFaces(scene, world));
+    });
   }
 
   private onWheel(event: WheelEvent): void {
     event.preventDefault();
-    const cam = this.camera();
-    const fit = this.fitCamera;
-    const inv = this.inverseCtm();
-    const cursor = this.clientToSvg(event, inv);
-    if (!cam || !fit || !cursor) {
+    const camera = this.camera();
+    const point = this.clientToCanvas(event);
+    if (!camera || !point) {
       return;
     }
-
-    const factor = Math.min(1.25, Math.max(0.8, Math.exp(event.deltaY * 0.0015)));
-    let width = cam.width * factor;
-    const minW = fit.width * 0.02;
-    const maxW = fit.width * 8;
-    width = Math.min(maxW, Math.max(minW, width));
-    const height = (width / cam.width) * cam.height;
-    const fx = (cursor.x - cam.minX) / cam.width;
-    const fy = (cursor.y - cam.minY) / cam.height;
-    this.camera.set({
-      ...cam,
-      minX: cursor.x - fx * width,
-      minY: cursor.y - fy * height,
-      width,
-      height,
-    });
+    this.userAdjusted = true;
+    const factor = event.deltaY < 0 ? ZOOM_IN : ZOOM_OUT;
+    this.camera.set(zoomCamera(camera, point.x, point.y, factor));
   }
 
-  private buildFitCamera(layout: Layout | null, fit: CadFitMode): CadCamera | null {
-    if (!layout) {
-      return null;
-    }
-    let bounds: BoundingBox | null = null;
+  private boundsForFit(layout: Layout, fit: CadFitMode): BoundingBox | null {
     if (fit === 'largest') {
       const room = largestRoom(layout);
-      bounds = room
-        ? (room.bbox ?? bboxFromPoints(roomPolygon(room).vertices))
-        : null;
+      const bounds = room ? (room.bbox ?? bboxFromPoints(roomPolygon(room).vertices)) : null;
+      if (bounds) {
+        return bounds;
+      }
     }
-    bounds ??= layoutBounds(layout);
-    if (!bounds) {
-      return null;
+    return layoutBounds(layout);
+  }
+
+  private applyFit(): void {
+    const bounds = this.fitBounds;
+    if (!bounds || this.cssWidth <= 0 || this.cssHeight <= 0) {
+      return;
     }
-    const padded = padBbox(bounds, 0.08);
-    const width = Math.max(padded.max_x - padded.min_x, 1e-6);
-    const height = Math.max(padded.max_y - padded.min_y, 1e-6);
-    return {
-      worldMaxY: padded.max_y,
-      minX: padded.min_x,
-      minY: 0,
-      width,
-      height,
-    };
+    this.camera.set(fitCamera(bounds, this.cssWidth, this.cssHeight));
   }
 
   private clientToWorld(event: { clientX: number; clientY: number }): Point | null {
-    const cam = this.camera();
-    const svg = this.clientToSvg(event, this.inverseCtm());
-    if (!cam || !svg) {
+    const camera = this.camera();
+    const point = this.clientToCanvas(event);
+    if (!camera || !point || camera.scale <= 0) {
       return null;
     }
-    return { x: svg.x, y: unmapY(svg.y, cam.worldMaxY) };
+    return screenToWorld(point.x, point.y, camera);
   }
 
-  private clientToSvg(
-    event: { clientX: number; clientY: number },
-    inv: DOMMatrix | null,
-  ): Point | null {
-    if (!inv) {
+  private clientToCanvas(event: { clientX: number; clientY: number }): Point | null {
+    const canvas = this.canvasEl();
+    if (!canvas) {
       return null;
     }
-    const mapped = new DOMPoint(event.clientX, event.clientY).matrixTransform(inv);
-    return { x: mapped.x, y: mapped.y };
+    const rect = canvas.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   }
 
-  private inverseCtm(): DOMMatrix | null {
-    const ctm = this.svgEl()?.getScreenCTM();
-    return ctm ? ctm.inverse() : null;
+  private scheduleDraw(): void {
+    if (this.drawFrame) {
+      return;
+    }
+    this.drawFrame = requestAnimationFrame(() => {
+      this.drawFrame = 0;
+      this.paint();
+    });
   }
 
-  private svgEl(): SVGSVGElement | undefined {
-    return unwrapElement(this.svg());
+  private paint(): void {
+    const ctx = this.ctx;
+    const camera = this.camera();
+    const scene = this.scene();
+    if (!ctx || !camera || !scene) {
+      return;
+    }
+    drawCadScene({
+      ctx,
+      cssWidth: this.cssWidth,
+      cssHeight: this.cssHeight,
+      dpr: this.dpr,
+      camera,
+      scene,
+      selectedRoomIds: this.store.selectedRoomIds(),
+      hoverFaceId: this.hoverFaceId(),
+      hoverRoomId: this.hoverRoomId(),
+      pendingStart: this.store.pendingStart(),
+      previewEnd: this.store.previewEnd(),
+    });
+  }
+
+  private syncCanvasSize(canvas: HTMLCanvasElement): void {
+    const rect = canvas.getBoundingClientRect();
+    const prevWidth = this.cssWidth;
+    const prevHeight = this.cssHeight;
+    const nextWidth = rect.width;
+    const nextHeight = rect.height;
+    this.dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+    const width = Math.max(1, Math.round(nextWidth * this.dpr));
+    const height = Math.max(1, Math.round(nextHeight * this.dpr));
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+    const sizeChanged = prevWidth !== nextWidth || prevHeight !== nextHeight;
+    this.cssWidth = nextWidth;
+    this.cssHeight = nextHeight;
+
+    if (!this.fitBounds || nextWidth <= 0 || nextHeight <= 0) {
+      return;
+    }
+    const camera = this.camera();
+    if (!camera || !this.userAdjusted) {
+      if (!camera || sizeChanged) {
+        this.applyFit();
+      }
+      return;
+    }
+    if (sizeChanged && prevWidth > 0 && prevHeight > 0) {
+      this.camera.set(recenterCamera(camera, prevWidth, prevHeight, nextWidth, nextHeight));
+    }
+  }
+
+  private canvasEl(): HTMLCanvasElement | undefined {
+    return unwrapElement(this.canvasRef());
   }
 }
 

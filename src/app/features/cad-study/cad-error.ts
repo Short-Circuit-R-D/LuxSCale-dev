@@ -8,6 +8,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   FILE_TOO_LARGE: 'The file exceeds the 50 MB limit. Choose a smaller drawing.',
   CONVERSION_ERROR: 'The drawing could not be converted. Export as DXF and try again.',
   JOB_NOT_FOUND: 'This analysis session expired. Upload the drawing again.',
+  JOB_FAILED: 'This analysis failed. Upload the drawing again or try another job.',
   VALIDATION_ERROR: 'The request was not valid. Check the drawing or divider points and try again.',
   CAD_PARSE_ERROR: 'The drawing could not be parsed. Check the file and try again.',
 };
@@ -62,6 +63,7 @@ export function errorFromHttp(err: unknown): CadClientError {
 function codeFromStatus(status: number): string {
   if (status === 413) return 'FILE_TOO_LARGE';
   if (status === 404) return 'JOB_NOT_FOUND';
+  if (status === 409) return 'JOB_FAILED';
   if (status === 400) return 'VALIDATION_ERROR';
   if (status === 422) return 'CONVERSION_ERROR';
   return 'UNKNOWN';
