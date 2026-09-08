@@ -18,16 +18,27 @@
         <title>Room layout preview</title>
         <desc>{{ ariaLabel() }}</desc>
 
-        <rect
-          x="0"
-          y="0"
-          [attr.width]="plan.lengthX"
-          [attr.height]="plan.widthY"
-          fill="rgba(255,255,255,0.04)"
-          stroke="#2B2B2B"
-          stroke-width="1.5"
-          vector-effect="non-scaling-stroke"
-        />
+        @if (plan.path) {
+          <path
+            [attr.d]="plan.path"
+            fill="rgba(255,255,255,0.04)"
+            fill-rule="evenodd"
+            stroke="#2B2B2B"
+            stroke-width="1.5"
+            vector-effect="non-scaling-stroke"
+          />
+        } @else {
+          <rect
+            x="0"
+            y="0"
+            [attr.width]="plan.lengthX"
+            [attr.height]="plan.widthY"
+            fill="rgba(255,255,255,0.04)"
+            stroke="#2B2B2B"
+            stroke-width="1.5"
+            vector-effect="non-scaling-stroke"
+          />
+        }
 
         <circle
           [attr.cx]="plan.origin.x"
@@ -45,11 +56,25 @@
           (0, 0)
         </text>
 
-        @for (label of plan.labels; track label.text) {
+        @for (label of plan.labels; track $index) {
           <text
             [attr.x]="label.x"
             [attr.y]="label.y"
             [attr.font-size]="plan.fontSize * 0.85"
+            [attr.text-anchor]="label.anchor"
+            fill="#B8B8B8"
+            font-family="JetBrains Mono, monospace"
+            dominant-baseline="middle"
+          >
+            {{ label.text }}
+          </text>
+        }
+
+        @for (label of plan.vertexLabels; track $index) {
+          <text
+            [attr.x]="label.x"
+            [attr.y]="label.y"
+            [attr.font-size]="plan.fontSize * 0.7"
             [attr.text-anchor]="label.anchor"
             fill="#B8B8B8"
             font-family="JetBrains Mono, monospace"

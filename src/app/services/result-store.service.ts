@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { Observable, forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import {
   CalculationResponse,
   CalculationResult,
@@ -86,31 +87,34 @@ export class ResultStoreService {
     }
   }
 
+  fetchFixtureResults(calc: CalculationResponse): Observable<FixtureResult[]> {
+    if (!calc.results.length) {
+      return of([]);
+    }
+    const uniqueKeys = this.getUniqueFixtureKeys(calc.results);
+    if (uniqueKeys.length === 0) {
+      return of([]);
+    }
+    return forkJoin(
+      uniqueKeys.map((key) => this.fixturesService.getFixtures(key.luminaire, key.power, key.power)),
+    ).pipe(
+      map((responses) =>
+        uniqueKeys.map((key, i) => ({
+          key,
+          fixtures: responses[i].fixtures,
+        })),
+      ),
+      catchError(() => of([])),
+    );
+  }
+
   loadFixturesIfNeeded() {
     const calc = this.calculationResult();
     if (!calc || calc.results.length === 0) return;
+    if (this.fixtureResults().length > 0) return;
 
-    const existing = this.fixtureResults();
-    if (existing.length > 0) return;
-
-    const uniqueKeys = this.getUniqueFixtureKeys(calc.results);
-    if (uniqueKeys.length === 0) return;
-
-    const requests = uniqueKeys.map((key) =>
-      this.fixturesService.getFixtures(key.luminaire, key.power, key.power),
-    );
-
-    forkJoin(requests).subscribe({
-      next: (responses) => {
-        const fixtureResults = uniqueKeys.map((key, i) => ({
-          key,
-          fixtures: responses[i].fixtures,
-        }));
-        this.setFixtureResults(fixtureResults);
-      },
-      error: () => {
-        this.setFixtureResults([]);
-      },
+    this.fetchFixtureResults(calc).subscribe((fixtureResults) => {
+      this.setFixtureResults(fixtureResults);
     });
   }
 

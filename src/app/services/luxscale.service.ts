@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
+import { CalculationResponse } from './calculation-result.service';
 
 interface PlacesResponse {
   standard_categories: string[];
@@ -55,6 +56,12 @@ export interface CalculatePayload {
   layout?: LayoutPayload;
 }
 
+export interface CadCalcPayload {
+  polygon: { vertices: [number, number][] };
+  height: number;
+  standard_ref_no: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -63,6 +70,7 @@ export class LuxScaleService {
   private readonly standardsUrl =
     'https://web-production-8d09d.up.railway.app/api/standards/cleaned';
   private readonly calculateUrl = 'http://localhost:5000/calculate';
+  private readonly cadCalcUrl = 'http://localhost:5000/cad_calc';
 
   getStandardCategories(): Observable<string[]> {
     return this.http
@@ -143,6 +151,12 @@ export class LuxScaleService {
 
   calculate(payload: CalculatePayload): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(this.calculateUrl, payload, {
+      responseType: 'json',
+    });
+  }
+
+  calculateCad(payload: CadCalcPayload): Observable<CalculationResponse> {
+    return this.http.post<CalculationResponse>(this.cadCalcUrl, payload, {
       responseType: 'json',
     });
   }

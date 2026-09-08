@@ -1,0 +1,94 @@
+<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+  <div class="flex-1">
+    <span
+      class="mb-3 inline-block rounded bg-primary px-3 py-1 font-mono text-xs font-semibold tracking-[0.1em] text-white"
+      >RESULTS</span
+    >
+    <h1 class="m-0 mb-2 font-display text-2xl leading-tight text-white sm:text-3xl">{{ title() }}</h1>
+    <p class="m-0 font-body text-sm text-muted">
+      {{ result().project_info.company }} — {{ result().project_info.standard_task_or_activity }}
+    </p>
+  </div>
+  <div class="flex items-center gap-3">
+    <button
+      type="button"
+      (click)="generateFullReport()"
+      class="flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-xl border-none bg-primary px-4 py-2.5 font-mono text-xs font-medium tracking-widest text-white uppercase transition-all duration-180 hover:bg-primary-dark sm:px-5 sm:text-xs"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
+        <polyline points="10 9 9 9 8 9" />
+      </svg>
+      Generate PDF Report
+    </button>
+    @if (showNewStudy()) {
+      <a
+        routerLink="/create-study"
+        class="flex items-center gap-2 whitespace-nowrap rounded-xl border border-border bg-transparent px-4 py-2.5 font-mono text-xs font-medium tracking-widest text-muted uppercase no-underline transition-all duration-180 hover:border-muted hover:text-white sm:px-5 sm:text-xs"
+        >NEW STUDY</a
+      >
+    }
+  </div>
+</div>
+
+<div
+  class="mb-6 grid grid-cols-2 gap-3 rounded-xl border border-border bg-surface px-4 py-4 sm:grid-cols-4 sm:gap-6 sm:px-8 sm:py-5"
+>
+  <div class="flex flex-col gap-1.5">
+    <span class="font-mono text-xs tracking-widest text-muted uppercase">Solutions</span>
+    <span class="font-display text-xl leading-none text-white sm:text-2xl">{{
+      result().calculation_meta.total_solutions_returned
+    }}</span>
+  </div>
+  <div class="flex flex-col gap-1.5">
+    <span class="font-mono text-xs tracking-widest text-muted uppercase">Compliant</span>
+    <span class="font-display text-xl leading-none text-green-500 sm:text-2xl">{{
+      compliantCount()
+    }}</span>
+  </div>
+  <div class="flex flex-col gap-1.5">
+    <span class="font-mono text-xs tracking-widest text-muted uppercase">Room Area</span>
+    <span class="font-display text-xl leading-none text-white sm:text-2xl"
+      >{{ result().width * result().length | number: '1.0-0'
+      }}<span class="ml-0.5 font-mono text-xs text-muted">m²</span></span
+    >
+  </div>
+  <div class="flex flex-col gap-1.5">
+    <span class="font-mono text-xs tracking-widest text-muted uppercase">Standard</span>
+    <span class="font-display text-xl leading-none text-white sm:text-2xl">{{
+      result().standard_row.ref_no
+    }}</span>
+  </div>
+</div>
+
+<div class="flex flex-col gap-6">
+  <app-room-dimensions
+    [width]="result().width"
+    [length]="result().length"
+    [ceilingHeight]="result().project_info.mounting_height"
+  />
+  <app-standard-row [standard]="result().standard_row" [fallbackFields]="fallbackFields()" />
+  <app-project-info [projectInfo]="result().project_info" />
+  <app-calculation-meta [meta]="result().calculation_meta" />
+  <app-results-grid
+    [calculation]="result()"
+    [fixtureResults]="fixtureResults()"
+    [requestSides]="requestSides()"
+    [vertices]="vertices()"
+    [holes]="holes()"
+  />
+</div>

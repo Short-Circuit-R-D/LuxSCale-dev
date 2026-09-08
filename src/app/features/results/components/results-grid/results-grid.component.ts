@@ -1,45 +1,62 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
-import { CalculationResult, UiSettings } from '../../../../services/calculation-result.service';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
+import { CalculationResponse } from '../../../../services/calculation-result.service';
 import { PdfReportService } from '../../../../services/pdf-report.service';
-import { ResultStoreService, FixtureResult } from '../../../../services/result-store.service';
+import { FixtureResult } from '../../../../services/result-store.service';
 import { selectionLabel } from '../../../../shared/room-plan/layout-copy';
 import { RoomPlanPreviewComponent } from '../../../../shared/room-plan/room-plan-preview.component';
+import { Point } from '../../../../shared/room-plan/room-polygon';
 import { CalculationsComponent } from '../calculations/calculations.component';
 import { FixtureDetailsComponent } from '../fixture-details/fixture-details.component';
+
+export interface RequestSides {
+  width1: number | null;
+  length1: number | null;
+  width2: number | null;
+  length2: number | null;
+}
+
+export const EMPTY_REQUEST_SIDES: RequestSides = {
+  width1: null,
+  length1: null,
+  width2: null,
+  length2: null,
+};
+
+export function requestSidesFromPayload(sides: number[] | null | undefined): RequestSides {
+  if (!sides || sides.length < 4) {
+    return EMPTY_REQUEST_SIDES;
+  }
+  return {
+    width1: sides[0],
+    length1: sides[1],
+    width2: sides[2],
+    length2: sides[3],
+  };
+}
 
 @Component({
   selector: 'app-results-grid',
   imports: [CalculationsComponent, FixtureDetailsComponent, RoomPlanPreviewComponent],
   templateUrl: './results-grid.component.html',
   styleUrl: './results-grid.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResultsGridComponent {
-  results = input.required<CalculationResult[]>();
-  uiSettings = input.required<UiSettings>();
+  calculation = input.required<CalculationResponse>();
   fixtureResults = input.required<FixtureResult[]>();
+  requestSides = input<RequestSides>(EMPTY_REQUEST_SIDES);
+  vertices = input<readonly Point[] | null>(null);
+  holes = input<readonly Point[][] | null>(null);
 
   private readonly pdfService = inject(PdfReportService);
-  private readonly resultStore = inject(ResultStoreService);
 
   protected readonly selectedIndex = signal(0);
   protected readonly activeView = signal<'calculations' | 'fixtures'>('calculations');
   protected readonly selectionLabel = selectionLabel;
 
-  protected readonly calc = this.resultStore.calculationResult;
-  protected readonly requestSides = computed(() => {
-    const sides = this.resultStore.calculationRequest()?.sides;
-    if (!sides || sides.length < 4) {
-      return { width1: null, length1: null, width2: null, length2: null };
-    }
-    return {
-      width1: sides[0],
-      length1: sides[1],
-      width2: sides[2],
-      length2: sides[3],
-    };
-  });
+  protected readonly results = computed(() => this.calculation().results);
   protected readonly layoutMode = computed((): 'auto' | 'user_grid' | null => {
-    const mode = this.calc()?.calculation_meta.layout_mode;
+    const mode = this.calculation().calculation_meta.layout_mode;
     return mode === 'user_grid' || mode === 'auto' ? mode : null;
   });
 
@@ -84,10 +101,9 @@ export class ResultsGridComponent {
   }
 
   generateSolutionReport() {
-    const response = this.resultStore.calculationResult();
     const result = this.selectedResult();
     const fixtureResult = this.selectedFixtureResult();
-    if (!response || !result) return;
-    this.pdfService.generateSolutionReport(response, result, fixtureResult ?? null);
+    if (!result) return;
+    this.pdfService.generateSolutionReport(this.calculation(), result, fixtureResult ?? null);
   }
 }

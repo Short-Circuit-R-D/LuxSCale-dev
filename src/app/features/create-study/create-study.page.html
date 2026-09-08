@@ -351,84 +351,25 @@
             </div>
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2">Standard Category *</label>
-                <div class="relative">
-                  <button
-                    type="button"
-                    class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-left font-body text-sm cursor-pointer transition-[border-color] duration-150 text-muted focus:outline-none focus:border-primary focus:text-white"
-                    (click)="toggleStandardDropdown()"
-                  >
-                    {{ store.technical().standardCategory || 'Select standard' }}
-                  </button>
-                  @if (showStandardDropdown()) {
-                    <div class="absolute top-full left-0 right-0 border border-border rounded-lg bg-surface z-20 overflow-hidden mt-1">
-                      <input
-                        type="text"
-                        class="w-full px-3.5 py-2.5 bg-transparent border-b border-border text-white font-body text-sm box-border focus:outline-none placeholder:text-muted"
-                        placeholder="Search..."
-                        [ngModel]="standardSearch()"
-                        (ngModelChange)="standardSearch.set($event)"
-                        (click)="$event.stopPropagation()"
-                      />
-                      <div class="max-h-[200px] overflow-y-auto">
-                        @for (cat of filteredStandards(); track cat) {
-                          <button
-                            type="button"
-                            class="block w-full px-3.5 py-2.5 bg-transparent border-none text-muted font-body text-sm text-left cursor-pointer transition-[background-color,color] duration-150 hover:bg-elevated hover:text-white"
-                            [class]="store.technical().standardCategory === cat ? 'text-primary' : ''"
-                            (click)="onStandardSelect(cat)"
-                          >
-                            {{ cat }}
-                          </button>
-                        }
-                        @if (filteredStandards().length === 0) {
-                          <div class="px-3.5 py-4 text-muted text-sm text-center">No results found</div>
-                        }
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
-              <div>
-                <label class="block font-mono text-sm text-muted tracking-widest uppercase mb-2">Task or Activity *</label>
-                <div class="relative">
-                  <button
-                    type="button"
-                    class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-left font-body text-sm cursor-pointer transition-[border-color] duration-150 text-muted focus:outline-none focus:border-primary focus:text-white"
-                    (click)="toggleTaskDropdown()"
-                  >
-                    {{ store.technical().taskOrActivity || 'Select task' }}
-                  </button>
-                  @if (showTaskDropdown()) {
-                    <div class="absolute top-full left-0 right-0 border border-border rounded-lg bg-surface z-20 overflow-hidden mt-1">
-                      <input
-                        type="text"
-                        class="w-full px-3.5 py-2.5 bg-transparent border-b border-border text-white font-body text-sm box-border focus:outline-none placeholder:text-muted"
-                        placeholder="Search..."
-                        [ngModel]="taskSearch()"
-                        (ngModelChange)="taskSearch.set($event)"
-                        (click)="$event.stopPropagation()"
-                      />
-                      <div class="max-h-[200px] overflow-y-auto">
-                        @for (task of filteredTasks(); track task) {
-                          <button
-                            type="button"
-                            class="block w-full px-3.5 py-2.5 bg-transparent border-none text-muted font-body text-sm text-left cursor-pointer transition-[background-color,color] duration-150 hover:bg-elevated hover:text-white"
-                            [class]="store.technical().taskOrActivity === task ? 'text-primary' : ''"
-                            (click)="onTaskSelect(task)"
-                          >
-                            {{ task }}
-                          </button>
-                        }
-                        @if (filteredTasks().length === 0) {
-                          <div class="px-3.5 py-4 text-muted text-sm text-center">No results found</div>
-                        }
-                      </div>
-                    </div>
-                  }
-                </div>
-              </div>
+              <app-searchable-select
+                label="Standard Category *"
+                placeholder="Select standard"
+                controlId="standard-category"
+                [options]="standardCategories()"
+                [value]="store.technical().standardCategory"
+                [loading]="categoriesLoading()"
+                (valueChange)="onStandardSelect($event)"
+              />
+              <app-searchable-select
+                label="Task or Activity *"
+                placeholder="Select task"
+                controlId="task-or-activity"
+                [options]="taskOrActivities()"
+                [value]="store.technical().taskOrActivity"
+                [disabled]="!store.technical().standardCategory"
+                [loading]="tasksLoading()"
+                (valueChange)="onTaskSelect($event)"
+              />
             </div>
           </div>
         </div>

@@ -2,11 +2,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { CalculationResponse } from '../../services/calculation-result.service';
+import { applyStandardFallbacks, CalculationResponse } from '../../services/calculation-result.service';
 import { CalculatePayload, LayoutPayload, LuxScaleService, StandardEntry } from '../../services/luxscale.service';
 import { ResultStoreService } from '../../services/result-store.service';
 import { RoomPlanPreviewComponent } from '../../shared/room-plan/room-plan-preview.component';
 import { layoutErrorList, validateCustomLayout } from '../../shared/room-plan/user-grid-pack';
+import { SearchableSelectComponent } from '../../shared/searchable-select/searchable-select.component';
 import { createStudyStore, TechnicalSpecs } from './stores/study-form.store';
 
 function toMetric(value: unknown): number | null {
@@ -17,7 +18,7 @@ function toMetric(value: unknown): number | null {
 
 @Component({
   selector: 'app-create-study',
-  imports: [FormsModule, RouterLink, RoomPlanPreviewComponent],
+  imports: [FormsModule, RouterLink, RoomPlanPreviewComponent, SearchableSelectComponent],
   templateUrl: './create-study.page.html',
   styleUrl: './create-study.page.css',
 })
@@ -30,26 +31,14 @@ export class CreateStudyPage implements OnInit {
   protected readonly standardCategories = signal<string[]>([]);
   protected readonly taskOrActivities = signal<string[]>([]);
   protected readonly selectedStandard = signal<StandardEntry | null>(null);
+  protected readonly categoriesLoading = signal(true);
+  protected readonly tasksLoading = signal(false);
 
-  protected readonly standardSearch = signal('');
-  protected readonly taskSearch = signal('');
-  protected readonly showStandardDropdown = signal(false);
-  protected readonly showTaskDropdown = signal(false);
   protected readonly isSubmitting = signal(false);
   protected readonly submitError = signal('');
 
   protected readonly phoneError = signal('');
   protected readonly emailError = signal('');
-
-  protected readonly filteredStandards = computed(() => {
-    const search = this.standardSearch().toLowerCase();
-    return this.standardCategories().filter((c) => c.toLowerCase().includes(search));
-  });
-
-  protected readonly filteredTasks = computed(() => {
-    const search = this.taskSearch().toLowerCase();
-    return this.taskOrActivities().filter((t) => t.toLowerCase().includes(search));
-  });
 
   protected readonly isStep1Valid = computed(() => {
     const p = this.store.project();
@@ -101,8 +90,14 @@ export class CreateStudyPage implements OnInit {
 
   ngOnInit() {
     this.luxscaleService.getStandardCategories().subscribe({
-      next: (categories) => this.standardCategories.set(categories),
-      error: () => this.standardCategories.set([]),
+      next: (categories) => {
+        this.standardCategories.set(categories);
+        this.categoriesLoading.set(false);
+      },
+      error: () => {
+        this.standardCategories.set([]);
+        this.categoriesLoading.set(false);
+      },
     });
   }
 
@@ -152,27 +147,13 @@ export class CreateStudyPage implements OnInit {
 
   onStandardSelect(value: string) {
     this.store.updateTechnical({ standardCategory: value, taskOrActivity: '' });
-    this.showStandardDropdown.set(false);
-    this.standardSearch.set('');
     this.selectedStandard.set(null);
     this.loadTasks(value);
   }
 
   onTaskSelect(value: string) {
     this.store.updateTechnical({ taskOrActivity: value });
-    this.showTaskDropdown.set(false);
-    this.taskSearch.set('');
     this.loadStandardObject(value);
-  }
-
-  toggleStandardDropdown() {
-    this.showStandardDropdown.update((v) => !v);
-    this.showTaskDropdown.set(false);
-  }
-
-  toggleTaskDropdown() {
-    this.showTaskDropdown.update((v) => !v);
-    this.showStandardDropdown.set(false);
   }
 
   onSubmit() {
@@ -213,27 +194,7 @@ export class CreateStudyPage implements OnInit {
     this.luxscaleService.calculate(payload).subscribe({
       next: (res: unknown) => {
         const response = res as CalculationResponse;
-        const requestLighting = payload.project_info.standard_lighting;
-
-        const fallbackParams = [
-          'Em_r_lx',
-          'Em_u_lx',
-          'Uo',
-          'Ra',
-          'RUGL',
-          'Ez_lx',
-          'Em_wall_lx',
-          'Em_ceiling_lx',
-        ] as const;
-
-        const usedFallback = new Set<string>();
-        for (const param of fallbackParams) {
-          if (response.standard_row[param] == null) {
-            response.standard_row[param] = requestLighting[param];
-            usedFallback.add(param);
-          }
-        }
-
+        const usedFallback = applyStandardFallbacks(response, payload.project_info.standard_lighting);
         this.resultStore.setCalculationResult(response, usedFallback, payload);
         this.isSubmitting.set(false);
         this.router.navigate(['/results']);
@@ -274,9 +235,16 @@ export class CreateStudyPage implements OnInit {
   }
 
   private loadTasks(category: string) {
+    this.tasksLoading.set(true);
     this.luxscaleService.getTasks(category).subscribe({
-      next: (tasks) => this.taskOrActivities.set(tasks),
-      error: () => this.taskOrActivities.set([]),
+      next: (tasks) => {
+        this.taskOrActivities.set(tasks);
+        this.tasksLoading.set(false);
+      },
+      error: () => {
+        this.taskOrActivities.set([]);
+        this.tasksLoading.set(false);
+      },
     });
   }
 

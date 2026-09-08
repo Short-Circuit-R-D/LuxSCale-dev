@@ -1,7 +1,7 @@
 <section class="min-h-screen bg-black pt-24 pb-12 sm:pt-[100px] sm:pb-16">
   <div
     class="mx-auto w-full max-w-[1440px] px-4 sm:px-6 md:px-12"
-    [attr.inert]="store.resetConfirmOpen() ? '' : null"
+    [attr.inert]="store.modalOpen() ? '' : null"
   >
     <div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
       <div class="max-w-[720px]">
@@ -73,7 +73,80 @@
     @if (!store.hasLayout()) {
       <app-cad-upload />
     } @else {
-      <div class="mb-4 flex flex-col gap-4">
+      <div
+        class="mb-6 flex flex-wrap items-stretch gap-2 overflow-x-auto"
+        role="tablist"
+        aria-label="CAD study views"
+        (keydown)="onTabListKeydown($event)"
+      >
+        <button
+          id="cad-tab-analysis"
+          type="button"
+          role="tab"
+          class="h-12 rounded-xl border border-border px-5 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          [class]="
+            store.activeTab() === 'analysis'
+              ? 'text-white border-b-2 border-b-primary'
+              : 'text-muted hover:text-white'
+          "
+          [attr.aria-selected]="store.activeTab() === 'analysis'"
+          [attr.tabindex]="store.activeTab() === 'analysis' ? 0 : -1"
+          aria-controls="cad-panel-analysis"
+          (click)="selectTab('analysis')"
+        >
+          Analysis
+        </button>
+        @for (study of store.roomStudies(); track study.id) {
+          <div class="flex items-stretch rounded-xl border border-border" role="presentation">
+            <button
+              [id]="'cad-tab-' + study.id"
+              type="button"
+              role="tab"
+              class="h-12 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:px-5"
+              [class]="
+                store.activeTab() === study.id
+                  ? 'text-white border-b-2 border-b-primary'
+                  : 'text-muted hover:text-white'
+              "
+              [attr.aria-selected]="store.activeTab() === study.id"
+              [attr.tabindex]="store.activeTab() === study.id ? 0 : -1"
+              [attr.aria-controls]="'cad-panel-' + study.id"
+              (click)="selectTab(study.id)"
+            >
+              {{ study.title }}
+            </button>
+            <button
+              type="button"
+              class="flex min-h-12 min-w-10 items-center justify-center text-muted transition-colors duration-180 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              [attr.aria-label]="'Close ' + study.title"
+              (click)="closeStudy(study.id, $event)"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (store.activeTab() === 'analysis') {
+      <div
+        id="cad-panel-analysis"
+        role="tabpanel"
+        aria-labelledby="cad-tab-analysis"
+        class="mb-4 flex flex-col gap-4"
+      >
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div class="flex flex-wrap items-center gap-2" role="toolbar" aria-label="Plan tools">
             <div class="flex rounded-xl border border-border">
@@ -139,6 +212,17 @@
               Rename
             </button>
             <button
+              #studyTrigger
+              type="button"
+              class="h-12 rounded-xl border border-[#3A3A3A] px-4 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:text-disabled"
+              [disabled]="!store.canStudy()"
+              aria-haspopup="dialog"
+              [attr.aria-expanded]="store.roomStudyOpen()"
+              (click)="openRoomStudy()"
+            >
+              Room study
+            </button>
+            <button
               type="button"
               class="h-12 rounded-xl border border-[#3A3A3A] px-4 text-sm font-medium text-white transition-colors duration-180 hover:border-primary hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:text-disabled"
               [disabled]="!store.canUndo()"
@@ -199,7 +283,6 @@
             Click a discarded face to restore it as a room. No room selection is required.
           </p>
         }
-      </div>
 
       @if (store.renameOpen()) {
         <div class="mb-4 flex flex-col gap-3 rounded-xl border border-border bg-surface px-5 py-4 sm:flex-row sm:items-end">
@@ -249,8 +332,34 @@
         </div>
         <app-cad-legend />
       </div>
+      </div>
+      } @else if (activeStudy(); as study) {
+        <div
+          [id]="'cad-panel-' + study.id"
+          role="tabpanel"
+          [attr.aria-labelledby]="'cad-tab-' + study.id"
+        >
+          <app-results-view
+            [result]="study.result"
+            [fixtureResults]="study.fixtureResults"
+            [fallbackFields]="study.fallbackFields"
+            [vertices]="study.vertices"
+            [holes]="study.holes"
+            [heading]="study.title"
+            [showNewStudy]="false"
+          />
+        </div>
+      }
     }
   </div>
+
+  @if (store.roomStudyOpen() && store.selectedRoom(); as room) {
+    <app-room-study-dialog
+      [room]="room"
+      (closed)="onRoomStudyClosed()"
+      (completed)="onRoomStudyCompleted($event)"
+    />
+  }
 
   @if (store.resetConfirmOpen()) {
     <div

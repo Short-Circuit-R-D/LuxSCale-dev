@@ -1,0 +1,51 @@
+<label class="mb-2 block font-mono text-sm tracking-widest text-muted uppercase" [attr.for]="fieldId()">
+  {{ label() }}
+</label>
+<div class="relative">
+  <button
+    [id]="fieldId()"
+    type="button"
+    class="w-full cursor-pointer rounded-lg border border-border bg-transparent px-3.5 py-2.5 text-left font-body text-sm transition-[border-color] duration-150 focus:border-primary focus:outline-none disabled:cursor-not-allowed disabled:text-disabled"
+    [class.text-white]="!!value()"
+    [class.text-muted]="!value()"
+    [disabled]="disabled()"
+    [attr.aria-expanded]="open()"
+    aria-haspopup="listbox"
+    (click)="toggle()"
+  >
+    {{ value() || placeholder() }}
+  </button>
+  @if (open()) {
+    <div class="absolute top-full right-0 left-0 z-20 mt-1 overflow-hidden rounded-lg border border-border bg-surface">
+      <input
+        type="text"
+        class="box-border w-full border-b border-border bg-transparent px-3.5 py-2.5 font-body text-sm text-white placeholder:text-muted focus:outline-none"
+        placeholder="Search..."
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+        (click)="$event.stopPropagation()"
+      />
+      <div class="max-h-[200px] overflow-y-auto" role="listbox">
+        @if (loading()) {
+          <div class="px-3.5 py-4 text-center text-sm text-muted">Loading...</div>
+        } @else {
+          @for (option of filtered(); track option) {
+            <button
+              type="button"
+              role="option"
+              class="block w-full cursor-pointer border-none bg-transparent px-3.5 py-2.5 text-left font-body text-sm text-muted transition-[background-color,color] duration-150 hover:bg-elevated hover:text-white"
+              [class.text-primary]="value() === option"
+              [attr.aria-selected]="value() === option"
+              (click)="select(option)"
+            >
+              {{ option }}
+            </button>
+          }
+          @if (filtered().length === 0) {
+            <div class="px-3.5 py-4 text-center text-sm text-muted">{{ emptyText() }}</div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>

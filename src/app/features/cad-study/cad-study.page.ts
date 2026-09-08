@@ -3,20 +3,29 @@ import {
   Component,
   ElementRef,
   OnInit,
+  computed,
   effect,
   inject,
   signal,
   untracked,
   viewChild,
 } from '@angular/core';
-import { CadViewerStore } from './cad-viewer.store';
+import { ResultsViewComponent } from '../results/results-view.component';
+import { CadActiveTab, CadRoomStudyDraft, CadViewerStore } from './cad-viewer.store';
 import { CadLegendComponent } from './components/cad-legend/cad-legend.component';
 import { CadPlanComponent } from './components/cad-plan/cad-plan.component';
 import { CadUploadComponent } from './components/cad-upload/cad-upload.component';
+import { RoomStudyDialogComponent } from './components/room-study-dialog/room-study-dialog.component';
 
 @Component({
   selector: 'app-cad-study',
-  imports: [CadUploadComponent, CadPlanComponent, CadLegendComponent],
+  imports: [
+    CadUploadComponent,
+    CadPlanComponent,
+    CadLegendComponent,
+    RoomStudyDialogComponent,
+    ResultsViewComponent,
+  ],
   templateUrl: './cad-study.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
@@ -26,9 +35,17 @@ import { CadUploadComponent } from './components/cad-upload/cad-upload.component
 export class CadStudyPage implements OnInit {
   protected readonly store = inject(CadViewerStore);
   protected readonly renameName = signal('');
+  protected readonly activeStudy = computed(() => {
+    const tab = this.store.activeTab();
+    if (tab === 'analysis') {
+      return null;
+    }
+    return this.store.roomStudies().find((study) => study.id === tab) ?? null;
+  });
 
   private readonly resetCancel = viewChild<ElementRef<HTMLButtonElement>>('resetCancel');
   private readonly resetTrigger = viewChild<ElementRef<HTMLButtonElement>>('resetTrigger');
+  private readonly studyTrigger = viewChild<ElementRef<HTMLButtonElement>>('studyTrigger');
 
   constructor() {
     effect(() => {
@@ -48,12 +65,7 @@ export class CadStudyPage implements OnInit {
   }
 
   openRename(): void {
-    const id = this.store.selectedRoomId();
-    const layout = this.store.currentLayout();
-    const room =
-      layout?.rooms.find((item) => item.id === id) ??
-      layout?.physical_rooms.find((item) => item.id === id);
-    this.renameName.set(room?.name || '');
+    this.renameName.set(this.store.selectedRoom()?.name || '');
     this.store.openRename();
   }
 
@@ -63,6 +75,60 @@ export class CadStudyPage implements OnInit {
 
   confirmRename(): void {
     this.store.renameSelectedRoom(this.renameName());
+  }
+
+  openRoomStudy(): void {
+    this.store.openRoomStudy();
+  }
+
+  onRoomStudyClosed(): void {
+    this.store.cancelRoomStudy();
+    queueMicrotask(() => this.studyTrigger()?.nativeElement.focus());
+  }
+
+  onRoomStudyCompleted(draft: CadRoomStudyDraft): void {
+    const id = this.store.addRoomStudy(draft);
+    this.focusTab(id);
+  }
+
+  selectTab(tab: CadActiveTab): void {
+    this.store.selectTab(tab);
+    this.focusTab(tab);
+  }
+
+  closeStudy(id: string, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const wasActive = this.store.activeTab() === id;
+    this.store.closeRoomStudy(id);
+    if (wasActive) {
+      this.focusTab('analysis');
+    }
+  }
+
+  onTabListKeydown(event: KeyboardEvent): void {
+    if ((event.target as HTMLElement).getAttribute('role') !== 'tab') {
+      return;
+    }
+    const ids: CadActiveTab[] = ['analysis', ...this.store.roomStudies().map((study) => study.id)];
+    const index = ids.indexOf(this.store.activeTab());
+    if (index < 0) {
+      return;
+    }
+    let next = index;
+    if (event.key === 'ArrowRight') {
+      next = (index + 1) % ids.length;
+    } else if (event.key === 'ArrowLeft') {
+      next = (index - 1 + ids.length) % ids.length;
+    } else if (event.key === 'Home') {
+      next = 0;
+    } else if (event.key === 'End') {
+      next = ids.length - 1;
+    } else {
+      return;
+    }
+    event.preventDefault();
+    this.selectTab(ids[next]);
   }
 
   openResetConfirm(): void {
@@ -80,6 +146,10 @@ export class CadStudyPage implements OnInit {
   }
 
   onDocumentEscape(): void {
+    if (this.store.roomStudyOpen()) {
+      queueMicrotask(() => this.onRoomStudyClosed());
+      return;
+    }
     if (!this.store.resetConfirmOpen()) {
       return;
     }
@@ -110,5 +180,9 @@ export class CadStudyPage implements OnInit {
       event.preventDefault();
       first.focus();
     }
+  }
+
+  private focusTab(tab: CadActiveTab): void {
+    queueMicrotask(() => document.getElementById(`cad-tab-${tab}`)?.focus());
   }
 }

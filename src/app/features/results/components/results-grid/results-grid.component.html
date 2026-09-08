@@ -91,8 +91,10 @@
           [length1]="requestSides().length1"
           [width2]="requestSides().width2"
           [length2]="requestSides().length2"
-          [engineLength]="calc()?.length ?? null"
-          [engineWidth]="calc()?.width ?? null"
+          [engineLength]="calculation().length"
+          [engineWidth]="calculation().width"
+          [vertices]="vertices()"
+          [holes]="holes()"
           [layoutNx]="result['layout_nx'] ?? null"
           [layoutNy]="result['layout_ny'] ?? null"
           [usedSpacingX]="result['Spacing X (m)'] ?? null"
@@ -131,7 +133,7 @@
 
       <div class="view-content">
         @if (activeView() === 'calculations') {
-          <app-calculations [result]="result" [uiSettings]="uiSettings()" />
+          <app-calculations [result]="result" [uiSettings]="calculation().ui_settings" />
         } @else if (selectedFixtureResult(); as fixtureResult) {
           <app-fixture-details [fixtureResult]="fixtureResult" />
         }
