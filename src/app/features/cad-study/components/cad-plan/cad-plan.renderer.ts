@@ -84,6 +84,8 @@ export interface DrawCadSceneArgs {
   hoverRoomId: string | null;
   pendingStart: Point | null;
   previewEnd: Point | null;
+  /** Optional midpoint label for the in-progress split preview (e.g. offsets). */
+  previewLabel?: string | null;
 }
 
 export function worldToScreen(point: Point, camera: CadCamera): Point {
@@ -379,6 +381,13 @@ function drawPreview(ctx: CanvasRenderingContext2D, args: DrawCadSceneArgs): voi
   ctx.strokeStyle = DIVIDER_STROKE;
   ctx.lineWidth = 1.4;
   ctx.stroke();
+  if (args.previewLabel) {
+    ctx.fillStyle = DIVIDER_STROKE;
+    ctx.font = '11px ui-monospace, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(args.previewLabel, (a.x + b.x) / 2, Math.min(a.y, b.y) - 6);
+  }
 }
 
 function drawObjects(ctx: CanvasRenderingContext2D, objects: PreparedObject[], camera: CadCamera): void {

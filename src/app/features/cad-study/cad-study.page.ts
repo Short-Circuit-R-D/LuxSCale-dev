@@ -16,6 +16,7 @@ import { CadLegendComponent } from './components/cad-legend/cad-legend.component
 import { CadPlanComponent } from './components/cad-plan/cad-plan.component';
 import { CadUploadComponent } from './components/cad-upload/cad-upload.component';
 import { RoomStudyDialogComponent } from './components/room-study-dialog/room-study-dialog.component';
+import { SplitMeasureComponent } from './components/split-measure/split-measure.component';
 
 @Component({
   selector: 'app-cad-study',
@@ -25,6 +26,7 @@ import { RoomStudyDialogComponent } from './components/room-study-dialog/room-st
     CadLegendComponent,
     RoomStudyDialogComponent,
     ResultsViewComponent,
+    SplitMeasureComponent,
   ],
   templateUrl: './cad-study.page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

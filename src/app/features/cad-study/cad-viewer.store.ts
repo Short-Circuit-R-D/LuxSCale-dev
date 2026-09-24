@@ -8,7 +8,15 @@ import type { VariantDetailResponseDto } from '../../core/variants/dtos/variants
 import type { AutomateProjectMeta } from '../../services/result-store.service';
 import { CadAnalysisService } from './cad-analysis.service';
 import { CadClientError, errorFromHttp, messageForCode } from './cad-error';
-import { normalizeLayout, roomPolygon } from './cad-geometry';
+import {
+  bboxFromPoints,
+  measureSplit,
+  normalizeLayout,
+  roomContainingPoint,
+  roomPolygon,
+  segmentAcrossBbox,
+} from './cad-geometry';
+import type { SplitAxis, SplitEdge, SplitMeasure } from './cad-geometry';
 import { CadUnit } from './models/cad-unit.model';
 import { Face } from './models/face.model';
 import { Layout } from './models/layout.model';
@@ -88,6 +96,21 @@ export class CadViewerStore {
   readonly selectedFaceId = signal<string | null>(null);
   readonly pendingStart = signal<Point | null>(null);
   readonly previewEnd = signal<Point | null>(null);
+  /** Inline error for the exact-number split panel; cleared on new input. */
+  readonly splitError = signal<string | null>(null);
+
+  /** Live measurement of the in-progress split against the room under the cursor. */
+  readonly splitMeasure = computed<SplitMeasure | null>(() => {
+    const layout = this.currentLayout();
+    const start = this.pendingStart();
+    const end = this.previewEnd();
+    if (!layout || !start || !end) {
+      return null;
+    }
+    const rooms = [...layout.rooms, ...layout.physical_rooms];
+    const room = roomContainingPoint(rooms, start);
+    return room ? measureSplit(room, start, end) : null;
+  });
   readonly renameOpen = signal(false);
   readonly resetConfirmOpen = signal(false);
   readonly roomStudyOpen = signal(false);
@@ -278,6 +301,51 @@ export class CadViewerStore {
   clearPreview(): void {
     this.pendingStart.set(null);
     this.previewEnd.set(null);
+  }
+
+  clearSplitError(): void {
+    this.splitError.set(null);
+  }
+
+  /**
+   * Commit a wall-to-wall split at an exact offset from a room bbox edge.
+   * Same mutation pipeline as freehand splits.
+   */
+  splitAtOffset(roomId: string, axis: SplitAxis, edge: SplitEdge, offset: number): void {
+    const jobId = this.jobId();
+    const layout = this.currentLayout();
+    if (!jobId || this.busy()) {
+      return;
+    }
+    const room = [...(layout?.rooms ?? []), ...(layout?.physical_rooms ?? [])].find(
+      (item) => item.id === roomId,
+    );
+    const bbox = room ? (room.bbox ?? bboxFromPoints(roomPolygon(room).vertices)) : null;
+    if (!room || !bbox) {
+      this.splitError.set('Room is no longer available. Pick the room again.');
+      return;
+    }
+    const span = axis === 'horizontal' ? bbox.max_y - bbox.min_y : bbox.max_x - bbox.min_x;
+    if (!Number.isFinite(offset) || offset <= 0 || offset >= span) {
+      this.splitError.set(`Enter a distance between 0 and ${span.toFixed(2)} m.`);
+      return;
+    }
+    const segment = segmentAcrossBbox(bbox, axis, edge, offset);
+    if (!segment) {
+      this.splitError.set(`Enter a distance between 0 and ${span.toFixed(2)} m.`);
+      return;
+    }
+    this.splitError.set(null);
+    this.clearPreview();
+    this.runMutation(
+      this.cadAnalysis.createDivider(jobId, {
+        start_x: segment.start.x,
+        start_y: segment.start.y,
+        end_x: segment.end.x,
+        end_y: segment.end.y,
+        expected_layout_rev: this.layoutRev(),
+      }),
+    );
   }
 
   splitWithDivider(start: Point, end: Point): void {

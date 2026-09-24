@@ -270,8 +270,15 @@
 
         @if (store.tool() === 'split') {
           <p class="font-body text-sm text-muted">
-            Click two points across a room to split it. Scroll to zoom first if the room is small.
+            Click two points across a room to split it — snapped horizontal/vertical, hold Shift
+            for a free line. Scroll to zoom first if the room is small.
           </p>
+          @if (store.splitMeasure(); as measure) {
+            <app-split-measure
+              [measure]="measure"
+              (commit)="store.splitAtOffset(measure.roomId, $event.axis, $event.edge, $event.distance)"
+            />
+          }
         }
         @if (store.tool() === 'select') {
           <p class="font-body text-sm text-muted">
