@@ -60,13 +60,15 @@ export function formatMeters(value: number): string {
 }
 
 const RING_EPS = 1e-9;
-/** ponytail: 5cm hides CAD wall tessellation; drop if a real jog under 5cm must stay. */
-const COLLINEAR_M = 0.05;
+/** Turn sin below ~5° is treated as a straight wall; 90° corners stay. */
+const COLLINEAR_SIN = 0.087;
 
 export interface EdgeLengthLabel {
   x: number;
   y: number;
   text: string;
+  from: Point;
+  to: Point;
 }
 
 /** Drop a closing vertex that repeats the first so a ring is open. */
@@ -115,21 +117,21 @@ export function localMeterPolygon(
   };
 }
 
-function pointLineDistance(point: Point, a: Point, b: Point): number {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const length = Math.hypot(dx, dy);
-  if (length < RING_EPS) {
-    return Math.hypot(point.x - a.x, point.y - a.y);
+function isStraightTurn(prev: Point, point: Point, following: Point): boolean {
+  const ax = point.x - prev.x;
+  const ay = point.y - prev.y;
+  const bx = following.x - point.x;
+  const by = following.y - point.y;
+  const la = Math.hypot(ax, ay);
+  const lb = Math.hypot(bx, by);
+  if (la < RING_EPS || lb < RING_EPS) {
+    return true;
   }
-  return Math.abs((point.x - a.x) * dy - (point.y - a.y) * dx) / length;
+  return Math.abs(ax * by - ay * bx) / (la * lb) < COLLINEAR_SIN;
 }
 
-/** Drop vertices that lie on a neighbor chord so one CAD wall is one side. */
-export function collapseColinearRing(
-  vertices: readonly Point[],
-  epsilon = COLLINEAR_M,
-): Point[] {
+/** Drop mid-wall tessellation samples so one CAD wall is one side. Keeps real corners. */
+export function collapseColinearRing(vertices: readonly Point[]): Point[] {
   let ring = dropClosedDuplicate(vertices);
   let changed = true;
   while (changed && ring.length > 3) {
@@ -139,7 +141,7 @@ export function collapseColinearRing(
       const prev = ring[(i - 1 + ring.length) % ring.length];
       const point = ring[i];
       const following = ring[(i + 1) % ring.length];
-      if (pointLineDistance(point, prev, following) < epsilon) {
+      if (isStraightTurn(prev, point, following)) {
         changed = true;
         continue;
       }
@@ -185,38 +187,73 @@ export function outwardEdgeLabels(vertices: readonly Point[], margin: number): E
       x: (a.x + b.x) / 2 + nx * margin,
       y: (a.y + b.y) / 2 + ny * margin,
       text: `${formatMeters(length)} m`,
+      from: a,
+      to: b,
     });
   }
   return labels;
 }
 
-/** Vertex coordinates, offset toward the ring centroid so they sit inside the room. */
-export function vertexCoordinateLabels(vertices: readonly Point[], margin: number): EdgeLengthLabel[] {
-  if (vertices.length === 0) {
+export function parseFixtureCoordinates(raw: unknown): Point[] {
+  if (!Array.isArray(raw)) {
     return [];
   }
-  let cx = 0;
-  let cy = 0;
-  for (const point of vertices) {
-    cx += point.x;
-    cy += point.y;
+  const points: Point[] = [];
+  for (const item of raw) {
+    const point = asPoint(item);
+    if (point) {
+      points.push(point);
+    }
   }
-  cx /= vertices.length;
-  cy /= vertices.length;
-  return vertices
-    .filter((point) => Math.hypot(point.x, point.y) >= RING_EPS)
-    .map((point) => {
-      const vx = cx - point.x;
-      const vy = cy - point.y;
-      const length = Math.hypot(vx, vy);
-      const ux = length < RING_EPS ? 0 : vx / length;
-      const uy = length < RING_EPS ? 0 : vy / length;
-      return {
-        x: point.x + ux * margin,
-        y: point.y + uy * margin,
-        text: `(${formatMeters(point.x)}, ${formatMeters(point.y)})`,
-      };
-    });
+  return points;
+}
+
+function asPoint(item: unknown): Point | null {
+  if (Array.isArray(item) && item.length >= 2) {
+    const x = Number(item[0]);
+    const y = Number(item[1]);
+    return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+  }
+  if (item && typeof item === 'object') {
+    const rec = item as Record<string, unknown>;
+    const x = Number(rec['x']);
+    const y = Number(rec['y']);
+    return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+  }
+  return null;
+}
+
+/**
+ * Even-odd fill: a point is inside the outer ring and outside holes.
+ * Same rule as the CAD hit-test and the SVG preview (`fill-rule="evenodd"`).
+ */
+export function pointInPolygon(
+  point: Point,
+  vertices: readonly Point[],
+  holes: readonly Point[][] = [],
+): boolean {
+  let inside = false;
+  for (const ring of [vertices, ...holes]) {
+    if (ring.length >= 3 && pointInRing(point, ring)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+function pointInRing(point: Point, ring: readonly Point[]): boolean {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const a = ring[i];
+    const b = ring[j];
+    if ((a.y > point.y) !== (b.y > point.y)) {
+      const atX = ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x;
+      if (point.x < atX) {
+        inside = !inside;
+      }
+    }
+  }
+  return inside;
 }
 
 export function svgPathFromRings(

@@ -1,4 +1,4 @@
-import { collapseColinearRing, localMeterPolygon } from './room-polygon';
+import { collapseColinearRing, localMeterPolygon, parseFixtureCoordinates, pointInPolygon } from './room-polygon';
 
 describe('localMeterPolygon', () => {
   it('shifts the bounding-box bottom-left to the origin and keeps fractional meters', () => {
@@ -63,5 +63,92 @@ describe('collapseColinearRing', () => {
       { x: 5.3, y: 4 },
       { x: 0, y: 4 },
     ]);
+  });
+
+  it('keeps a 90° corner when tessellation samples sit a few centimetres away', () => {
+    const ring = collapseColinearRing([
+      { x: 0, y: 0 },
+      { x: 5.27, y: 0 },
+      { x: 5.3, y: 0 },
+      { x: 5.3, y: 0.03 },
+      { x: 5.3, y: 4 },
+      { x: 0, y: 4 },
+    ]);
+    expect(ring).toEqual([
+      { x: 0, y: 0 },
+      { x: 5.3, y: 0 },
+      { x: 5.3, y: 4 },
+      { x: 0, y: 4 },
+    ]);
+  });
+});
+
+describe('pointInPolygon', () => {
+  const lShape = [
+    { x: 0, y: 0 },
+    { x: 3, y: 0 },
+    { x: 3, y: 1 },
+    { x: 1, y: 1 },
+    { x: 1, y: 3 },
+    { x: 0, y: 3 },
+  ];
+
+  it('keeps L-shape arms and drops the missing square, including holes', () => {
+    expect(pointInPolygon({ x: 2, y: 0.5 }, lShape)).toBe(true);
+    expect(pointInPolygon({ x: 0.5, y: 2 }, lShape)).toBe(true);
+    expect(pointInPolygon({ x: 2, y: 2 }, lShape)).toBe(false);
+
+    const outer = [
+      { x: 0, y: 0 },
+      { x: 4, y: 0 },
+      { x: 4, y: 4 },
+      { x: 0, y: 4 },
+    ];
+    const hole = [
+      { x: 1, y: 1 },
+      { x: 3, y: 1 },
+      { x: 3, y: 3 },
+      { x: 1, y: 3 },
+    ];
+    expect(pointInPolygon({ x: 0.5, y: 0.5 }, outer, [hole])).toBe(true);
+    expect(pointInPolygon({ x: 2, y: 2 }, outer, [hole])).toBe(false);
+
+    expect(
+      [
+        { x: 0.5, y: 0.5 },
+        { x: 2, y: 0.5 },
+        { x: 0.5, y: 2 },
+        { x: 2, y: 2 },
+      ].filter((point) => pointInPolygon(point, lShape)),
+    ).toEqual([
+      { x: 0.5, y: 0.5 },
+      { x: 2, y: 0.5 },
+      { x: 0.5, y: 2 },
+    ]);
+  });
+});
+
+describe('parseFixtureCoordinates', () => {
+  it('keeps finite number pairs and drops junk', () => {
+    expect(
+      parseFixtureCoordinates([
+        [1, 1],
+        [3, 1],
+        [5, 1],
+        [1],
+        ['2', '4'],
+        [Number.NaN, 1],
+        null,
+        { x: 9, y: 9 },
+      ]),
+    ).toEqual([
+      { x: 1, y: 1 },
+      { x: 3, y: 1 },
+      { x: 5, y: 1 },
+      { x: 2, y: 4 },
+      { x: 9, y: 9 },
+    ]);
+    expect(parseFixtureCoordinates(null)).toEqual([]);
+    expect(parseFixtureCoordinates({ foo: 1 })).toEqual([]);
   });
 });

@@ -1,3 +1,4 @@
+import { pointInPolygon as pointInMeterPolygon } from '../../shared/room-plan/room-polygon';
 import { BoundingBox } from './models/bounding-box.model';
 import { CadObject } from './models/cad-object.model';
 import { Layout } from './models/layout.model';
@@ -193,29 +194,7 @@ export function pointInBbox(point: Point, bbox: BoundingBox): boolean {
 }
 
 export function pointInPolygon(point: Point, polygon: Polygon): boolean {
-  const rings = [polygon.vertices, ...(polygon.holes ?? [])];
-  let inside = false;
-  for (const ring of rings) {
-    if (ring.length >= 3 && pointInRing(point, ring)) {
-      inside = !inside;
-    }
-  }
-  return inside;
-}
-
-function pointInRing(point: Point, ring: Point[]): boolean {
-  let inside = false;
-  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    const a = ring[i];
-    const b = ring[j];
-    if ((a.y > point.y) !== (b.y > point.y)) {
-      const atX = ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x;
-      if (point.x < atX) {
-        inside = !inside;
-      }
-    }
-  }
-  return inside;
+  return pointInMeterPolygon(point, polygon.vertices, polygon.holes ?? []);
 }
 
 export function dividerPayload(dividers: Array<{ start: Point; end: Point }>): Segment[] {

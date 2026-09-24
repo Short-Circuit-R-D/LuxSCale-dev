@@ -1,0 +1,94 @@
+<div class="rounded-xl border border-border bg-elevated p-4 sm:p-5">
+  <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    @if (isPolygon()) {
+      <div class="view-slider">
+        <div class="slider-container" role="tablist" aria-label="Result preview">
+          <div class="slider-track">
+            <div class="slider-indicator" [class.is-right]="previewTab() === 'heatmap'"></div>
+          </div>
+          <button
+            type="button"
+            role="tab"
+            class="slider-label"
+            [class.active]="previewTab() === 'layout'"
+            [attr.aria-selected]="previewTab() === 'layout'"
+            [attr.aria-controls]="layoutPanelId"
+            [id]="layoutPanelId + '-tab'"
+            (click)="setPreviewTab('layout')"
+          >
+            Layout
+          </button>
+          <button
+            type="button"
+            role="tab"
+            class="slider-label"
+            [class.active]="previewTab() === 'heatmap'"
+            [attr.aria-selected]="previewTab() === 'heatmap'"
+            [attr.aria-controls]="heatmapPanelId"
+            [id]="heatmapPanelId + '-tab'"
+            (click)="setPreviewTab('heatmap')"
+          >
+            Heatmap
+          </button>
+        </div>
+      </div>
+    } @else {
+      <span class="font-mono text-xs tracking-widest text-primary uppercase">Layout preview</span>
+    }
+    @if (isPolygon() && previewTab() === 'heatmap') {
+      <label class="flex items-center gap-2 font-mono text-xs tracking-widest text-muted uppercase">
+        Resolution
+        <select
+          class="cursor-pointer rounded-lg border border-border bg-transparent px-2.5 py-1.5 font-mono text-xs text-white focus:border-primary focus:outline-none"
+          [value]="resolution()"
+          (change)="onResolutionChange($event)"
+        >
+          @for (option of resolutionOptions; track option) {
+            <option [value]="option">{{ option }} × {{ option }}</option>
+          }
+        </select>
+      </label>
+    }
+  </div>
+
+  @if (!isPolygon() || previewTab() === 'layout') {
+    <div
+      [attr.role]="isPolygon() ? 'tabpanel' : null"
+      [id]="layoutPanelId"
+      [attr.aria-labelledby]="isPolygon() ? layoutPanelId + '-tab' : null"
+    >
+      <app-room-plan-preview
+        [chrome]="false"
+        [width1]="width1()"
+        [length1]="length1()"
+        [width2]="width2()"
+        [length2]="length2()"
+        [engineLength]="engineLength()"
+        [engineWidth]="engineWidth()"
+        [vertices]="vertices()"
+        [holes]="holes()"
+        [layoutNx]="layoutNx()"
+        [layoutNy]="layoutNy()"
+        [usedSpacingX]="usedSpacingX()"
+        [usedSpacingY]="usedSpacingY()"
+        [fixtureCoordinates]="fixtureCoordinates()"
+        [offsetStartX]="offsetStartX()"
+        [offsetStartY]="offsetStartY()"
+        [offsetEndMinX]="offsetEndMinX()"
+        [offsetEndMinY]="offsetEndMinY()"
+        [layoutMode]="layoutMode()"
+      />
+    </div>
+  } @else {
+    <div role="tabpanel" [id]="heatmapPanelId" [attr.aria-labelledby]="heatmapPanelId + '-tab'">
+      <app-heatmap-preview
+        [chrome]="false"
+        [heatmap]="heatmap()"
+        [loading]="heatmapLoading()"
+        [error]="heatmapError()"
+        [vertices]="vertices()"
+        [holes]="holes()"
+      />
+    </div>
+  }
+</div>

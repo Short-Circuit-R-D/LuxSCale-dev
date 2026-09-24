@@ -3,10 +3,13 @@ import { CalculationResponse } from '../../../../services/calculation-result.ser
 import { PdfReportService } from '../../../../services/pdf-report.service';
 import { FixtureResult } from '../../../../services/result-store.service';
 import { selectionLabel } from '../../../../shared/room-plan/layout-copy';
-import { RoomPlanPreviewComponent } from '../../../../shared/room-plan/room-plan-preview.component';
 import { Point } from '../../../../shared/room-plan/room-polygon';
 import { CalculationsComponent } from '../calculations/calculations.component';
 import { FixtureDetailsComponent } from '../fixture-details/fixture-details.component';
+import {
+  CalculationType,
+  ResultPreviewComponent,
+} from '../result-preview/result-preview.component';
 
 export interface RequestSides {
   width1: number | null;
@@ -36,7 +39,7 @@ export function requestSidesFromPayload(sides: number[] | null | undefined): Req
 
 @Component({
   selector: 'app-results-grid',
-  imports: [CalculationsComponent, FixtureDetailsComponent, RoomPlanPreviewComponent],
+  imports: [CalculationsComponent, FixtureDetailsComponent, ResultPreviewComponent],
   templateUrl: './results-grid.component.html',
   styleUrl: './results-grid.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +50,7 @@ export class ResultsGridComponent {
   requestSides = input<RequestSides>(EMPTY_REQUEST_SIDES);
   vertices = input<readonly Point[] | null>(null);
   holes = input<readonly Point[][] | null>(null);
+  calculationType = input<CalculationType>('Rectangular');
 
   private readonly pdfService = inject(PdfReportService);
 

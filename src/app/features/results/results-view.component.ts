@@ -7,6 +7,7 @@ import { FixtureResult } from '../../services/result-store.service';
 import { Point } from '../../shared/room-plan/room-polygon';
 import { CalculationMetaComponent } from './components/calculation-meta/calculation-meta.component';
 import { ProjectInfoComponent } from './components/project-info/project-info.component';
+import { CalculationType } from './components/result-preview/result-preview.component';
 import {
   EMPTY_REQUEST_SIDES,
   RequestSides,
@@ -38,6 +39,7 @@ export class ResultsViewComponent {
   readonly requestSides = input<RequestSides>(EMPTY_REQUEST_SIDES);
   readonly vertices = input<readonly Point[] | null>(null);
   readonly holes = input<readonly Point[][] | null>(null);
+  readonly calculationType = input<CalculationType>('Rectangular');
   readonly showNewStudy = input(true);
   readonly heading = input('');
 

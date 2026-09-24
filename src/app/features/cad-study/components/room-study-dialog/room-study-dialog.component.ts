@@ -157,6 +157,9 @@ export class RoomStudyDialogComponent {
       .subscribe({
         next: (response) => {
           const fallbackFields = applyStandardFallbacks(response, this.selectedStandard());
+          if (response.project_info) {
+            response.project_info.mounting_height = height;
+          }
           this.submitting.set(false);
           this.completed.emit({
             title: this.title(),

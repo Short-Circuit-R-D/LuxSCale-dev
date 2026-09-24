@@ -86,7 +86,11 @@
       </div>
 
       <div class="mb-6">
-        <app-room-plan-preview
+        <app-result-preview
+          [calculationType]="calculationType()"
+          [selectedIndex]="selectedIndex()"
+          [result]="result"
+          [height]="calculation().project_info.mounting_height"
           [width1]="requestSides().width1"
           [length1]="requestSides().length1"
           [width2]="requestSides().width2"
@@ -99,6 +103,7 @@
           [layoutNy]="result['layout_ny'] ?? null"
           [usedSpacingX]="result['Spacing X (m)'] ?? null"
           [usedSpacingY]="result['Spacing Y (m)'] ?? null"
+          [fixtureCoordinates]="result['fixture_coordinates'] ?? null"
           [offsetStartX]="result['offset_start_x_m'] ?? null"
           [offsetStartY]="result['offset_start_y_m'] ?? null"
           [offsetEndMinX]="result['offset_end_min_x_m'] ?? null"
