@@ -1,43 +1,37 @@
-<div class="border border-border rounded-xl bg-surface p-5 sm:p-8">
-  <div class="flex items-center gap-2 mb-6 pl-3 border-l-2 border-primary">
-    <span class="font-mono text-xs text-primary">III.</span>
-    <span class="font-mono text-xs text-primary tracking-widest uppercase"
-      >Project Information</span
-    >
-  </div>
+@if (projectInfo(); as info) {
+  <div class="border border-border rounded-xl bg-surface p-5 sm:p-8">
+    <div class="flex items-center gap-2 mb-6 pl-3 border-l-2 border-primary">
+      <span class="font-mono text-xs text-primary">III.</span>
+      <span class="font-mono text-xs text-primary tracking-widest uppercase"
+        >Project Information</span
+      >
+    </div>
 
-  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm"
-        >Project Name</span
-      >
-      <span class="font-body text-sm text-white sm:text-sm">{{ projectInfo().project_name }}</span>
-    </div>
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Company</span>
-      <span class="font-body text-sm text-white sm:text-sm">{{ projectInfo().company }}</span>
-    </div>
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm"
-        >Client Name</span
-      >
-      <span class="font-body text-sm text-white sm:text-sm">{{ projectInfo().name }}</span>
-    </div>
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Phone</span>
-      <span class="font-body text-sm text-white sm:text-sm">{{ projectInfo().phone }}</span>
-    </div>
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Email</span>
-      <span class="font-body text-sm text-white sm:text-sm">{{ projectInfo().email }}</span>
-    </div>
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm"
-        >Mounting Height</span
-      >
-      <span class="font-body text-sm text-white sm:text-sm"
-        >{{ projectInfo().mounting_height }}m</span
-      >
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-3">
+      <div class="flex flex-col gap-1.5">
+        <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm"
+          >Project Name</span
+        >
+        <span class="font-body text-sm text-white sm:text-sm">{{ info.projectName }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Company</span>
+        <span class="font-body text-sm text-white sm:text-sm">{{ info.companyName }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm"
+          >Client Name</span
+        >
+        <span class="font-body text-sm text-white sm:text-sm">{{ info.clientName }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Phone</span>
+        <span class="font-body text-sm text-white sm:text-sm">{{ info.clientPhone }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Email</span>
+        <span class="font-body text-sm text-white sm:text-sm">{{ info.clientEmail }}</span>
+      </div>
     </div>
   </div>
-</div>
+}

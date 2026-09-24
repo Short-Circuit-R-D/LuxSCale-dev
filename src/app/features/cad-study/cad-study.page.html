@@ -340,14 +340,10 @@
           [attr.aria-labelledby]="'cad-tab-' + study.id"
         >
           <app-results-view
-            [result]="study.result"
-            [fixtureResults]="study.fixtureResults"
-            [fallbackFields]="study.fallbackFields"
-            [vertices]="study.vertices"
-            [holes]="study.holes"
+            [study]="study"
+            [variants]="study.variantHeaders"
             [heading]="study.title"
             [showNewStudy]="false"
-            calculationType="Polygon"
           />
         </div>
       }

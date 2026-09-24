@@ -7,14 +7,17 @@
   overflow: visible;
 }
 
-.preview-svg image {
-  image-rendering: pixelated;
-}
-
 .room-outline {
   fill: none;
   stroke: #4a4a4a;
   stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.fixture-quad {
+  fill: rgba(235, 27, 38, 0.25);
+  stroke: #eb1b26;
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
 

@@ -11,4 +11,5 @@ export class RoomDimensionsComponent {
   width = input.required<number>();
   length = input.required<number>();
   ceilingHeight = input.required<number>();
+  mountingHeight = input<number | null>(null);
 }

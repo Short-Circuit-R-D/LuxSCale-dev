@@ -1,7 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
-import { CalculationResponse } from '../../services/calculation-result.service';
-import { ResultStoreService } from '../../services/result-store.service';
+import type { AutomateResponseDto } from '../../core/automate/dtos/automate-response.dto';
 import { CadAnalysisService } from './cad-analysis.service';
 import { CadRoomStudyDraft, CadViewerStore } from './cad-viewer.store';
 
@@ -9,8 +7,22 @@ function draft(title = "Kitchen's study", roomId = 'room-1'): CadRoomStudyDraft 
   return {
     title,
     roomId,
-    result: { results: [] } as unknown as CalculationResponse,
-    fallbackFields: new Set(),
+    request: {
+      polygon: [
+        { x: 0, y: 0 },
+        { x: 1, y: 0 },
+        { x: 1, y: 1 },
+      ],
+      ceilingHeight: 3,
+      mountingHeight: 2.5,
+      activityId: 'en12464_1_v2019_6_2_3',
+      variantIds: null,
+    },
+    response: { solutions: [], closestMiss: null } as unknown as AutomateResponseDto,
+    project: null,
+    standard: null,
+    requestId: null,
+    variantHeaders: new Map(),
     vertices: [
       { x: 0, y: 0 },
       { x: 1, y: 0 },
@@ -23,11 +35,7 @@ function draft(title = "Kitchen's study", roomId = 'room-1'): CadRoomStudyDraft 
 describe('CadViewerStore room studies', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        CadViewerStore,
-        { provide: CadAnalysisService, useValue: {} },
-        { provide: ResultStoreService, useValue: { fetchFixtureResults: () => of([]) } },
-      ],
+      providers: [CadViewerStore, { provide: CadAnalysisService, useValue: {} }],
     });
   });
 

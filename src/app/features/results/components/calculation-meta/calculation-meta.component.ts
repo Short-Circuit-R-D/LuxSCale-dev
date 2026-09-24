@@ -1,6 +1,5 @@
 import { Component, input } from '@angular/core';
-import { CalculationMeta } from '../../../../services/calculation-result.service';
-import { freeAxisLabel, layoutModeLabel } from '../../../../shared/room-plan/layout-copy';
+import type { AutomateResponseDto } from '../../../../core/automate/dtos/automate-response.dto';
 
 @Component({
   selector: 'app-calculation-meta',
@@ -8,8 +7,5 @@ import { freeAxisLabel, layoutModeLabel } from '../../../../shared/room-plan/lay
   styleUrl: './calculation-meta.component.css',
 })
 export class CalculationMetaComponent {
-  meta = input.required<CalculationMeta>();
-
-  protected readonly layoutModeLabel = layoutModeLabel;
-  protected readonly freeAxisLabel = freeAxisLabel;
+  result = input.required<AutomateResponseDto>();
 }

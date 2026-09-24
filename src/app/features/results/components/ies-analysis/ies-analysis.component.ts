@@ -1,5 +1,5 @@
 import { Component, effect, inject, input } from '@angular/core';
-import { Fixture } from '../../../../services/fixtures.service';
+import { Fixture } from '../../../../services/result-store.service';
 import { CPlaneMetricsComponent } from './components/c-plane-metrics/c-plane-metrics.component';
 import { CPlaneSelectorComponent } from './components/c-plane-selector/c-plane-selector.component';
 import { PolarDistributionComponent } from './components/polar-distribution/polar-distribution.component';

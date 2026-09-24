@@ -1,0 +1,61 @@
+<div [class]="chrome() ? 'rounded-xl border border-border bg-elevated p-4 sm:p-5' : ''">
+  @if (chrome()) {
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <span class="font-mono text-xs tracking-widest text-primary uppercase">Layout plan</span>
+      @if (caption(); as text) {
+        <span class="font-mono text-xs text-muted text-right">{{ text }}</span>
+      }
+    </div>
+  }
+
+  @if (view(); as plan) {
+    <div class="aspect-[5/4] w-full">
+      <svg
+        class="preview-svg h-full w-full"
+        [attr.viewBox]="plan.viewBox"
+        preserveAspectRatio="xMidYMid meet"
+        role="img"
+        [attr.aria-label]="ariaLabel()"
+      >
+        <title>{{ ariaLabel() }}</title>
+        @for (rect of plan.rects; track $index) {
+          <rect
+            [attr.x]="rect.x"
+            [attr.y]="rect.y"
+            [attr.width]="rect.size"
+            [attr.height]="rect.size"
+            [attr.fill]="rect.fill"
+          />
+        }
+        @if (plan.path) {
+          <path class="room-outline" [attr.d]="plan.path" fill-rule="evenodd" />
+        }
+        @for (quad of plan.quads; track $index) {
+          <polygon class="fixture-quad" [attr.points]="quad" />
+        }
+        @for (dot of plan.dots; track $index) {
+          <circle
+            class="fixture-mark"
+            [attr.cx]="dot.x"
+            [attr.cy]="dot.y"
+            [attr.r]="plan.fixtureR"
+          />
+        }
+      </svg>
+    </div>
+    @if (values() != null) {
+      <div class="mt-3 flex flex-wrap items-center gap-3">
+        <div class="legend-bar h-2 min-w-0 flex-1" aria-hidden="true"></div>
+        <span class="font-mono text-xs text-muted whitespace-nowrap">
+          {{ plan.legendMin }} / {{ plan.legendAvg }} / {{ plan.legendMax }} lx
+        </span>
+      </div>
+    }
+  } @else {
+    <div
+      class="flex min-h-[220px] items-center justify-center border border-dashed border-border px-4 py-10 text-center"
+    >
+      <p class="m-0 font-body text-sm text-muted">Layout plan is not available for this solution.</p>
+    </div>
+  }
+</div>

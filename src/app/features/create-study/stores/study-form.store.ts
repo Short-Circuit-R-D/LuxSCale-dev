@@ -9,21 +9,12 @@ export interface ProjectDefinition {
 }
 
 export interface TechnicalSpecs {
-  width1: number | null;
-  length1: number | null;
-  width2: number | null;
-  length2: number | null;
+  length: number | null;
+  width: number | null;
   ceilingHeight: number | null;
   mountingHeight: number | null;
   standardCategory: string;
   taskOrActivity: string;
-  customInstall: boolean;
-  spacingX: number | null;
-  spacingY: number | null;
-  offsetStartX: number | null;
-  offsetStartY: number | null;
-  offsetEndMinX: number | null;
-  offsetEndMinY: number | null;
 }
 
 export interface StudyFormState {
@@ -41,21 +32,12 @@ const INITIAL_PROJECT: ProjectDefinition = {
 };
 
 const INITIAL_TECHNICAL: TechnicalSpecs = {
-  width1: null,
-  length1: null,
-  width2: null,
-  length2: null,
+  length: null,
+  width: null,
   ceilingHeight: null,
   mountingHeight: null,
   standardCategory: '',
   taskOrActivity: '',
-  customInstall: false,
-  spacingX: null,
-  spacingY: null,
-  offsetStartX: null,
-  offsetStartY: null,
-  offsetEndMinX: null,
-  offsetEndMinY: null,
 };
 
 export function createStudyStore() {

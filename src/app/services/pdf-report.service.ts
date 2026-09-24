@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import 'svg2pdf.js';
 import autoTable from 'jspdf-autotable';
-import { CalculationResponse, CalculationResult } from './calculation-result.service';
+import { CalculationResponse, CalculationResult } from './result-store.service';
 import { FixtureResult } from './result-store.service';
 import { extraClearanceNote, freeAxisLabel, layoutModeLabel, selectionLabel } from '../shared/room-plan/layout-copy';
 import {

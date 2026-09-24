@@ -4,111 +4,72 @@
     <span class="font-mono text-xs text-primary tracking-widest uppercase">Lighting Solutions</span>
   </div>
 
-  <div class="solution-tabs flex gap-2 mb-6 overflow-x-auto pb-2">
-    @for (result of results(); track $index) {
-      <button
-        type="button"
-        class="flex flex-col items-center gap-1 px-4 py-3 bg-elevated border border-border rounded-lg cursor-pointer transition-all duration-180 min-w-[140px] max-h-[200px] hover:border-muted sm:min-w-[180px] sm:px-5"
-        [class]="selectedIndex() === $index ? 'border-primary bg-primary/10' : ''"
-        (click)="selectResult($index)"
-      >
-        @if (resultImages()[$index]) {
-          <img
-            [src]="resultImages()[$index]"
-            [alt]="result['Luminaire']"
-            class="max-h-[80%] object-contain"
-          />
-        }
-        <span
-          class="font-mono text-xs tracking-widest uppercase sm:text-sm"
-          [class]="selectedIndex() === $index ? 'text-white' : 'text-muted'"
-        >
-          Solution {{ $index + 1 }}
-        </span>
-        <span
-          class="font-mono text-xs uppercase sm:text-xs"
-          [class]="result['is_compliant'] ? 'text-green-500' : 'text-muted'"
-        >
-          {{ result['is_compliant'] ? 'COMPLIANT' : 'NON-COMPLIANT' }}
-        </span>
-      </button>
-    }
+  <div class="mb-6 p-4 bg-elevated rounded-lg">
+    <span class="block font-mono text-sm text-white font-medium mb-1">{{ status().title }}</span>
+    <p class="font-body text-sm text-muted m-0 leading-relaxed">{{ status().hint }}</p>
   </div>
 
-  @if (selectedResult(); as result) {
+  @if (solutions().length > 0) {
+    <div class="solution-tabs flex gap-2 mb-6 overflow-x-auto pb-2">
+      @for (solution of solutions(); track solution.variantId) {
+        <button
+          type="button"
+          class="flex flex-col items-center gap-1 px-4 py-3 bg-elevated border border-border rounded-lg cursor-pointer transition-all duration-180 min-w-[140px] max-h-[200px] hover:border-muted sm:min-w-[180px] sm:px-5"
+          [class]="selectedIndex() === $index ? 'border-primary bg-primary/10' : ''"
+          (click)="selectResult($index)"
+        >
+          <span
+            class="font-mono text-xs tracking-widest uppercase sm:text-sm"
+            [class]="selectedIndex() === $index ? 'text-white' : 'text-muted'"
+          >
+            Solution {{ $index + 1 }}
+          </span>
+          <span
+            class="font-mono text-xs uppercase sm:text-xs"
+            [class]="solution.recommended ? 'text-green-500' : 'text-primary'"
+          >
+            {{ solution.recommended ? 'RECOMMENDED' : 'NOT RECOMMENDED' }}
+          </span>
+          <span class="font-body text-xs text-muted">{{ variantName(solution.variantId) }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  @if (selectedSolution(); as solution) {
     <div class="pt-2">
       <div
         class="mb-6 flex flex-col gap-3 pb-4 border-b border-border sm:flex-row sm:items-center sm:justify-between"
       >
         <div class="flex flex-col gap-1">
-          <span class="font-display text-lg text-white sm:text-xl">{{ result['Luminaire'] }}</span>
-          <span class="font-mono text-xs text-muted uppercase sm:text-sm">{{
-            selectionLabel(result['Selection'])
+          <span class="font-display text-lg text-white sm:text-xl">{{
+            variantName(solution.variantId)
           }}</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <button
-            type="button"
-            (click)="generateSolutionReport()"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-elevated text-muted font-mono text-xs font-medium tracking-wider uppercase border border-border cursor-pointer transition-all duration-180 hover:text-primary hover:border-primary sm:px-4 sm:text-sm"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-              <polyline points="10 9 9 9 8 9" />
-            </svg>
-            <span class="hidden sm:inline">Generate Solution PDF Report</span>
-            <span class="sm:hidden">PDF</span>
-          </button>
-          <span
-            class="px-2 py-1.5 rounded-md font-mono text-xs font-semibold tracking-widest uppercase sm:px-3 sm:text-sm"
-            [class]="
-              result['is_compliant']
-                ? 'bg-green-500/15 text-green-500'
-                : 'bg-primary/15 text-primary'
-            "
-          >
-            {{ result['is_compliant'] ? 'COMPLIANT' : 'NON-COMPLIANT' }}
+          <span class="font-mono text-xs text-muted uppercase sm:text-sm">
+            {{ solution.fixtureCount }} fixtures · {{ solution.average | number: '1.0-0' }} lx avg ·
+            U {{ solution.uniformity | number: '1.2-2' }}
           </span>
         </div>
+        <span
+          class="px-2 py-1.5 rounded-md font-mono text-xs font-semibold tracking-widest uppercase sm:px-3 sm:text-sm"
+          [class]="
+            solution.recommended ? 'bg-green-500/15 text-green-500' : 'bg-primary/15 text-primary'
+          "
+        >
+          {{ solution.recommended ? 'RECOMMENDED' : 'NOT RECOMMENDED' }}
+        </span>
       </div>
 
       <div class="mb-6">
-        <app-result-preview
-          [calculationType]="calculationType()"
-          [selectedIndex]="selectedIndex()"
-          [result]="result"
-          [height]="calculation().project_info.mounting_height"
-          [width1]="requestSides().width1"
-          [length1]="requestSides().length1"
-          [width2]="requestSides().width2"
-          [length2]="requestSides().length2"
-          [engineLength]="calculation().length"
-          [engineWidth]="calculation().width"
-          [vertices]="vertices()"
-          [holes]="holes()"
-          [layoutNx]="result['layout_nx'] ?? null"
-          [layoutNy]="result['layout_ny'] ?? null"
-          [usedSpacingX]="result['Spacing X (m)'] ?? null"
-          [usedSpacingY]="result['Spacing Y (m)'] ?? null"
-          [fixtureCoordinates]="result['fixture_coordinates'] ?? null"
-          [offsetStartX]="result['offset_start_x_m'] ?? null"
-          [offsetStartY]="result['offset_start_y_m'] ?? null"
-          [offsetEndMinX]="result['offset_end_min_x_m'] ?? null"
-          [offsetEndMinY]="result['offset_end_min_y_m'] ?? null"
-          [layoutMode]="layoutMode()"
+        <app-solution-plan
+          [polygon]="polygon()"
+          [patches]="result().floorPatches"
+          [values]="solution.totalFloor?.values ?? null"
+          [minLux]="solution.minimum"
+          [avgLux]="solution.average"
+          [maxLux]="solution.maximum"
+          [fixtures]="solution.fixtures"
+          [placements]="solution.placements"
         />
       </div>
 
@@ -138,11 +99,42 @@
 
       <div class="view-content">
         @if (activeView() === 'calculations') {
-          <app-calculations [result]="result" [uiSettings]="calculation().ui_settings" />
-        } @else if (selectedFixtureResult(); as fixtureResult) {
-          <app-fixture-details [fixtureResult]="fixtureResult" />
+          <app-calculations [solution]="solution" [variant]="selectedVariant()" />
+        } @else {
+          <app-fixture-details [variant]="selectedVariant()" />
         }
       </div>
+    </div>
+  }
+
+  @if (result().closestMiss; as miss) {
+    <div class="mt-6 pt-6 border-t border-border">
+      <button
+        type="button"
+        class="bg-transparent border-none p-0 font-mono text-xs text-muted tracking-widest uppercase cursor-pointer hover:text-white"
+        [attr.aria-expanded]="showMiss()"
+        (click)="toggleMiss()"
+      >
+        {{ showMiss() ? 'Hide closest miss' : 'Show closest miss' }}
+      </button>
+      @if (showMiss()) {
+        <div class="mt-4">
+          <app-solution-plan
+            [polygon]="polygon()"
+            [patches]="result().floorPatches"
+            [values]="null"
+            [minLux]="miss.minimum"
+            [avgLux]="miss.average"
+            [maxLux]="miss.maximum"
+            [fixtures]="miss.fixtures"
+            [placements]="miss.placements"
+            [chrome]="false"
+          />
+          <div class="mt-4">
+            <app-calculations [solution]="miss" [variant]="variants().get(miss.variantId) ?? null" />
+          </div>
+        </div>
+      }
     </div>
   }
 </div>

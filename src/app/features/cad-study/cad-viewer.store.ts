@@ -1,8 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subject, of, takeUntil } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
-import { CalculationResponse } from '../../services/calculation-result.service';
-import { FixtureResult, ResultStoreService } from '../../services/result-store.service';
+import type { AutomateRequestDto } from '../../core/automate/dtos/automate-request.dto';
+import type { AutomateResponseDto } from '../../core/automate/dtos/automate-response.dto';
+import type { StandardResponseDto } from '../../core/standards/dtos/standards.dto';
+import type { VariantDetailResponseDto } from '../../core/variants/dtos/variants.dto';
+import type { AutomateProjectMeta } from '../../services/result-store.service';
 import { CadAnalysisService } from './cad-analysis.service';
 import { CadClientError, errorFromHttp, messageForCode } from './cad-error';
 import { normalizeLayout, roomPolygon } from './cad-geometry';
@@ -20,14 +23,17 @@ export interface CadRoomStudy {
   id: string;
   title: string;
   roomId: string;
-  result: CalculationResponse;
-  fixtureResults: FixtureResult[];
-  fallbackFields: Set<string>;
+  request: AutomateRequestDto;
+  response: AutomateResponseDto;
+  project: AutomateProjectMeta | null;
+  standard: StandardResponseDto | null;
+  requestId: string | null;
+  variantHeaders: Map<string, VariantDetailResponseDto>;
   vertices: Point[];
   holes: Point[][];
 }
 
-export type CadRoomStudyDraft = Omit<CadRoomStudy, 'id' | 'fixtureResults'>;
+export type CadRoomStudyDraft = Omit<CadRoomStudy, 'id'>;
 
 export interface CadLayerVisibility {
   rooms: boolean;
@@ -60,7 +66,6 @@ const STORAGE_FILE = 'luxscale_cad_file_name';
 })
 export class CadViewerStore {
   private readonly cadAnalysis = inject(CadAnalysisService);
-  private readonly resultStore = inject(ResultStoreService);
   private readonly cancelPoll$ = new Subject<void>();
   private facesInFlight: string | null = null;
 
@@ -363,17 +368,9 @@ export class CadViewerStore {
 
   addRoomStudy(draft: CadRoomStudyDraft): string {
     const id = crypto.randomUUID();
-    this.roomStudies.update((list) => [...list, { ...draft, id, fixtureResults: [] }]);
+    this.roomStudies.update((list) => [...list, { ...draft, id }]);
     this.activeTab.set(id);
     this.roomStudyOpen.set(false);
-    this.resultStore
-      .fetchFixtureResults(draft.result)
-      .pipe(takeUntil(this.cancelPoll$))
-      .subscribe((fixtureResults) => {
-        this.roomStudies.update((list) =>
-          list.map((study) => (study.id === id ? { ...study, fixtureResults } : study)),
-        );
-      });
     return id;
   }
 
