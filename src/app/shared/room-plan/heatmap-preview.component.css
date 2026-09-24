@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.preview-svg {
+  background: rgba(237, 235, 230, 0.88);
+  overflow: visible;
+}
+
+.preview-svg image {
+  image-rendering: pixelated;
+}
+
+.room-outline {
+  fill: none;
+  stroke: #4a4a4a;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.fixture-mark {
+  fill: #eb1b26;
+  stroke: #edebe6;
+  stroke-width: 0.6;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.legend-bar {
+  background: linear-gradient(90deg, #2b2b2b, #edebe6);
+}

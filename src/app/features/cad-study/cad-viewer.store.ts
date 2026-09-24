@@ -1,16 +1,33 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subject, of, takeUntil } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
+import { CalculationResponse } from '../../services/calculation-result.service';
+import { FixtureResult, ResultStoreService } from '../../services/result-store.service';
 import { CadAnalysisService } from './cad-analysis.service';
 import { CadClientError, errorFromHttp, messageForCode } from './cad-error';
-import { normalizeLayout } from './cad-geometry';
+import { normalizeLayout, roomPolygon } from './cad-geometry';
 import { CadUnit } from './models/cad-unit.model';
 import { Face } from './models/face.model';
 import { Layout } from './models/layout.model';
 import { Point } from './models/point.model';
+import { Room } from './models/room.model';
 
 export type CadTool = 'pan' | 'select' | 'split' | 'restore';
 export type CadFitMode = 'all' | 'largest';
+export type CadActiveTab = 'analysis' | string;
+
+export interface CadRoomStudy {
+  id: string;
+  title: string;
+  roomId: string;
+  result: CalculationResponse;
+  fixtureResults: FixtureResult[];
+  fallbackFields: Set<string>;
+  vertices: Point[];
+  holes: Point[][];
+}
+
+export type CadRoomStudyDraft = Omit<CadRoomStudy, 'id' | 'fixtureResults'>;
 
 export interface CadLayerVisibility {
   rooms: boolean;
@@ -43,6 +60,7 @@ const STORAGE_FILE = 'luxscale_cad_file_name';
 })
 export class CadViewerStore {
   private readonly cadAnalysis = inject(CadAnalysisService);
+  private readonly resultStore = inject(ResultStoreService);
   private readonly cancelPoll$ = new Subject<void>();
   private facesInFlight: string | null = null;
 
@@ -67,8 +85,24 @@ export class CadViewerStore {
   readonly previewEnd = signal<Point | null>(null);
   readonly renameOpen = signal(false);
   readonly resetConfirmOpen = signal(false);
+  readonly roomStudyOpen = signal(false);
+  readonly roomStudies = signal<CadRoomStudy[]>([]);
+  readonly activeTab = signal<CadActiveTab>('analysis');
 
   readonly selectedRoomId = computed(() => this.selectedRoomIds().at(-1) ?? null);
+  readonly selectedRoom = computed((): Room | null => {
+    const id = this.selectedRoomId();
+    const layout = this.currentLayout();
+    if (!id || !layout) {
+      return null;
+    }
+    return (
+      layout.rooms.find((item) => item.id === id) ??
+      layout.physical_rooms.find((item) => item.id === id) ??
+      null
+    );
+  });
+  readonly modalOpen = computed(() => this.resetConfirmOpen() || this.roomStudyOpen());
   readonly hasLayout = computed(() => !!this.currentLayout());
   readonly unitAssumed = computed(() => this.currentLayout()?.meta.unit_source === 'fallback');
   readonly sourceUnit = computed(() => this.currentLayout()?.meta.unit ?? null);
@@ -87,6 +121,13 @@ export class CadViewerStore {
   readonly canRename = computed(
     () => !!this.jobId() && !this.busy() && this.selectedRoomIds().length === 1,
   );
+  readonly canStudy = computed(() => {
+    if (!this.jobId() || this.busy() || this.selectedRoomIds().length !== 1) {
+      return false;
+    }
+    const room = this.selectedRoom();
+    return !!room && roomPolygon(room).vertices.length >= 3;
+  });
   readonly canResetJob = computed(() => !!this.jobId() && !this.busy());
 
   checkHealth(): void {
@@ -294,6 +335,7 @@ export class CadViewerStore {
     if (!this.canRename()) {
       return;
     }
+    this.roomStudyOpen.set(false);
     this.renameOpen.set(true);
   }
 
@@ -301,11 +343,53 @@ export class CadViewerStore {
     this.renameOpen.set(false);
   }
 
+  openRoomStudy(): void {
+    if (!this.canStudy()) {
+      return;
+    }
+    this.renameOpen.set(false);
+    this.roomStudyOpen.set(true);
+  }
+
+  cancelRoomStudy(): void {
+    this.roomStudyOpen.set(false);
+  }
+
+  selectTab(tab: CadActiveTab): void {
+    if (tab === 'analysis' || this.roomStudies().some((study) => study.id === tab)) {
+      this.activeTab.set(tab);
+    }
+  }
+
+  addRoomStudy(draft: CadRoomStudyDraft): string {
+    const id = crypto.randomUUID();
+    this.roomStudies.update((list) => [...list, { ...draft, id, fixtureResults: [] }]);
+    this.activeTab.set(id);
+    this.roomStudyOpen.set(false);
+    this.resultStore
+      .fetchFixtureResults(draft.result)
+      .pipe(takeUntil(this.cancelPoll$))
+      .subscribe((fixtureResults) => {
+        this.roomStudies.update((list) =>
+          list.map((study) => (study.id === id ? { ...study, fixtureResults } : study)),
+        );
+      });
+    return id;
+  }
+
+  closeRoomStudy(id: string): void {
+    this.roomStudies.update((list) => list.filter((study) => study.id !== id));
+    if (this.activeTab() === id) {
+      this.activeTab.set('analysis');
+    }
+  }
+
   openResetConfirm(): void {
     if (!this.canResetJob()) {
       return;
     }
     this.renameOpen.set(false);
+    this.roomStudyOpen.set(false);
     this.resetConfirmOpen.set(true);
   }
 
@@ -368,6 +452,9 @@ export class CadViewerStore {
     this.selectedFaceId.set(null);
     this.renameOpen.set(false);
     this.resetConfirmOpen.set(false);
+    this.roomStudyOpen.set(false);
+    this.roomStudies.set([]);
+    this.activeTab.set('analysis');
     this.clearPreview();
     sessionStorage.removeItem(STORAGE_JOB);
     sessionStorage.removeItem(STORAGE_SELECTED);

@@ -1,3 +1,80 @@
 :host {
   display: block;
 }
+
+.preview-svg {
+  background: rgba(237, 235, 230, 0.88);
+  overflow: visible;
+}
+
+.room {
+  fill: #6b6b6b;
+  stroke: #4a4a4a;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.side-label {
+  fill: #1b365d;
+  font-family: 'JetBrains Mono', monospace;
+  pointer-events: none;
+}
+
+.hit {
+  cursor: pointer;
+}
+
+.hit-pad {
+  fill: transparent;
+}
+
+.hit-pad:focus {
+  outline: none;
+}
+
+.mark {
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.vertex-mark {
+  fill: #edebe6;
+  stroke: #1b365d;
+  stroke-width: 1;
+}
+
+.fixture-mark {
+  fill: #eb1b26;
+  stroke: #edebe6;
+  stroke-width: 0.6;
+}
+
+.tip {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tip-box {
+  fill: #f7f6f3;
+  stroke: #1b365d;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.tip-text {
+  fill: #1b365d;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.hit:hover .vertex-mark,
+.hit:focus-within .vertex-mark,
+.hit:hover .fixture-mark,
+.hit:focus-within .fixture-mark {
+  stroke: #1b365d;
+  stroke-width: 2;
+}
+
+.hit:hover .tip,
+.hit:focus-within .tip {
+  visibility: visible;
+}

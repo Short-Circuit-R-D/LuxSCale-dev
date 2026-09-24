@@ -109,6 +109,36 @@ export interface CalculationResponse {
   width: number;
 }
 
+export const STANDARD_FALLBACK_PARAMS = [
+  'Em_r_lx',
+  'Em_u_lx',
+  'Uo',
+  'Ra',
+  'RUGL',
+  'Ez_lx',
+  'Em_wall_lx',
+  'Em_ceiling_lx',
+] as const;
+
+type FallbackLighting = Pick<StandardLighting, (typeof STANDARD_FALLBACK_PARAMS)[number]>;
+
+export function applyStandardFallbacks(
+  response: CalculationResponse,
+  requestLighting?: FallbackLighting | null,
+): Set<string> {
+  const usedFallback = new Set<string>();
+  if (!requestLighting || !response.standard_row) {
+    return usedFallback;
+  }
+  for (const param of STANDARD_FALLBACK_PARAMS) {
+    if (response.standard_row[param] == null) {
+      response.standard_row[param] = requestLighting[param];
+      usedFallback.add(param);
+    }
+  }
+  return usedFallback;
+}
+
 const STORAGE_KEY = 'luxscale_calculation_result';
 
 @Injectable({
