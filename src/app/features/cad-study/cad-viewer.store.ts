@@ -1,11 +1,22 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Subject, of, takeUntil } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
-import { CalculationResponse } from '../../services/calculation-result.service';
-import { FixtureResult, ResultStoreService } from '../../services/result-store.service';
+import type { AutomateRequestDto } from '../../core/automate/dtos/automate-request.dto';
+import type { AutomateResponseDto } from '../../core/automate/dtos/automate-response.dto';
+import type { StandardResponseDto } from '../../core/standards/dtos/standards.dto';
+import type { VariantDetailResponseDto } from '../../core/variants/dtos/variants.dto';
+import type { AutomateProjectMeta } from '../../services/result-store.service';
 import { CadAnalysisService } from './cad-analysis.service';
 import { CadClientError, errorFromHttp, messageForCode } from './cad-error';
-import { normalizeLayout, roomPolygon } from './cad-geometry';
+import {
+  bboxFromPoints,
+  measureSplit,
+  normalizeLayout,
+  roomContainingPoint,
+  roomPolygon,
+  segmentAcrossBbox,
+} from './cad-geometry';
+import type { SplitAxis, SplitEdge, SplitMeasure } from './cad-geometry';
 import { CadUnit } from './models/cad-unit.model';
 import { Face } from './models/face.model';
 import { Layout } from './models/layout.model';
@@ -20,14 +31,17 @@ export interface CadRoomStudy {
   id: string;
   title: string;
   roomId: string;
-  result: CalculationResponse;
-  fixtureResults: FixtureResult[];
-  fallbackFields: Set<string>;
+  request: AutomateRequestDto;
+  response: AutomateResponseDto;
+  project: AutomateProjectMeta | null;
+  standard: StandardResponseDto | null;
+  requestId: string | null;
+  variantHeaders: Map<string, VariantDetailResponseDto>;
   vertices: Point[];
   holes: Point[][];
 }
 
-export type CadRoomStudyDraft = Omit<CadRoomStudy, 'id' | 'fixtureResults'>;
+export type CadRoomStudyDraft = Omit<CadRoomStudy, 'id'>;
 
 export interface CadLayerVisibility {
   rooms: boolean;
@@ -60,7 +74,6 @@ const STORAGE_FILE = 'luxscale_cad_file_name';
 })
 export class CadViewerStore {
   private readonly cadAnalysis = inject(CadAnalysisService);
-  private readonly resultStore = inject(ResultStoreService);
   private readonly cancelPoll$ = new Subject<void>();
   private facesInFlight: string | null = null;
 
@@ -83,6 +96,21 @@ export class CadViewerStore {
   readonly selectedFaceId = signal<string | null>(null);
   readonly pendingStart = signal<Point | null>(null);
   readonly previewEnd = signal<Point | null>(null);
+  /** Inline error for the exact-number split panel; cleared on new input. */
+  readonly splitError = signal<string | null>(null);
+
+  /** Live measurement of the in-progress split against the room under the cursor. */
+  readonly splitMeasure = computed<SplitMeasure | null>(() => {
+    const layout = this.currentLayout();
+    const start = this.pendingStart();
+    const end = this.previewEnd();
+    if (!layout || !start || !end) {
+      return null;
+    }
+    const rooms = [...layout.rooms, ...layout.physical_rooms];
+    const room = roomContainingPoint(rooms, start);
+    return room ? measureSplit(room, start, end) : null;
+  });
   readonly renameOpen = signal(false);
   readonly resetConfirmOpen = signal(false);
   readonly roomStudyOpen = signal(false);
@@ -275,6 +303,51 @@ export class CadViewerStore {
     this.previewEnd.set(null);
   }
 
+  clearSplitError(): void {
+    this.splitError.set(null);
+  }
+
+  /**
+   * Commit a wall-to-wall split at an exact offset from a room bbox edge.
+   * Same mutation pipeline as freehand splits.
+   */
+  splitAtOffset(roomId: string, axis: SplitAxis, edge: SplitEdge, offset: number): void {
+    const jobId = this.jobId();
+    const layout = this.currentLayout();
+    if (!jobId || this.busy()) {
+      return;
+    }
+    const room = [...(layout?.rooms ?? []), ...(layout?.physical_rooms ?? [])].find(
+      (item) => item.id === roomId,
+    );
+    const bbox = room ? (room.bbox ?? bboxFromPoints(roomPolygon(room).vertices)) : null;
+    if (!room || !bbox) {
+      this.splitError.set('Room is no longer available. Pick the room again.');
+      return;
+    }
+    const span = axis === 'horizontal' ? bbox.max_y - bbox.min_y : bbox.max_x - bbox.min_x;
+    if (!Number.isFinite(offset) || offset <= 0 || offset >= span) {
+      this.splitError.set(`Enter a distance between 0 and ${span.toFixed(2)} m.`);
+      return;
+    }
+    const segment = segmentAcrossBbox(bbox, axis, edge, offset);
+    if (!segment) {
+      this.splitError.set(`Enter a distance between 0 and ${span.toFixed(2)} m.`);
+      return;
+    }
+    this.splitError.set(null);
+    this.clearPreview();
+    this.runMutation(
+      this.cadAnalysis.createDivider(jobId, {
+        start_x: segment.start.x,
+        start_y: segment.start.y,
+        end_x: segment.end.x,
+        end_y: segment.end.y,
+        expected_layout_rev: this.layoutRev(),
+      }),
+    );
+  }
+
   splitWithDivider(start: Point, end: Point): void {
     const jobId = this.jobId();
     if (!jobId || this.busy()) {
@@ -363,17 +436,9 @@ export class CadViewerStore {
 
   addRoomStudy(draft: CadRoomStudyDraft): string {
     const id = crypto.randomUUID();
-    this.roomStudies.update((list) => [...list, { ...draft, id, fixtureResults: [] }]);
+    this.roomStudies.update((list) => [...list, { ...draft, id }]);
     this.activeTab.set(id);
     this.roomStudyOpen.set(false);
-    this.resultStore
-      .fetchFixtureResults(draft.result)
-      .pipe(takeUntil(this.cancelPoll$))
-      .subscribe((fixtureResults) => {
-        this.roomStudies.update((list) =>
-          list.map((study) => (study.id === id ? { ...study, fixtureResults } : study)),
-        );
-      });
     return id;
   }
 

@@ -10,7 +10,13 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { bboxFromPoints, largestRoom, layoutBounds, roomPolygon } from '../../cad-geometry';
+import {
+  bboxFromPoints,
+  largestRoom,
+  layoutBounds,
+  roomPolygon,
+  snapSplitSegment,
+} from '../../cad-geometry';
 import { CadFitMode, CadViewerStore } from '../../cad-viewer.store';
 import { BoundingBox } from '../../models/bounding-box.model';
 import { Layout } from '../../models/layout.model';
@@ -68,6 +74,14 @@ export class CadPlanComponent {
   protected readonly draggingCanvas = signal(false);
 
   protected readonly layout = computed(() => this.store.currentLayout());
+
+  protected readonly splitPreviewLabel = computed(() => {
+    const measure = this.store.splitMeasure();
+    if (!measure) {
+      return null;
+    }
+    return `${measure.fromMin.toFixed(2)} / ${measure.toMax.toFixed(2)} m`;
+  });
 
   protected readonly scene = computed(() =>
     prepareCadScene({
@@ -152,6 +166,7 @@ export class CadPlanComponent {
       this.hoverRoomId();
       this.store.pendingStart();
       this.store.previewEnd();
+      this.splitPreviewLabel();
       this.store.tool();
       this.scheduleDraw();
     });
@@ -178,7 +193,8 @@ export class CadPlanComponent {
         this.store.setPreviewEnd(world);
         return;
       }
-      this.store.splitWithDivider(start, world);
+      const end = event.shiftKey ? world : snapSplitSegment(start, world).end;
+      this.store.splitWithDivider(start, end);
       return;
     }
 
@@ -201,8 +217,9 @@ export class CadPlanComponent {
       if (!world) {
         return;
       }
-      if (this.store.pendingStart()) {
-        this.store.setPreviewEnd(world);
+      const start = this.store.pendingStart();
+      if (start) {
+        this.store.setPreviewEnd(event.shiftKey ? world : snapSplitSegment(start, world).end);
       }
       return;
     }
@@ -382,6 +399,7 @@ export class CadPlanComponent {
       hoverRoomId: this.hoverRoomId(),
       pendingStart: this.store.pendingStart(),
       previewEnd: this.store.previewEnd(),
+      previewLabel: this.splitPreviewLabel(),
     });
   }
 

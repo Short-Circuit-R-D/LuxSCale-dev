@@ -1,130 +1,62 @@
 <div class="border border-border rounded-xl bg-surface p-5 sm:p-8">
   <div class="flex items-center gap-2 mb-6 pl-3 border-l-2 border-primary">
     <span class="font-mono text-xs text-primary">IV.</span>
-    <span class="font-mono text-xs text-primary tracking-widest uppercase">Calculation Metadata</span>
+    <span class="font-mono text-xs text-primary tracking-widest uppercase">Design Metadata</span>
   </div>
 
   <div class="grid grid-cols-2 gap-3 mb-6 sm:grid-cols-3 md:grid-cols-4 sm:gap-4">
-    @if (meta().layout_mode) {
-      <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Layout Mode</span>
-        <span class="font-body text-sm text-white font-medium">{{ layoutModeLabel(meta().layout_mode) }}</span>
-      </div>
-    }
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Calc Mode</span>
-      <span class="font-body text-sm text-white font-medium">{{ meta().calc_mode }}</span>
+      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Target Avg</span>
+      <span class="font-body text-sm text-white font-medium">{{ result().target.avgLux }} lx</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Total Solutions</span>
-      <span class="font-body text-sm text-white font-medium">{{ meta().total_solutions_returned }}</span>
+      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Target Uniformity</span>
+      <span class="font-body text-sm text-white font-medium">{{ result().target.uniformity }}</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Max Cap</span>
-      <span class="font-body text-sm text-white font-medium">{{ meta().max_solutions_cap }}</span>
+      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Max Overdesign</span>
+      <span class="font-body text-sm text-white font-medium">{{ result().target.maxOverdesign }}</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Interior Height Threshold</span>
-      <span class="font-body text-sm text-white font-medium">{{ meta().interior_height_threshold_m }}m</span>
+      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Application</span>
+      <span class="font-body text-sm text-white font-medium">{{ result().application }}</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Capped at Max</span>
-      <span class="font-body text-sm font-medium" [class]="meta().capped_at_max ? 'text-green-500' : 'text-muted'">
-        {{ meta().capped_at_max ? 'YES' : 'NO' }}
-      </span>
+      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Evaluated (A)</span>
+      <span class="font-body text-sm text-white font-medium">{{ result().evaluatedA }}</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Compliant Cap Only</span>
-      <span class="font-body text-sm font-medium" [class]="meta().compliant_cap_only ? 'text-green-500' : 'text-muted'">
-        {{ meta().compliant_cap_only ? 'YES' : 'NO' }}
-      </span>
+      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Verified (B)</span>
+      <span class="font-body text-sm text-white font-medium">{{ result().evaluatedB }}</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">No Compliant Options</span>
-      <span class="font-body text-sm font-medium" [class]="meta().no_compliant_options ? 'text-green-500' : 'text-muted'">
-        {{ meta().no_compliant_options ? 'YES' : 'NO' }}
-      </span>
+      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Pruned</span>
+      <span class="font-body text-sm text-white font-medium">{{ result().pruned.count }}</span>
     </div>
     <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Had Non-Compliant Closest</span>
-      <span class="font-body text-sm font-medium" [class]="meta().had_non_compliant_closest ? 'text-green-500' : 'text-muted'">
-        {{ meta().had_non_compliant_closest ? 'YES' : 'NO' }}
-      </span>
-    </div>
-    <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Weatherproof Prioritized</span>
-      <span class="font-body text-sm font-medium" [class]="meta().prioritized_weatherproof_triproof ? 'text-green-500' : 'text-muted'">
-        {{ meta().prioritized_weatherproof_triproof ? 'YES' : 'NO' }}
-      </span>
-    </div>
-    <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Non-Compliant Fallback</span>
-      <span class="font-body text-sm font-medium" [class]="meta().used_closest_non_compliant_fallback ? 'text-green-500' : 'text-muted'">
-        {{ meta().used_closest_non_compliant_fallback ? 'YES' : 'NO' }}
-      </span>
-    </div>
-    <div class="flex flex-col gap-1.5 p-3 bg-elevated rounded-lg">
-      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Uniformity Sweep Fallback</span>
-      <span class="font-body text-sm font-medium" [class]="meta().used_uniformity_sweep_fallback ? 'text-green-500' : 'text-muted'">
-        {{ meta().used_uniformity_sweep_fallback ? 'YES' : 'NO' }}
-      </span>
+      <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Floor Grid</span>
+      <span class="font-body text-sm text-white font-medium"
+        >{{ result().floorMeta.nx }} × {{ result().floorMeta.ny }}</span
+      >
     </div>
   </div>
 
-  @if (meta().user_grid; as grid) {
-    <div class="mb-6 p-4 bg-elevated rounded-lg">
-      <span class="block font-mono text-xs text-muted tracking-widest uppercase mb-3">User-specified install</span>
-      <p class="font-body text-sm text-muted m-0 mb-4 leading-relaxed">
-        @if (grid.free_axis) {
-          Grid was user-specified. The other spacing was chosen for uniformity.
-        } @else {
-          Grid was user-specified.
-        }
-      </p>
-      <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div class="flex flex-col gap-0.5">
-          <span class="font-mono text-xs text-muted tracking-tight uppercase">Spacing X</span>
-          <span class="font-body text-sm text-white">{{ grid.spacing_x_m ?? 'Auto' }}@if (grid.spacing_x_m != null) { m }</span>
-        </div>
-        <div class="flex flex-col gap-0.5">
-          <span class="font-mono text-xs text-muted tracking-tight uppercase">Spacing Y</span>
-          <span class="font-body text-sm text-white">{{ grid.spacing_y_m ?? 'Auto' }}@if (grid.spacing_y_m != null) { m }</span>
-        </div>
-        <div class="flex flex-col gap-0.5">
-          <span class="font-mono text-xs text-muted tracking-tight uppercase">Free Axis</span>
-          <span class="font-body text-sm text-white">{{ freeAxisLabel(grid.free_axis) }}</span>
-        </div>
-        <div class="flex flex-col gap-0.5">
-          <span class="font-mono text-xs text-muted tracking-tight uppercase">Start offset X</span>
-          <span class="font-body text-sm text-white">{{ grid.offset_start_x_m }} m</span>
-        </div>
-        <div class="flex flex-col gap-0.5">
-          <span class="font-mono text-xs text-muted tracking-tight uppercase">Start offset Y</span>
-          <span class="font-body text-sm text-white">{{ grid.offset_start_y_m }} m</span>
-        </div>
-        <div class="flex flex-col gap-0.5">
-          <span class="font-mono text-xs text-muted tracking-tight uppercase">Min far X / Y</span>
-          <span class="font-body text-sm text-white">{{ grid.offset_end_min_x_m }} m / {{ grid.offset_end_min_y_m }} m</span>
-        </div>
-      </div>
+  <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+    <div class="flex flex-col gap-0.5">
+      <span class="font-mono text-xs text-muted tracking-tight uppercase">Spacing X searched</span>
+      <span class="font-body text-sm text-white"
+        >{{ result().appliedSpacingX.min }} – {{ result().appliedSpacingX.max }} m</span
+      >
     </div>
-  }
-
-  @if (meta().fixture_family_shortfall.length > 0) {
-    <div class="pt-5 border-t border-border">
-      <span class="block font-mono text-sm text-muted tracking-widest uppercase mb-4">Fixture Family Shortfalls</span>
-      <div class="flex flex-col gap-3">
-        @for (item of meta().fixture_family_shortfall; track item.luminaire) {
-          <div class="p-4 bg-elevated rounded-lg border-l-3 border-primary">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:mb-2">
-              <span class="font-body text-sm text-white font-medium">{{ item.luminaire }}</span>
-              <span class="font-mono text-sm text-primary uppercase">{{ item.issue }}</span>
-            </div>
-            <p class="font-body text-sm text-muted m-0 mb-2 leading-relaxed">{{ item.summary }}</p>
-            <p class="font-body text-sm text-muted m-0 leading-relaxed italic">{{ item.recommendation }}</p>
-          </div>
-        }
-      </div>
+    <div class="flex flex-col gap-0.5">
+      <span class="font-mono text-xs text-muted tracking-tight uppercase">Spacing Y searched</span>
+      <span class="font-body text-sm text-white"
+        >{{ result().appliedSpacingY.min }} – {{ result().appliedSpacingY.max }} m</span
+      >
     </div>
-  }
+    <div class="flex flex-col gap-0.5">
+      <span class="font-mono text-xs text-muted tracking-tight uppercase">Workplane</span>
+      <span class="font-body text-sm text-white">{{ result().floorMeta.workPlaneHeight }} m</span>
+    </div>
+  </div>
 </div>

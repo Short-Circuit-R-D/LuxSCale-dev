@@ -1,7 +1,7 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, input } from '@angular/core';
-import { CalculationResult, UiSettings } from '../../../../services/calculation-result.service';
-import { extraClearanceNote, selectionLabel } from '../../../../shared/room-plan/layout-copy';
+import type { AutomateSolutionDto } from '../../../../core/automate/dtos/automate-response.dto';
+import type { VariantDetailResponseDto } from '../../../../core/variants/dtos/variants.dto';
 
 @Component({
   selector: 'app-calculations',
@@ -10,9 +10,22 @@ import { extraClearanceNote, selectionLabel } from '../../../../shared/room-plan
   styleUrl: './calculations.component.css',
 })
 export class CalculationsComponent {
-  result = input.required<CalculationResult>();
-  uiSettings = input.required<UiSettings>();
+  solution = input.required<AutomateSolutionDto>();
+  variant = input<VariantDetailResponseDto | null>(null);
 
-  protected readonly selectionLabel = selectionLabel;
-  protected readonly extraClearanceNote = extraClearanceNote;
+  protected lumensText(): string {
+    const variant = this.variant();
+    if (!variant) return '—';
+    return Math.round(variant.power * variant.efficacy).toLocaleString('en-US');
+  }
+
+  protected powerText(): string {
+    const power = this.solution().powerW;
+    return power == null ? '—' : `${Math.round(power).toLocaleString('en-US')}`;
+  }
+
+  protected powerDensityText(): string {
+    const density = this.solution().powerDensity;
+    return density == null ? '—' : String(Math.round(density * 100) / 100);
+  }
 }

@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { ProjectInfo } from '../../../../services/calculation-result.service';
+import type { AutomateProjectMeta } from '../../../../services/result-store.service';
 
 @Component({
   selector: 'app-project-info',
@@ -7,5 +7,5 @@ import { ProjectInfo } from '../../../../services/calculation-result.service';
   styleUrl: './project-info.component.css',
 })
 export class ProjectInfoComponent {
-  projectInfo = input.required<ProjectInfo>();
+  projectInfo = input.required<AutomateProjectMeta | null>();
 }

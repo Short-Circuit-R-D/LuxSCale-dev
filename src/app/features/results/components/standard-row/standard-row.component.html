@@ -1,198 +1,97 @@
-<div class="border border-border rounded-xl bg-surface p-5 sm:p-8">
-  <div class="flex items-center gap-2 mb-6 pl-3 border-l-2 border-primary">
-    <span class="font-mono text-xs text-primary">II.</span>
-    <span class="font-mono text-xs text-primary tracking-widest uppercase"
-      >Compliance Standard</span
-    >
-  </div>
-
-  <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 sm:gap-6 md:grid-cols-4">
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Reference</span>
-      <span class="font-body text-sm text-white sm:text-sm">{{ standard().ref_no }}</span>
-    </div>
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Table</span>
-      <span class="font-body text-sm text-white sm:text-sm">{{ standard().table }}</span>
-    </div>
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm"
-        >Task / Activity</span
-      >
-      <span class="font-body text-sm text-white sm:text-sm">{{ standard().task_or_activity }}</span>
-    </div>
-    <div class="flex flex-col gap-1.5">
-      <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Category</span>
-      <span class="font-body text-sm text-white sm:text-sm"
-        >{{ standard().category_base }} — {{ standard().category_sub }}</span
+@if (standard(); as standard) {
+  <div class="border border-border rounded-xl bg-surface p-5 sm:p-8">
+    <div class="flex items-center gap-2 mb-6 pl-3 border-l-2 border-primary">
+      <span class="font-mono text-xs text-primary">II.</span>
+      <span class="font-mono text-xs text-primary tracking-widest uppercase"
+        >Compliance Standard</span
       >
     </div>
-  </div>
 
-  <div class="mb-5">
-    <span class="block font-mono text-sm text-muted tracking-widest uppercase mb-4"
-      >Requirements</span
-    >
-    <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-          >Maintained illuminance (Em)</span
+    <div class="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2 sm:gap-6 md:grid-cols-4">
+      <div class="flex flex-col gap-1.5">
+        <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Reference</span>
+        <span class="font-body text-sm text-white sm:text-sm">{{ standard.hierarchy.ref_number }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Table</span>
+        <span class="font-body text-sm text-white sm:text-sm">{{ standard.hierarchy.category_table_number }}</span>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm"
+          >Task / Activity</span
         >
-        <div class="flex items-center gap-1.5">
-          <span class="font-body text-sm text-white font-medium">{{ standard().Em_r_lx }} lx</span>
-          @if (isFallback('Em_r_lx')) {
-            <span class="fallback-tooltip-wrapper relative">
-              <button type="button" class="fallback-info-btn" aria-label="Value assumed from parent category">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 16v-4"/>
-                  <path d="M12 8h.01"/>
-                </svg>
-              </button>
-              <span class="fallback-tooltip">This reference number ({{ standard().ref_no }}) has no value for this field, assumed from parent category ({{ standard().category_base }} — {{ standard().category_sub }})</span>
-            </span>
-          }
-        </div>
+        <span class="font-body text-sm text-white sm:text-sm">{{ standard.activity }}</span>
       </div>
-      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-          >Uniformity (Uo)</span
+      <div class="flex flex-col gap-1.5">
+        <span class="font-mono text-xs text-muted tracking-widest uppercase sm:text-sm">Category</span>
+        <span class="font-body text-sm text-white sm:text-sm"
+          >{{ standard.hierarchy.category_table_number }} —
+          {{ standard.hierarchy.category_title }}</span
         >
-        <div class="flex items-center gap-1.5">
-          <span class="font-body text-sm text-white font-medium">{{ standard().Uo }}</span>
-          @if (isFallback('Uo')) {
-            <span class="fallback-tooltip-wrapper relative">
-              <button type="button" class="fallback-info-btn" aria-label="Value assumed from parent category">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 16v-4"/>
-                  <path d="M12 8h.01"/>
-                </svg>
-              </button>
-              <span class="fallback-tooltip">This reference number ({{ standard().ref_no }}) has no value for this field, assumed from parent category ({{ standard().category_base }} — {{ standard().category_sub }})</span>
-            </span>
-          }
-        </div>
       </div>
-      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-          >Color Rendering (Ra)</span
-        >
-        <div class="flex items-center gap-1.5">
-          <span class="font-body text-sm text-white font-medium">{{ standard().Ra }}</span>
-          @if (isFallback('Ra')) {
-            <span class="fallback-tooltip-wrapper relative">
-              <button type="button" class="fallback-info-btn" aria-label="Value assumed from parent category">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 16v-4"/>
-                  <path d="M12 8h.01"/>
-                </svg>
-              </button>
-              <span class="fallback-tooltip">This reference number ({{ standard().ref_no }}) has no value for this field, assumed from parent category ({{ standard().category_base }} — {{ standard().category_sub }})</span>
-            </span>
-          }
-        </div>
-      </div>
-      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-          >Wall illuminance</span
-        >
-        <div class="flex items-center gap-1.5">
-          <span class="font-body text-sm text-white font-medium">{{ standard().Em_wall_lx }} lx</span>
-          @if (isFallback('Em_wall_lx')) {
-            <span class="fallback-tooltip-wrapper relative">
-              <button type="button" class="fallback-info-btn" aria-label="Value assumed from parent category">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 16v-4"/>
-                  <path d="M12 8h.01"/>
-                </svg>
-              </button>
-              <span class="fallback-tooltip">This reference number ({{ standard().ref_no }}) has no value for this field, assumed from parent category ({{ standard().category_base }} — {{ standard().category_sub }})</span>
-            </span>
-          }
-        </div>
-      </div>
-      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-          >Ceiling illuminance</span
-        >
-        <div class="flex items-center gap-1.5">
-          <span class="font-body text-sm text-white font-medium"
-            >{{ standard().Em_ceiling_lx }} lx</span
-          >
-          @if (isFallback('Em_ceiling_lx')) {
-            <span class="fallback-tooltip-wrapper relative">
-              <button type="button" class="fallback-info-btn" aria-label="Value assumed from parent category">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 16v-4"/>
-                  <path d="M12 8h.01"/>
-                </svg>
-              </button>
-              <span class="fallback-tooltip">This reference number ({{ standard().ref_no }}) has no value for this field, assumed from parent category ({{ standard().category_base }} — {{ standard().category_sub }})</span>
-            </span>
-          }
-        </div>
-      </div>
-      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">RUGL</span>
-        <div class="flex items-center gap-1.5">
-          <span class="font-body text-sm text-white font-medium">{{ standard().RUGL }}</span>
-          @if (isFallback('RUGL')) {
-            <span class="fallback-tooltip-wrapper relative">
-              <button type="button" class="fallback-info-btn" aria-label="Value assumed from parent category">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 16v-4"/>
-                  <path d="M12 8h.01"/>
-                </svg>
-              </button>
-              <span class="fallback-tooltip">This reference number ({{ standard().ref_no }}) has no value for this field, assumed from parent category ({{ standard().category_base }} — {{ standard().category_sub }})</span>
-            </span>
-          }
-        </div>
-      </div>
-      <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
-        <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Ez</span>
-        <div class="flex items-center gap-1.5">
-          <span class="font-body text-sm text-white font-medium">{{ standard().Ez_lx }} lx</span>
-          @if (isFallback('Ez_lx')) {
-            <span class="fallback-tooltip-wrapper relative">
-              <button type="button" class="fallback-info-btn" aria-label="Value assumed from parent category">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M12 16v-4"/>
-                  <path d="M12 8h.01"/>
-                </svg>
-              </button>
-              <span class="fallback-tooltip">This reference number ({{ standard().ref_no }}) has no value for this field, assumed from parent category ({{ standard().category_base }} — {{ standard().category_sub }})</span>
-            </span>
-          }
-        </div>
-      </div>
-      @if (standard().tcp_min_K && standard().tcp_max_K) {
+    </div>
+
+    <div class="mb-5">
+      <span class="block font-mono text-sm text-muted tracking-widest uppercase mb-4"
+        >Requirements</span
+      >
+      <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
         <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
           <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-            >TCP Range</span
+            >Maintained illuminance (Em)</span
           >
-          <span class="font-body text-sm text-white font-medium"
-            >{{ standard().tcp_min_K }}K — {{ standard().tcp_max_K }}K</span
-          >
+          <span class="font-body text-sm text-white font-medium">{{ param(standard.parameters.em_r_lx) }} lx</span>
         </div>
-      }
+        <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+            >Useful illuminance</span
+          >
+          <span class="font-body text-sm text-white font-medium">{{ param(standard.parameters.em_u_lx) }} lx</span>
+        </div>
+        <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+            >Uniformity (Uo)</span
+          >
+          <span class="font-body text-sm text-white font-medium">{{ param(standard.parameters.uo) }}</span>
+        </div>
+        <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+            >Color Rendering (Ra)</span
+          >
+          <span class="font-body text-sm text-white font-medium">{{ param(standard.parameters.ra) }}</span>
+        </div>
+        <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+            >Wall illuminance</span
+          >
+          <span class="font-body text-sm text-white font-medium">{{ param(standard.parameters.em_wall_lx) }} lx</span>
+        </div>
+        <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+            >Ceiling illuminance</span
+          >
+          <span class="font-body text-sm text-white font-medium">{{ param(standard.parameters.em_ceiling_lx) }} lx</span>
+        </div>
+        <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">RUGL</span>
+          <span class="font-body text-sm text-white font-medium">{{ param(standard.parameters.ugr_rugl) }}</span>
+        </div>
+        <div class="flex flex-col gap-1 p-3 bg-elevated rounded-lg">
+          <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs">Ez</span>
+          <span class="font-body text-sm text-white font-medium">{{ param(standard.parameters.ez_lx) }} lx</span>
+        </div>
+      </div>
     </div>
-  </div>
 
-  @if (standard().specific_requirements) {
-    <div class="pt-5 border-t border-border">
-      <span class="block font-mono text-sm text-muted tracking-widest uppercase mb-2"
-        >Specific Requirements</span
-      >
-      <p class="font-body text-sm text-muted leading-relaxed m-0">
-        {{ standard().specific_requirements }}
-      </p>
-    </div>
-  }
-</div>
+    @if (standard.specific_requirements) {
+      <div class="pt-5 border-t border-border">
+        <span class="block font-mono text-sm text-muted tracking-widest uppercase mb-2"
+          >Specific Requirements</span
+        >
+        <p class="font-body text-sm text-muted leading-relaxed m-0">
+          {{ standard.specific_requirements }}
+        </p>
+      </div>
+    }
+  </div>
+}

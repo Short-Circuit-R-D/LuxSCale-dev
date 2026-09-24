@@ -1,0 +1,61 @@
+---
+description: Environment Variables — .env key names only in .env.example, typed in env.d.ts, read via environment.ts; never write secret values or edit .env
+alwaysApply: true
+---
+
+# Environment Variables & Configuration (Angular)
+
+Same pattern as viora-main-frontend. Env flows: `.env` (local, untracked)
+→ injected at build time by `@ngx-env/builder` → typed in `src/env.d.ts`
+→ read via `src/environments/environment.ts` (`import.meta.env.NG_APP_*`).
+
+Builders in `angular.json` must stay on `@ngx-env/builder:application` and
+`@ngx-env/builder:dev-server` (test stays on `@angular/build:unit-test`).
+
+When code needs a new environment variable or configuration property:
+
+1. Add **only the key name** (empty value, `NG_APP_*` prefix so the builder
+injects it) to `.env.example`:
+
+```bash
+NG_APP_API_BASE_URL=
+```
+
+2. Declare it in `src/env.d.ts`:
+
+```typescript
+interface ImportMetaEnv {
+  readonly NG_APP_API_BASE_URL: string;
+}
+```
+
+3. Expose it typed in `src/environments/environment.ts`:
+
+```typescript
+export const environment = {
+  apiBaseUrl: import.meta.env.NG_APP_API_BASE_URL ?? '/api/v1',
+};
+```
+
+4. **Stop and prompt the user** to add the actual value to their local
+untracked `.env` file.
+
+## Never
+
+```typescript
+// BAD — hardcoding environment-specific values in environment.ts
+export const environment = {
+  apiBaseUrl: 'https://api.myapp.com', // BAD: baked into one build artifact
+};
+```
+
+```bash
+# BAD — sample hosts, tokens, or dummy credentials in template files
+NG_APP_API_BASE_URL=http://localhost:3000
+NG_APP_SECRET_KEY=changeme
+```
+
+- **Do not put deployment-specific values in `environment.ts`.** Values come from `.env` at build time; one artifact per environment is expected.
+- **Do not create or edit `.env`.** The developer or CI/CD pipeline owns it.
+- **Do not put sample hosts, tokens, passwords, or dummy credentials in `.env.example`.**
+- If the key already exists in `.env.example` / `env.d.ts` / `environment.ts`, do not duplicate it; still prompt the user if their local `.env` may be missing it.

@@ -1,335 +1,274 @@
-@if (product; as product) {
-  <div class="flex flex-col gap-8">
-    <div>
-      <div class="flex items-center gap-2 mb-5 pl-3 border-l-2 border-primary">
-        <span class="font-mono text-xs text-primary">A.</span>
-        <span class="font-mono text-xs text-primary tracking-widest uppercase"
-          >Fixture Information</span
-        >
-      </div>
+@if (variant(); as variant) {
+  <div>
+    <div class="flex items-center gap-2 mb-5 pl-3 border-l-2 border-primary">
+      <span class="font-mono text-xs text-primary">A.</span>
+      <span class="font-mono text-xs text-primary tracking-widest uppercase"
+        >Fixture Information</span
+      >
+    </div>
 
-      <div class="flex flex-col gap-6 lg:grid lg:grid-cols-2">
-        <div class="flex flex-col gap-4">
-          <div class="relative bg-elevated rounded-xl overflow-hidden aspect-square">
-            @if (images.length > 0) {
-              <img
-                [src]="images[selectedImageIndex()]"
-                [alt]="product.name"
-                class="w-full h-full object-contain p-4 cursor-zoom-in"
-                [class.zoomed]="isZoomed()"
-                [style.transform]="isZoomed() ? 'scale(2.5)' : 'scale(1)'"
-                [style.transform-origin]="zoomPosition().x + '% ' + zoomPosition().y + '%'"
-                (click)="toggleZoom()"
-                (mousemove)="onZoomMove($event)"
-              />
-            } @else {
-              <div class="w-full h-full flex items-center justify-center">
-                <span class="font-mono text-sm text-muted">No Image Available</span>
-              </div>
-            }
-
-            @if (isZoomed()) {
-              <button
-                type="button"
-                class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-black/60 text-white cursor-pointer border-none hover:bg-black/80"
-                (click)="closeZoom(); $event.stopPropagation()"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-            }
-
-            @if (images.length > 1 && !isZoomed()) {
-              <button
-                type="button"
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white cursor-pointer border-none hover:bg-black/70"
-                (click)="prevImage(); $event.stopPropagation()"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white cursor-pointer border-none hover:bg-black/70"
-                (click)="nextImage(); $event.stopPropagation()"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </button>
-            }
-          </div>
-
-          @if (images.length > 1) {
-            <div class="flex gap-2 overflow-x-auto pb-1">
-              @for (img of images; track $index) {
-                <button
-                  type="button"
-                  class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 cursor-pointer bg-elevated p-1 sm:w-16 sm:h-16"
-                  [class]="selectedImageIndex() === $index ? 'border-primary' : 'border-border'"
-                  (click)="selectImage($index)"
-                >
-                  <img
-                    [src]="img"
-                    [alt]="product.name + ' ' + ($index + 1)"
-                    class="w-full h-full object-contain"
-                  />
-                </button>
-              }
+    <div class="flex flex-col gap-6 lg:grid lg:grid-cols-2">
+      <div class="flex flex-col gap-4">
+        <div class="relative bg-elevated rounded-xl overflow-hidden aspect-square">
+          @if (images().length > 0) {
+            <img
+              [src]="images()[selectedImageIndex()].url"
+              [alt]="images()[selectedImageIndex()].alt"
+              class="w-full h-full object-contain p-4 cursor-zoom-in"
+              [class.zoomed]="isZoomed()"
+              [style.transform]="isZoomed() ? 'scale(2.5)' : 'scale(1)'"
+              [style.transform-origin]="zoomPosition().x + '% ' + zoomPosition().y + '%'"
+              (click)="toggleZoom()"
+              (mousemove)="onZoomMove($event)"
+            />
+          } @else {
+            <div class="w-full h-full flex items-center justify-center">
+              <span class="font-mono text-sm text-muted">No Image Available</span>
             </div>
+          }
+
+          @if (isZoomed()) {
+            <button
+              type="button"
+              class="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-black/60 text-white cursor-pointer border-none hover:bg-black/80"
+              (click)="closeZoom(); $event.stopPropagation()"
+              aria-label="Close zoom"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          }
+
+          @if (images().length > 1 && !isZoomed()) {
+            <button
+              type="button"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white cursor-pointer border-none hover:bg-black/70"
+              (click)="prevImage(); $event.stopPropagation()"
+              aria-label="Previous image"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white cursor-pointer border-none hover:bg-black/70"
+              (click)="nextImage(); $event.stopPropagation()"
+              aria-label="Next image"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
           }
         </div>
 
-        <div class="flex flex-col gap-5">
-          <div>
-            <span class="font-mono text-xs text-primary tracking-widest uppercase sm:text-xs">{{
-              product.category
-            }}</span>
-            <h3 class="font-display text-xl text-white m-0 mt-1 sm:text-2xl">{{ product.title }}</h3>
-            <span class="font-mono text-xs text-muted sm:text-sm">{{ product.series }} Series</span>
+        @if (images().length > 1) {
+          <div class="flex gap-2 overflow-x-auto pb-1">
+            @for (img of images(); track $index) {
+              <button
+                type="button"
+                class="flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 cursor-pointer bg-elevated p-1 sm:w-16 sm:h-16"
+                [class]="selectedImageIndex() === $index ? 'border-primary' : 'border-border'"
+                (click)="selectImage($index)"
+              >
+                <img
+                  [src]="img.url"
+                  [alt]="img.alt + ' ' + ($index + 1)"
+                  class="w-full h-full object-contain"
+                />
+              </button>
+            }
           </div>
+        }
+      </div>
 
-          <div class="flex gap-3">
-            <div class="flex-1 p-3 bg-elevated rounded-lg text-center">
-              <span
-                class="block font-mono text-xs text-muted tracking-widest uppercase mb-1 sm:text-xs"
-                >Power</span
+      <div class="flex flex-col gap-5">
+        <div>
+          <span class="font-mono text-xs text-primary tracking-widest uppercase sm:text-xs">{{
+            variant.fixture.manufacturer_name
+          }}</span>
+          <h3 class="font-display text-xl text-white m-0 mt-1 sm:text-2xl">{{ variant.fixture.name }}</h3>
+          <span class="font-mono text-xs text-muted sm:text-sm">{{ variant.name }}</span>
+        </div>
+
+        <div class="flex gap-3">
+          <div class="flex-1 p-3 bg-elevated rounded-lg text-center">
+            <span
+              class="block font-mono text-xs text-muted tracking-widest uppercase mb-1 sm:text-xs"
+              >Power</span
+            >
+            <span class="font-display text-base text-white sm:text-lg"
+              >{{ variant.power
+              }}<span class="font-mono text-xs text-muted ml-0.5">W</span></span
+            >
+          </div>
+          <div class="flex-1 p-3 bg-elevated rounded-lg text-center">
+            <span
+              class="block font-mono text-xs text-muted tracking-widest uppercase mb-1 sm:text-xs"
+              >Efficacy</span
+            >
+            <span class="font-display text-base text-white sm:text-lg"
+              >{{ variant.efficacy
+              }}<span class="font-mono text-xs text-muted ml-0.5"> lm/W</span></span
+            >
+          </div>
+          <div class="flex-1 p-3 bg-elevated rounded-lg text-center">
+            <span
+              class="block font-mono text-xs text-muted tracking-widest uppercase mb-1 sm:text-xs"
+              >Lumens</span
+            >
+            <span class="font-display text-base text-white sm:text-lg">{{ lumens() }}</span>
+          </div>
+        </div>
+
+        <div class="p-4 bg-elevated rounded-lg">
+          <span
+            class="block font-mono text-xs text-muted tracking-widest uppercase mb-3"
+            >Specifications</span
+          >
+          <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-0.5">
+              <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+                >Chip</span
               >
-              <span class="font-display text-base text-white sm:text-lg"
-                >{{ fixture!.power_w
-                }}<span class="font-mono text-xs text-muted ml-0.5">W</span></span
-              >
+              <span class="font-body text-sm text-white font-medium sm:text-sm">{{
+                variant.chip
+              }}</span>
             </div>
-            <div class="flex-1 p-3 bg-elevated rounded-lg text-center">
-              <span
-                class="block font-mono text-xs text-muted tracking-widest uppercase mb-1 sm:text-xs"
-                >Beam Angle</span
+            <div class="flex flex-col gap-0.5">
+              <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+                >Driver</span
               >
-              <span class="font-display text-base text-white sm:text-lg">{{ product.specs.beam_angle }}</span>
+              <span class="font-body text-sm text-white font-medium sm:text-sm">{{
+                variant.driver
+              }}</span>
             </div>
-            <div class="flex-1 p-3 bg-elevated rounded-lg text-center">
-              <span
-                class="block font-mono text-xs text-muted tracking-widest uppercase mb-1 sm:text-xs"
-                >Efficacy</span
+            <div class="flex flex-col gap-0.5">
+              <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+                >Power Factor</span
               >
-              <span class="font-display text-base text-white sm:text-lg">{{
-                product.specs.luminous_efficacy
+              <span class="font-body text-sm text-white font-medium sm:text-sm">{{
+                variant.power_factor
+              }}</span>
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+                >CRI</span
+              >
+              <span class="font-body text-sm text-white font-medium sm:text-sm">{{
+                variant.cri
+              }}</span>
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+                >Dimensions</span
+              >
+              <span class="font-body text-sm text-white font-medium sm:text-sm">{{
+                dimensions()
+              }}</span>
+            </div>
+            <div class="flex flex-col gap-0.5">
+              <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
+                >Mechanical</span
+              >
+              <span class="font-body text-sm text-white font-medium sm:text-sm">{{
+                variant.mechanical_protections.length > 0
+                  ? variant.mechanical_protections.join(', ')
+                  : '—'
               }}</span>
             </div>
           </div>
+        </div>
 
-          <div class="p-4 bg-elevated rounded-lg">
-            <span
-              class="block font-mono text-xs text-muted tracking-widest uppercase mb-3"
-              >Specifications</span
-            >
-            <div class="grid grid-cols-2 gap-3">
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >Chip</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.chip
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >Driver</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.driver
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >CCT</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.cct
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >Power Factor</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.power_factor
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >Input Voltage</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.input_voltage
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >Frequency</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.frequency
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >Protection</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.protection
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >Lifetime</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.lifetime
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >PCB</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.pcb
-                }}</span>
-              </div>
-              <div class="flex flex-col gap-0.5">
-                <span class="font-mono text-xs text-muted tracking-tight uppercase sm:text-xs"
-                  >Warranty</span
-                >
-                <span class="font-body text-sm text-white font-medium sm:text-sm">{{
-                  product.specs.warranty
-                }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="p-4 bg-elevated rounded-lg">
-            <span
-              class="block font-mono text-xs text-muted tracking-widest uppercase mb-3"
-              >Protections</span
-            >
-            <div class="flex flex-wrap gap-4">
-              <div class="flex items-center gap-2">
-                <span
-                  class="w-2 h-2 rounded-full"
-                  [class]="product.specs.oc_protection ? 'bg-green-500' : 'bg-disabled'"
-                ></span>
-                <span class="font-mono text-xs text-muted sm:text-sm">Over-Current</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span
-                  class="w-2 h-2 rounded-full"
-                  [class]="product.specs.ov_protection ? 'bg-green-500' : 'bg-disabled'"
-                ></span>
-                <span class="font-mono text-xs text-muted sm:text-sm">Over-Voltage</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span
-                  class="w-2 h-2 rounded-full"
-                  [class]="product.specs.ot_protection ? 'bg-green-500' : 'bg-disabled'"
-                ></span>
-                <span class="font-mono text-xs text-muted sm:text-sm">Over-Temperature</span>
-              </div>
-            </div>
-          </div>
-
-          @if (fixture!.ies_available) {
-            <div class="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-              <div class="flex items-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="text-green-500"
-                >
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                  <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-                <span class="font-mono text-sm text-green-500 font-medium sm:text-xs"
-                  >IES File Available</span
-                >
-              </div>
-            </div>
-          }
-
-          <a
-            [href]="product.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-mono text-xs font-medium tracking-widest uppercase no-underline transition-colors duration-150 hover:bg-primary-dark"
+        <div class="p-4 bg-elevated rounded-lg">
+          <span
+            class="block font-mono text-xs text-muted tracking-widest uppercase mb-3"
+            >Electrical Protections</span
           >
-            View Product Page
+          <div class="flex flex-wrap gap-4">
+            @for (code of ['OV', 'OC', 'OT']; track code) {
+              <div class="flex items-center gap-2">
+                <span
+                  class="w-2 h-2 rounded-full"
+                  [class]="variant.electrical_protections.includes(code) ? 'bg-green-500' : 'bg-disabled'"
+                ></span>
+                <span class="font-mono text-xs text-muted sm:text-sm">
+                  @switch (code) {
+                    @case ('OV') {
+                      Over-Voltage
+                    }
+                    @case ('OC') {
+                      Over-Current
+                    }
+                    @default {
+                      Over-Temperature
+                    }
+                  }
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+          <div class="flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
+              class="text-green-500"
             >
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
-          </a>
+            <span class="font-mono text-sm text-green-500 font-medium sm:text-xs"
+              >IES File: {{ variant.ies_file.original_filename }}</span
+            >
+          </div>
         </div>
       </div>
     </div>
-
-    <div>
-      <div class="flex items-center gap-2 mb-5 pl-3 border-l-2 border-primary">
-        <span class="font-mono text-xs text-primary">B.</span>
-        <span class="font-mono text-xs text-primary tracking-widest uppercase">IES Analysis</span>
-      </div>
-
-      <div class="border border-border rounded-xl bg-surface p-5 sm:p-8">
-        <app-ies-analysis [fixture]="fixture!" />
-      </div>
-    </div>
+  </div>
+} @else {
+  <div class="flex items-center justify-center min-h-[200px]">
+    <span class="font-mono text-sm text-muted">Variant details are not available.</span>
   </div>
 }

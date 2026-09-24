@@ -1,99 +1,47 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
-import { CalculationResponse } from '../../../../services/calculation-result.service';
-import { PdfReportService } from '../../../../services/pdf-report.service';
-import { FixtureResult } from '../../../../services/result-store.service';
-import { selectionLabel } from '../../../../shared/room-plan/layout-copy';
-import { Point } from '../../../../shared/room-plan/room-polygon';
+import { DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { automateStatusFor } from '../../../../core/automate/automate-status';
+import type {
+  AutomateResponseDto,
+  AutomateSolutionDto,
+} from '../../../../core/automate/dtos/automate-response.dto';
+import type { VariantDetailResponseDto } from '../../../../core/variants/dtos/variants.dto';
+import { SolutionPlanComponent } from '../../../../shared/room-plan/solution-plan.component';
+import type { Point } from '../../../../shared/room-plan/room-polygon';
 import { CalculationsComponent } from '../calculations/calculations.component';
 import { FixtureDetailsComponent } from '../fixture-details/fixture-details.component';
-import {
-  CalculationType,
-  ResultPreviewComponent,
-} from '../result-preview/result-preview.component';
-
-export interface RequestSides {
-  width1: number | null;
-  length1: number | null;
-  width2: number | null;
-  length2: number | null;
-}
-
-export const EMPTY_REQUEST_SIDES: RequestSides = {
-  width1: null,
-  length1: null,
-  width2: null,
-  length2: null,
-};
-
-export function requestSidesFromPayload(sides: number[] | null | undefined): RequestSides {
-  if (!sides || sides.length < 4) {
-    return EMPTY_REQUEST_SIDES;
-  }
-  return {
-    width1: sides[0],
-    length1: sides[1],
-    width2: sides[2],
-    length2: sides[3],
-  };
-}
 
 @Component({
   selector: 'app-results-grid',
-  imports: [CalculationsComponent, FixtureDetailsComponent, ResultPreviewComponent],
+  imports: [DecimalPipe, CalculationsComponent, FixtureDetailsComponent, SolutionPlanComponent],
   templateUrl: './results-grid.component.html',
   styleUrl: './results-grid.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResultsGridComponent {
-  calculation = input.required<CalculationResponse>();
-  fixtureResults = input.required<FixtureResult[]>();
-  requestSides = input<RequestSides>(EMPTY_REQUEST_SIDES);
-  vertices = input<readonly Point[] | null>(null);
-  holes = input<readonly Point[][] | null>(null);
-  calculationType = input<CalculationType>('Rectangular');
-
-  private readonly pdfService = inject(PdfReportService);
+  result = input.required<AutomateResponseDto>();
+  variants = input.required<Map<string, VariantDetailResponseDto>>();
+  polygon = input<readonly Point[] | null>(null);
 
   protected readonly selectedIndex = signal(0);
   protected readonly activeView = signal<'calculations' | 'fixtures'>('calculations');
-  protected readonly selectionLabel = selectionLabel;
+  protected readonly showMiss = signal(false);
 
-  protected readonly results = computed(() => this.calculation().results);
-  protected readonly layoutMode = computed((): 'auto' | 'user_grid' | null => {
-    const mode = this.calculation().calculation_meta.layout_mode;
-    return mode === 'user_grid' || mode === 'auto' ? mode : null;
-  });
+  protected readonly status = computed(() => automateStatusFor(this.result()));
 
-  protected readonly selectedResult = computed(() => this.results()[this.selectedIndex()]);
+  protected readonly solutions = computed(() => this.result().solutions);
 
-  protected readonly selectedFixtureResult = computed(() => {
-    const result = this.selectedResult();
-    if (!result) return null;
+  protected readonly selectedSolution = computed<AutomateSolutionDto | null>(
+    () => this.solutions()[this.selectedIndex()] ?? null,
+  );
 
-    const luminaire = result['Luminaire'] as string;
-    const power = result['Power (W)'] as number;
+  protected readonly selectedVariant = computed(
+    () => this.variants().get(this.selectedSolution()?.variantId ?? '') ?? null,
+  );
 
-    return (
-      this.fixtureResults().find((fr) => fr.key.luminaire === luminaire && fr.key.power === power) ??
-      null
-    );
-  });
-
-  protected readonly resultImages = computed(() => {
-    const fixtureMap = new Map<string, string>();
-    for (const fr of this.fixtureResults()) {
-      const key = `${fr.key.luminaire}|${fr.key.power}`;
-      if (fr.fixtures.length > 0 && fr.fixtures[0].product.images.length > 0) {
-        fixtureMap.set(key, fr.fixtures[0].product.images[0]);
-      }
-    }
-
-    return this.results().map((r) => {
-      const luminaire = r['Luminaire'] as string;
-      const power = r['Power (W)'] as number;
-      return fixtureMap.get(`${luminaire}|${power}`) ?? null;
-    });
-  });
+  protected variantName(variantId: string): string {
+    return this.variants().get(variantId)?.name ?? variantId;
+  }
 
   selectResult(index: number) {
     this.selectedIndex.set(index);
@@ -104,10 +52,7 @@ export class ResultsGridComponent {
     this.activeView.set(view);
   }
 
-  generateSolutionReport() {
-    const result = this.selectedResult();
-    const fixtureResult = this.selectedFixtureResult();
-    if (!result) return;
-    this.pdfService.generateSolutionReport(this.calculation(), result, fixtureResult ?? null);
+  toggleMiss() {
+    this.showMiss.update((v) => !v);
   }
 }

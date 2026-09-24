@@ -32,21 +32,42 @@
       <app-room-plan-preview [vertices]="localShape().vertices" [holes]="localShape().holes" />
     </div>
 
-    <div class="mt-6">
-      <label class="mb-2 block font-mono text-sm tracking-widest text-muted uppercase" for="room-study-h">
-        Mounting height (h)
-      </label>
-      <input
-        id="room-study-h"
-        type="number"
-        min="0"
-        step="any"
-        class="box-border w-full rounded-lg border border-border bg-transparent px-3.5 py-2.5 font-body text-sm text-white transition-[border-color] duration-150 placeholder:text-muted focus:border-primary focus:outline-none sm:max-w-xs"
-        placeholder="0.00"
-        [ngModel]="mountingHeight()"
-        (ngModelChange)="onHeightInput($event)"
-      />
+    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div>
+        <label class="mb-2 block font-mono text-sm tracking-widest text-muted uppercase" for="room-study-ceiling">
+          Ceiling height (m)
+        </label>
+        <input
+          id="room-study-ceiling"
+          type="number"
+          min="0"
+          step="any"
+          class="box-border w-full rounded-lg border border-border bg-transparent px-3.5 py-2.5 font-body text-sm text-white transition-[border-color] duration-150 placeholder:text-muted focus:border-primary focus:outline-none"
+          placeholder="0.00"
+          [ngModel]="ceilingHeight()"
+          (ngModelChange)="onCeilingInput($event)"
+        />
+      </div>
+      <div>
+        <label class="mb-2 block font-mono text-sm tracking-widest text-muted uppercase" for="room-study-h">
+          Mounting height (m)
+        </label>
+        <input
+          id="room-study-h"
+          type="number"
+          min="0"
+          step="any"
+          class="box-border w-full rounded-lg border bg-transparent px-3.5 py-2.5 font-body text-sm text-white transition-[border-color] duration-150 placeholder:text-muted focus:border-primary focus:outline-none"
+          [class]="heightError() ? 'border-primary' : 'border-border'"
+          placeholder="0.00"
+          [ngModel]="mountingHeight()"
+          (ngModelChange)="onHeightInput($event)"
+        />
+      </div>
     </div>
+    @if (heightError()) {
+      <p class="mt-2 font-mono text-sm text-primary" role="alert">{{ heightError() }}</p>
+    }
 
     <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
       <app-searchable-select

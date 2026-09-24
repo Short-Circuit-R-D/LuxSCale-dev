@@ -317,3 +317,113 @@ export function openingMark(opening: Opening): Segment | null {
   }
   return { start: opening.start, end: opening.end };
 }
+
+export type SplitAxis = 'horizontal' | 'vertical';
+
+export interface SnappedSplit {
+  start: Point;
+  end: Point;
+  axis: SplitAxis;
+}
+
+/**
+ * Force a split segment onto world axes: dominant delta wins
+ * (`|dx| >= |dy|` → horizontal locked to `start.y`, else vertical).
+ * Callers bypass this when the user holds Shift for a free diagonal.
+ */
+export function snapSplitSegment(start: Point, end: Point): SnappedSplit {
+  if (Math.abs(end.x - start.x) >= Math.abs(end.y - start.y)) {
+    return { start, end: { x: end.x, y: start.y }, axis: 'horizontal' };
+  }
+  return { start, end: { x: start.x, y: end.y }, axis: 'vertical' };
+}
+
+/** Smallest-area room containing the point (bbox pre-check, polygon exact). */
+export function roomContainingPoint(rooms: Room[], point: Point): Room | null {
+  let best: Room | null = null;
+  let bestArea = Infinity;
+  for (const room of rooms) {
+    const bbox = room.bbox ?? bboxFromPoints(roomPolygon(room).vertices);
+    if (!bbox || !pointInBbox(point, bbox)) {
+      continue;
+    }
+    if (!pointInPolygon(point, roomPolygon(room))) {
+      continue;
+    }
+    const area = netArea(room);
+    if (area < bestArea) {
+      best = room;
+      bestArea = area;
+    }
+  }
+  return best;
+}
+
+export interface SplitMeasure {
+  roomId: string;
+  roomName: string | null;
+  axis: SplitAxis;
+  /** Cut length in meters. */
+  cutLength: number;
+  /** Distance from the cut to the bbox min edge along the cut axis. */
+  fromMin: number;
+  /** Distance from the cut to the bbox max edge along the cut axis. */
+  toMax: number;
+  /** Full room span along the cut axis. */
+  span: number;
+}
+
+/**
+ * Measure an axis-aligned cut against a room's bbox.
+ * ponytail: bbox approximation — exact polygon-intersection offsets for
+ * concave rooms would need segment/polygon clipping; upgrade here if needed.
+ */
+export function measureSplit(room: Room, start: Point, end: Point): SplitMeasure | null {
+  const bbox = room.bbox ?? bboxFromPoints(roomPolygon(room).vertices);
+  if (!bbox) {
+    return null;
+  }
+  const snapped = snapSplitSegment(start, end);
+  const cutLength = distance(snapped.start, snapped.end);
+  if (snapped.axis === 'horizontal') {
+    return {
+      roomId: room.id,
+      roomName: room.name,
+      axis: 'horizontal',
+      cutLength,
+      fromMin: snapped.start.y - bbox.min_y,
+      toMax: bbox.max_y - snapped.start.y,
+      span: bbox.max_y - bbox.min_y,
+    };
+  }
+  return {
+    roomId: room.id,
+    roomName: room.name,
+    axis: 'vertical',
+    cutLength,
+    fromMin: snapped.start.x - bbox.min_x,
+    toMax: bbox.max_x - snapped.start.x,
+    span: bbox.max_x - bbox.min_x,
+  };
+}
+
+export type SplitEdge = 'min' | 'max';
+
+/** Wall-to-wall segment across a room bbox at an exact offset from an edge. */
+export function segmentAcrossBbox(
+  bbox: BoundingBox,
+  axis: SplitAxis,
+  edge: SplitEdge,
+  offset: number,
+): { start: Point; end: Point } | null {
+  const span = axis === 'horizontal' ? bbox.max_y - bbox.min_y : bbox.max_x - bbox.min_x;
+  if (!Number.isFinite(offset) || offset <= 0 || offset >= span || span <= 0) {
+    return null;
+  }
+  if (axis === 'horizontal') {
+    const y = edge === 'min' ? bbox.min_y + offset : bbox.max_y - offset;
+    return { start: { x: bbox.min_x, y }, end: { x: bbox.max_x, y } };
+  }
+  const x = edge === 'min' ? bbox.min_x + offset : bbox.max_x - offset;
+  return { start: { x, y: bbox.min_y }, end: { x, y: bbox.max_y } };
+}

@@ -1,16 +1,10 @@
 <section class="min-h-screen bg-black pt-24 pb-8 sm:pt-[100px] sm:pb-12">
   <div class="mx-auto w-full max-w-[1200px] px-4 sm:px-6">
-    @if (hasResult()) {
-      <app-results-view
-        [result]="result()!"
-        [fixtureResults]="fixtureResults()"
-        [fallbackFields]="fallbackFields()"
-        [requestSides]="requestSides()"
-        calculationType="Rectangular"
-      />
+    @if (hasResult() && study(); as study) {
+      <app-results-view [study]="study" [variants]="variants()" />
     } @else {
       <div class="flex min-h-[50vh] flex-col items-center justify-center gap-6">
-        <p class="m-0 font-body text-base text-muted">No calculation results available.</p>
+        <p class="m-0 font-body text-base text-muted">No design results available.</p>
         <a
           routerLink="/create-study"
           class="flex items-center gap-2 rounded-xl border border-border bg-transparent px-5 py-2.5 font-mono text-xs font-medium tracking-widest text-muted uppercase no-underline transition-all duration-180 hover:border-muted hover:text-white"

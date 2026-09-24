@@ -1,0 +1,98 @@
+<div class="mt-3 flex flex-col gap-3 rounded-xl border border-border bg-surface px-5 py-4">
+  <p class="m-0 font-mono text-xs text-muted" role="status">{{ readout() }}</p>
+
+  <div class="flex flex-wrap items-end gap-3">
+    <div class="flex flex-col gap-1.5">
+      <span class="font-mono text-xs tracking-widest text-muted uppercase" id="split-axis-label"
+        >Direction</span
+      >
+      <div
+        class="flex rounded-lg border border-border"
+        role="group"
+        aria-labelledby="split-axis-label"
+      >
+        <button
+          type="button"
+          class="h-10 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          [class]="axis() === 'horizontal' ? 'text-white' : 'text-muted hover:text-white'"
+          [attr.aria-pressed]="axis() === 'horizontal'"
+          (click)="setAxis('horizontal')"
+        >
+          Horizontal
+        </button>
+        <button
+          type="button"
+          class="h-10 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          [class]="axis() === 'vertical' ? 'text-white' : 'text-muted hover:text-white'"
+          [attr.aria-pressed]="axis() === 'vertical'"
+          (click)="setAxis('vertical')"
+        >
+          Vertical
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <span class="font-mono text-xs tracking-widest text-muted uppercase" id="split-edge-label"
+        >Measured from</span
+      >
+      <div
+        class="flex rounded-lg border border-border"
+        role="group"
+        aria-labelledby="split-edge-label"
+      >
+        <button
+          type="button"
+          class="h-10 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          [class]="edge() === 'min' ? 'text-white' : 'text-muted hover:text-white'"
+          [attr.aria-pressed]="edge() === 'min'"
+          (click)="setEdge('min')"
+        >
+          {{ minEdgeLabel() }}
+        </button>
+        <button
+          type="button"
+          class="h-10 px-4 text-sm font-medium transition-colors duration-180 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          [class]="edge() === 'max' ? 'text-white' : 'text-muted hover:text-white'"
+          [attr.aria-pressed]="edge() === 'max'"
+          (click)="setEdge('max')"
+        >
+          {{ maxEdgeLabel() }}
+        </button>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-1.5">
+      <label
+        class="font-mono text-xs tracking-widest text-muted uppercase"
+        for="split-exact-distance"
+        >Distance (m, max {{ measure().span.toFixed(2) }})</label
+      >
+      <input
+        id="split-exact-distance"
+        type="number"
+        min="0"
+        [max]="measure().span"
+        step="0.01"
+        class="box-border h-10 w-36 rounded-lg border border-border bg-transparent px-3 font-body text-sm text-white transition-[border-color] duration-150 placeholder:text-muted focus:border-primary focus:outline-none"
+        placeholder="0.00"
+        [ngModel]="distance()"
+        (ngModelChange)="onDistanceInput($event)"
+        [attr.aria-invalid]="!!(localError() || storeError())"
+      />
+    </div>
+
+    <button
+      type="button"
+      class="h-10 rounded-xl bg-primary px-5 text-sm font-medium text-white transition-colors duration-180 hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-40"
+      [disabled]="busy() || distance() == null"
+      (click)="apply()"
+    >
+      {{ busy() ? 'Splitting…' : 'Split here' }}
+    </button>
+  </div>
+
+  @if (localError() ?? storeError(); as message) {
+    <p class="m-0 font-mono text-sm text-primary" role="alert">{{ message }}</p>
+  }
+</div>
