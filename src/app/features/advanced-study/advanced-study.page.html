@@ -1,0 +1,1142 @@
+<section class="bg-black min-h-screen py-24 sm:py-[80px]">
+  <div class="w-full px-4 sm:px-6 md:px-12 mx-auto max-w-[1440px]">
+
+    <!-- ========================================== -->
+    <!-- MODE A: 3-STEP SETUP WIZARD                -->
+    <!-- ========================================== -->
+    @if (store.viewMode() === 'wizard') {
+      <div class="max-w-[1100px] mx-auto">
+        <!-- Progress Bar -->
+        <div class="mb-8">
+          <div class="h-0.5 bg-border rounded overflow-hidden mb-3">
+            <div
+              class="h-full bg-primary transition-[width] duration-300"
+              [style.width]="store.currentStep() === 1 ? '33.3%' : store.currentStep() === 2 ? '66.6%' : '100%'"
+            ></div>
+          </div>
+          <div class="flex justify-between">
+            <span
+              class="font-mono text-xs tracking-widest uppercase"
+              [class]="store.currentStep() === 1 ? 'text-primary' : 'text-muted'"
+            >
+              STEP 01 — PROJECT & GEOMETRY
+            </span>
+            <span
+              class="font-mono text-xs tracking-widest uppercase"
+              [class]="store.currentStep() === 2 ? 'text-primary' : 'text-muted'"
+            >
+              STEP 02 — PHOTOMETRY & GRID
+            </span>
+            <span
+              class="font-mono text-xs tracking-widest uppercase"
+              [class]="store.currentStep() === 3 ? 'text-primary' : 'text-muted'"
+            >
+              STEP 03 — ENVIRONMENT & COMPLIANCE
+            </span>
+          </div>
+        </div>
+
+        <!-- Wizard Box Container -->
+        <div class="border border-border rounded-xl bg-surface p-5 sm:p-8 md:p-10 mb-6">
+
+          <!-- ---------------------------------------- -->
+          <!-- STEP 1: PROJECT & ROOM GEOMETRY          -->
+          <!-- ---------------------------------------- -->
+          @if (store.currentStep() === 1) {
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
+              <div class="space-y-8">
+                <!-- Section I: Project -->
+                <div>
+                  <div class="flex items-center gap-2 mb-4 pl-3 border-l-2 border-primary">
+                    <span class="font-mono text-xs text-primary">I.</span>
+                    <span class="font-mono text-xs text-primary tracking-widest uppercase">Project Identity</span>
+                  </div>
+
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advProjectName">Project Name *</label>
+                      <input
+                        id="advProjectName"
+                        type="text"
+                        class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm placeholder:text-muted focus:outline-none focus:border-primary"
+                        placeholder="e.g. LUX-ADVANCED-LAB-01"
+                        [ngModel]="store.project().projectName"
+                        (ngModelChange)="store.updateProject({ projectName: $event })"
+                        required
+                      />
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advCompanyName">Client Company *</label>
+                        <input
+                          id="advCompanyName"
+                          type="text"
+                          class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm placeholder:text-muted focus:outline-none focus:border-primary"
+                          placeholder="Organization"
+                          [ngModel]="store.project().companyName"
+                          (ngModelChange)="store.updateProject({ companyName: $event })"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advClientName">Client Contact *</label>
+                        <input
+                          id="advClientName"
+                          type="text"
+                          class="w-full px-3.5 py-2.5 bg-transparent border border-border rounded-lg text-white font-body text-sm placeholder:text-muted focus:outline-none focus:border-primary"
+                          placeholder="Lead Architect"
+                          [ngModel]="store.project().clientName"
+                          (ngModelChange)="store.updateProject({ clientName: $event })"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advClientPhone">Phone *</label>
+                        <input
+                          id="advClientPhone"
+                          type="tel"
+                          class="w-full px-3.5 py-2.5 bg-transparent border rounded-lg text-white font-body text-sm placeholder:text-muted focus:outline-none focus:border-primary"
+                          [class]="phoneError() ? 'border-primary' : 'border-border'"
+                          placeholder="+1 000 000 0000"
+                          [ngModel]="store.project().clientPhone"
+                          (ngModelChange)="onPhoneInput($event)"
+                          required
+                        />
+                        @if (phoneError()) {
+                          <span class="block mt-1 font-mono text-xs text-primary">{{ phoneError() }}</span>
+                        }
+                      </div>
+                      <div>
+                        <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advClientEmail">Email *</label>
+                        <input
+                          id="advClientEmail"
+                          type="email"
+                          class="w-full px-3.5 py-2.5 bg-transparent border rounded-lg text-white font-body text-sm placeholder:text-muted focus:outline-none focus:border-primary"
+                          [class]="emailError() ? 'border-primary' : 'border-border'"
+                          placeholder="client@domain.com"
+                          [ngModel]="store.project().clientEmail"
+                          (ngModelChange)="onEmailInput($event)"
+                          required
+                        />
+                        @if (emailError()) {
+                          <span class="block mt-1 font-mono text-xs text-primary">{{ emailError() }}</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section II: Room Dimensions & Geometry -->
+                <div>
+                  <div class="flex items-center justify-between mb-4 pb-2 border-b border-border">
+                    <div class="flex items-center gap-2 pl-3 border-l-2 border-primary">
+                      <span class="font-mono text-xs text-primary">II.</span>
+                      <span class="font-mono text-xs text-primary tracking-widest uppercase">Room Geometry</span>
+                    </div>
+
+                    <!-- Geometry Mode Switcher -->
+                    <div class="inline-flex items-center p-0.5 rounded-lg border border-border/70 bg-[#0d0d0d]">
+                      <button
+                        type="button"
+                        class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150"
+                        [class]="store.geometryMode() === 'dimensions' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                        (click)="store.setGeometryMode('dimensions')"
+                      >
+                        Rectangle
+                      </button>
+                      <button
+                        type="button"
+                        class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150"
+                        [class]="store.geometryMode() === 'polygon' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                        (click)="store.setGeometryMode('polygon')"
+                      >
+                        Polygon
+                      </button>
+                    </div>
+                  </div>
+
+
+                  <!-- Mode 1: Length x Width -->
+                  @if (store.geometryMode() === 'dimensions') {
+                    <div class="grid grid-cols-2 gap-3.5 mb-4">
+                      <div>
+                        <label class="block font-mono text-[11px] text-muted tracking-widest uppercase mb-1" for="advLength">Length (m) *</label>
+                        <input
+                          id="advLength"
+                          type="number"
+                          step="0.1"
+                          min="0.5"
+                          class="w-full px-3 py-2 bg-transparent border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                          [ngModel]="store.roomLength()"
+                          (ngModelChange)="onLengthInput($event)"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label class="block font-mono text-[11px] text-muted tracking-widest uppercase mb-1" for="advWidth">Width (m) *</label>
+                        <input
+                          id="advWidth"
+                          type="number"
+                          step="0.1"
+                          min="0.5"
+                          class="w-full px-3 py-2 bg-transparent border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                          [ngModel]="store.roomWidth()"
+                          (ngModelChange)="onWidthInput($event)"
+                          required
+                        />
+                      </div>
+                    </div>
+                  }
+
+                  <!-- Mode 2: Custom Polygon -->
+                  @if (store.geometryMode() === 'polygon') {
+                    <div class="space-y-3 mb-4">
+                      <!-- Quick templates -->
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-mono text-[11px] text-muted uppercase mr-1">Templates:</span>
+                        <button
+                          type="button"
+                          class="px-2.5 py-1 rounded bg-black border border-border font-mono text-xs text-muted hover:text-white transition-colors"
+                          (click)="store.applyPolygonTemplate('l-shape')"
+                        >
+                          L-Shaped
+                        </button>
+                        <button
+                          type="button"
+                          class="px-2.5 py-1 rounded bg-black border border-border font-mono text-xs text-muted hover:text-white transition-colors"
+                          (click)="store.applyPolygonTemplate('t-shape')"
+                        >
+                          T-Shaped
+                        </button>
+                        <button
+                          type="button"
+                          class="px-2.5 py-1 rounded bg-black border border-border font-mono text-xs text-muted hover:text-white transition-colors"
+                          (click)="store.applyPolygonTemplate('trapezoid')"
+                        >
+                          Trapezoid
+                        </button>
+                        <button
+                          type="button"
+                          class="px-2.5 py-1 rounded bg-black border border-border font-mono text-xs text-muted hover:text-white transition-colors"
+                          (click)="store.applyPolygonTemplate('box')"
+                        >
+                          Box (4-pt)
+                        </button>
+                      </div>
+
+                      <!-- Vertices List -->
+                      <div class="border border-border rounded-lg bg-black p-3 space-y-2 max-h-48 overflow-y-auto">
+                        @for (p of store.customPolygon(); track $index; let i = $index) {
+                          <div class="flex items-center gap-2">
+                            <span class="font-mono text-xs text-muted w-6 text-center">V{{ i + 1 }}</span>
+                            <div class="flex-1 flex items-center gap-2">
+                              <input
+                                type="number"
+                                step="0.1"
+                                class="w-full px-2 py-1 bg-surface border border-border rounded text-white font-mono text-xs focus:border-primary focus:outline-none"
+                                placeholder="X"
+                                [ngModel]="p.x"
+                                (ngModelChange)="store.updatePolygonVertex(i, toNum($event), p.y)"
+                              />
+                              <input
+                                type="number"
+                                step="0.1"
+                                class="w-full px-2 py-1 bg-surface border border-border rounded text-white font-mono text-xs focus:border-primary focus:outline-none"
+                                placeholder="Y"
+                                [ngModel]="p.y"
+                                (ngModelChange)="store.updatePolygonVertex(i, p.x, toNum($event))"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              class="text-muted hover:text-primary transition-colors p-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                              [disabled]="store.customPolygon().length <= 3"
+                              (click)="store.removePolygonVertex(i)"
+                              title="Delete vertex"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                              </svg>
+                            </button>
+                          </div>
+                        }
+                      </div>
+
+                      <button
+                        type="button"
+                        class="w-full py-1.5 rounded border border-dashed border-border font-mono text-xs text-muted hover:text-white hover:border-[#3A3A3A] transition-colors"
+                        (click)="store.addPolygonVertex(0, 0)"
+                      >
+                        + ADD VERTEX
+                      </button>
+                    </div>
+                  }
+
+                  <!-- Elevations (Common for both modes) -->
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                    <div>
+                      <label class="block font-mono text-[11px] text-muted tracking-widest uppercase mb-1" for="advCeilingHeight">Ceiling Height (m) *</label>
+                      <input
+                        id="advCeilingHeight"
+                        type="number"
+                        step="0.1"
+                        min="0.5"
+                        class="w-full px-3 py-2 bg-transparent border rounded-lg text-white font-mono text-sm focus:outline-none"
+                        [class]="heightError() ? 'border-primary' : 'border-border focus:border-primary'"
+                        [ngModel]="store.ceilingHeight()"
+                        (ngModelChange)="onCeilingHeightInput($event)"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label class="block font-mono text-[11px] text-muted tracking-widest uppercase mb-1" for="advMountingHeight">Mounting Height (m) *</label>
+                      <input
+                        id="advMountingHeight"
+                        type="number"
+                        step="0.1"
+                        min="0.5"
+                        class="w-full px-3 py-2 bg-transparent border rounded-lg text-white font-mono text-sm focus:outline-none"
+                        [class]="heightError() ? 'border-primary' : 'border-border focus:border-primary'"
+                        [ngModel]="store.mountingHeight()"
+                        (ngModelChange)="onMountingHeightInput($event)"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label class="block font-mono text-[11px] text-muted tracking-widest uppercase mb-1" for="advWorkplane">Workplane (m)</label>
+                      <input
+                        id="advWorkplane"
+                        type="number"
+                        step="0.05"
+                        min="0"
+                        class="w-full px-3 py-2 bg-transparent border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                        [ngModel]="store.workPlaneHeight()"
+                        (ngModelChange)="onWorkPlaneInput($event)"
+                      />
+                    </div>
+                  </div>
+
+                  @if (heightError()) {
+                    <p class="mt-2 font-mono text-xs text-primary">{{ heightError() }}</p>
+                  }
+                  <p class="mt-3 font-body text-xs text-muted">
+                    Workplane: 0.0m for true floor, 0.75m–0.85m for standard office desks.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Right: Live Plan Preview -->
+              <div class="lg:sticky lg:top-24">
+                <app-room-plan-preview
+                  [engineLength]="store.geometryMode() === 'dimensions' ? store.roomLength() : null"
+                  [engineWidth]="store.geometryMode() === 'dimensions' ? store.roomWidth() : null"
+                  [vertices]="store.geometryMode() === 'polygon' ? store.polygon() : null"
+                />
+              </div>
+            </div>
+          }
+
+
+          <!-- ---------------------------------------- -->
+          <!-- STEP 2: PHOTOMETRY & INITIAL LAYOUT     -->
+          <!-- ---------------------------------------- -->
+          @if (store.currentStep() === 2) {
+            <div class="space-y-8">
+              <!-- Section I: Photometry Source -->
+              <div>
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-border">
+                  <div class="flex items-center gap-2 pl-3 border-l-2 border-primary">
+                    <span class="font-mono text-xs text-primary">I.</span>
+                    <span class="font-mono text-xs text-primary tracking-widest uppercase">Photometry Source</span>
+                  </div>
+
+                  <!-- Mode Switcher -->
+                  <div class="inline-flex items-center p-0.5 rounded-lg border border-border/70 bg-[#0d0d0d]">
+                    <button
+                      type="button"
+                      class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150"
+                      [class]="store.photometryMode() === 'catalog' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                      (click)="store.setPhotometryMode('catalog')"
+                    >
+                      Catalog
+                    </button>
+                    <button
+                      type="button"
+                      class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150"
+                      [class]="store.photometryMode() === 'ies' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                      (click)="store.setPhotometryMode('ies')"
+                    >
+                      Custom .IES
+                    </button>
+                  </div>
+                </div>
+
+
+                <!-- Catalog Variants Selector (Grouped by Application & Fixture) -->
+                @if (store.photometryMode() === 'catalog') {
+                  <div class="space-y-5">
+                    <p class="font-body text-sm text-muted">
+                      Select one or more catalog luminaires. When multiple variants are selected, a multi-variant benchmark study will be evaluated across concurrent calculations.
+                    </p>
+
+                    @if (catalogLoading()) {
+                      <div class="py-10 text-center font-mono text-xs text-muted flex items-center justify-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        Loading catalog luminaires...
+                      </div>
+                    } @else {
+                      <div class="space-y-4">
+                        @for (app of groupedApplications(); track app.application) {
+                          <div class="rounded-xl border border-border bg-surface overflow-hidden">
+                            <!-- Accordion Header -->
+                            <button
+                              type="button"
+                              class="w-full px-5 py-4 flex items-center justify-between bg-black/40 hover:bg-black/60 transition-colors text-left cursor-pointer select-none"
+                              [attr.aria-expanded]="app.application === 'interior' ? interiorOpen() : industrialOpen()"
+                              (click)="toggleAccordion(app.application)"
+                              [title]="'Expand or collapse ' + app.title + ' section'"
+                            >
+                              <div class="flex items-center gap-3">
+                                @if (app.application === 'interior') {
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                  </svg>
+                                } @else {
+                                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                  </svg>
+                                }
+                                <div>
+                                  <h3 class="font-mono text-sm font-bold text-white tracking-wide uppercase">
+                                    {{ app.title }}
+                                  </h3>
+                                  <span class="font-mono text-[11px] text-muted">
+                                    {{ app.fixtures.length }} luminaire family(s) · {{ app.totalVariants }} total variant(s)
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div class="flex items-center gap-3">
+                                <span
+                                  class="font-mono text-xs px-2.5 py-1 rounded-full border"
+                                  [class]="app.selectedCount > 0 ? 'bg-primary/20 text-primary border-primary/40 font-semibold' : 'bg-black text-muted border-border'"
+                                >
+                                  {{ app.selectedCount }} selected
+                                </span>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  class="w-4 h-4 text-muted transition-transform duration-200"
+                                  [class.rotate-180]="app.application === 'interior' ? interiorOpen() : industrialOpen()"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                              </div>
+                            </button>
+
+                            <!-- Accordion Body -->
+                            @if (app.application === 'interior' ? interiorOpen() : industrialOpen()) {
+                              <div class="p-4 sm:p-5 space-y-4 border-t border-border/60">
+                                @if (app.fixtures.length === 0) {
+                                  <div class="py-6 text-center font-mono text-xs text-muted">
+                                    No luminaires currently cataloged under {{ app.title }}.
+                                  </div>
+                                } @else {
+                                  @for (fixture of app.fixtures; track fixture.fixtureId) {
+                                    <div class="rounded-xl border border-border/70 bg-black/50 p-4 space-y-3">
+                                      <!-- Fixture Family Header -->
+                                      <div class="flex items-center justify-between pb-2 border-b border-border/40">
+                                        <div class="flex items-center gap-2.5">
+                                          <span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0"></span>
+                                          <div>
+                                            <div class="flex items-center gap-2">
+                                              <h4 class="font-mono text-xs font-bold text-white tracking-wide uppercase">
+                                                {{ fixture.name }}
+                                              </h4>
+                                              @if (fixture.isMainSolution) {
+                                                <span
+                                                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#1FA971]/15 text-[#1FA971] border border-[#1FA971]/30 font-mono text-[9px] font-semibold tracking-wider uppercase"
+                                                  title="Certified as a main solution luminaire"
+                                                >
+                                                  <span class="w-1 h-1 rounded-full bg-[#1FA971]"></span>
+                                                  Main Solution
+                                                </span>
+                                              }
+                                            </div>
+                                            <span class="font-mono text-[10px] text-muted">
+                                              {{ fixture.manufacturer }} · {{ fixture.variants.length }} variant(s)
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        <button
+                                          type="button"
+                                          class="px-2.5 py-1 rounded bg-black border border-border font-mono text-[10px] text-muted hover:text-white hover:border-primary transition-colors cursor-pointer"
+                                          (click)="toggleFixtureAll(fixture.variants)"
+                                          [title]="'Select or deselect all ' + fixture.variants.length + ' variants in ' + fixture.name"
+                                        >
+                                          {{ isFixtureFullySelected(fixture.variants) ? 'DESELECT ALL' : 'SELECT ALL' }}
+                                        </button>
+                                      </div>
+
+                                      <!-- Variants Grid for this Fixture -->
+                                      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                        @for (variant of fixture.variants; track variant.id) {
+                                          <div
+                                            class="p-3.5 rounded-xl border transition-all cursor-pointer select-none group"
+                                            [class]="store.selectedVariantIds().includes(variant.id) ? 'border-primary bg-primary/10 shadow-sm' : 'border-border bg-black hover:border-[#3A3A3A]'"
+                                            (click)="store.toggleVariantId(variant.id, variant)"
+                                            [title]="'Select variant: ' + variant.name + ' (' + variant.power + 'W, ' + variant.efficacy + ' lm/W, CRI ' + variant.cri + ')'"
+                                          >
+                                            <div class="flex items-start justify-between gap-2">
+                                              <span class="font-mono text-xs font-semibold text-white truncate" [title]="variant.name">
+                                                {{ variant.name }}
+                                              </span>
+                                              <div
+                                                class="w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5"
+                                                [class]="store.selectedVariantIds().includes(variant.id) ? 'border-primary bg-primary text-white' : 'border-border group-hover:border-muted'"
+                                              >
+                                                @if (store.selectedVariantIds().includes(variant.id)) {
+                                                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                  </svg>
+                                                }
+                                              </div>
+                                            </div>
+
+                                            <div class="mt-2.5 flex items-center justify-between text-muted font-mono text-[11px]">
+                                              <div class="flex items-center gap-2">
+                                                <span>{{ variant.power }}W</span>
+                                                <span>·</span>
+                                                <span>{{ variant.efficacy }} lm/W</span>
+                                                <span>·</span>
+                                                <span>CRI {{ variant.cri }}</span>
+                                              </div>
+
+                                              <button
+                                                type="button"
+                                                class="p-1 rounded text-muted hover:text-white transition-colors cursor-pointer"
+                                                (click)="$event.stopPropagation(); store.openFixtureDetails(variant)"
+                                                title="View technical datasheet and photometric curve"
+                                              >
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                  <circle cx="12" cy="12" r="10"></circle>
+                                                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                                                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                                </svg>
+                                              </button>
+                                            </div>
+                                          </div>
+                                        }
+                                      </div>
+                                    </div>
+                                  }
+                                }
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+
+                    <!-- Summary & Validation Line -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-mono pt-2 border-t border-border/40">
+                      <div class="flex items-center gap-2 text-muted">
+                        <span>Total Selected:</span>
+                        <strong class="text-white">{{ store.selectedVariantIds().length }} variant(s)</strong>
+                        @if (store.selectedVariantIds().length > 1) {
+                          <span class="text-primary font-medium">(Concurrent benchmark mode active)</span>
+                        }
+                      </div>
+
+                      @if (store.selectedVariantIds().length === 0) {
+                        <span class="text-primary font-semibold">Please select at least one luminaire variant to continue.</span>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Custom IES Upload Zone -->
+                @if (store.photometryMode() === 'ies') {
+                  <div class="space-y-4">
+                    <div
+                      class="border-2 border-dashed border-border rounded-xl p-8 text-center bg-black hover:border-primary transition-colors cursor-pointer"
+                      (dragover)="$event.preventDefault()"
+                      (drop)="onFileDrop($event)"
+                      (click)="fileInput.click()"
+                    >
+                      <input
+                        #fileInput
+                        type="file"
+                        accept=".ies,.IES"
+                        class="hidden"
+                        (change)="onFileSelect($event)"
+                      />
+                      <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-10 w-10 text-muted mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      <p class="font-body text-sm text-white font-medium">
+                        {{ store.iesFileName() || 'Drop standard IES LM-63 (.ies) file here or click to browse' }}
+                      </p>
+                      <p class="font-mono text-xs text-muted mt-1">Must declare TILT=NONE per LM-63 standard</p>
+                    </div>
+
+                    @if (iesParsedDetails(); as details) {
+                      <div class="p-4 rounded-xl border border-border bg-elevated flex items-center justify-between">
+                        <div>
+                          <span class="font-mono text-xs text-primary uppercase">Parsed Photometry</span>
+                          <p class="font-body text-sm text-white font-semibold mt-0.5">{{ details.luminaire }}</p>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs font-mono text-muted">
+                          <span>Output: <strong class="text-white">{{ details.lumens }} lm</strong></span>
+                          <span>Symmetry: <strong class="text-white">{{ details.symmetry }}</strong></span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+
+              <!-- Section II: Initial Placement Grid -->
+              <div>
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-border">
+                  <div class="flex items-center gap-2 pl-3 border-l-2 border-primary">
+                    <span class="font-mono text-xs text-primary">II.</span>
+                    <span class="font-mono text-xs text-primary tracking-widest uppercase">Initial Grid Distribution</span>
+                  </div>
+
+                  <div class="inline-flex items-center p-0.5 rounded-lg border border-border/70 bg-[#0d0d0d]">
+                    <button
+                      type="button"
+                      class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150"
+                      [class]="store.gridType() === 'count' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                      (click)="store.gridType.set('count')"
+                    >
+                      Count
+                    </button>
+                    <button
+                      type="button"
+                      class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150"
+                      [class]="store.gridType() === 'spacing' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                      (click)="store.gridType.set('spacing')"
+                    >
+                      Spacing
+                    </button>
+                  </div>
+                </div>
+
+
+                @if (store.gridType() === 'count') {
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advCountX">Count X *</label>
+                      <input
+                        id="advCountX"
+                        type="number"
+                        min="1"
+                        max="30"
+                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                        [ngModel]="store.countX()"
+                        (ngModelChange)="store.countX.set($event)"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advCountY">Count Y *</label>
+                      <input
+                        id="advCountY"
+                        type="number"
+                        min="1"
+                        max="30"
+                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                        [ngModel]="store.countY()"
+                        (ngModelChange)="store.countY.set($event)"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advOffsetFrac">Offset Fraction</label>
+                      <input
+                        id="advOffsetFrac"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        max="1"
+                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                        [ngModel]="store.offsetFraction()"
+                        (ngModelChange)="store.offsetFraction.set($event)"
+                      />
+                      <span class="block mt-1 font-mono text-[10px] text-muted">0.5 = DIALux symmetric half-spacing</span>
+                    </div>
+                  </div>
+                }
+
+                @if (store.gridType() === 'spacing') {
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advSpacingX">Spacing X (m) *</label>
+                      <input
+                        id="advSpacingX"
+                        type="number"
+                        step="0.1"
+                        min="0.5"
+                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                        [ngModel]="store.spacingX()"
+                        (ngModelChange)="store.spacingX.set($event)"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advSpacingY">Spacing Y (m) *</label>
+                      <input
+                        id="advSpacingY"
+                        type="number"
+                        step="0.1"
+                        min="0.5"
+                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                        [ngModel]="store.spacingY()"
+                        (ngModelChange)="store.spacingY.set($event)"
+                        required
+                      />
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- ---------------------------------------- -->
+          <!-- STEP 3: ENVIRONMENT & COMPLIANCE         -->
+          <!-- ---------------------------------------- -->
+          @if (store.currentStep() === 3) {
+            <div class="space-y-8">
+              <!-- Section I: Reflectances & Physics -->
+              <div>
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-border">
+                  <div class="flex items-center gap-2 pl-3 border-l-2 border-primary">
+                    <span class="font-mono text-xs text-primary">I.</span>
+                    <span class="font-mono text-xs text-primary tracking-widest uppercase">Boundary Reflectances & Radiosity</span>
+                  </div>
+
+                  <!-- Quick Presets -->
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono text-xs text-muted uppercase mr-1">Presets:</span>
+                    <button
+                      type="button"
+                      class="px-2.5 py-1 rounded bg-black border border-border font-mono text-xs text-muted hover:text-white transition-colors"
+                      (click)="applyReflectancePreset('office')"
+                    >
+                      Office (70/50/20)
+                    </button>
+                    <button
+                      type="button"
+                      class="px-2.5 py-1 rounded bg-black border border-border font-mono text-xs text-muted hover:text-white transition-colors"
+                      (click)="applyReflectancePreset('warehouse')"
+                    >
+                      Warehouse (50/30/10)
+                    </button>
+                    <button
+                      type="button"
+                      class="px-2.5 py-1 rounded bg-black border border-border font-mono text-xs text-muted hover:text-white transition-colors"
+                      (click)="applyReflectancePreset('cleanroom')"
+                    >
+                      Cleanroom (80/70/30)
+                    </button>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advCeilingRefl">
+                      Ceiling Reflectance (ρc)
+                    </label>
+                    <input
+                      id="advCeilingRefl"
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      max="1"
+                      class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                      [ngModel]="store.ceilingReflectance()"
+                      (ngModelChange)="store.ceilingReflectance.set($event)"
+                    />
+                  </div>
+                  <div>
+                    <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advWallRefl">
+                      Wall Reflectance (ρw)
+                    </label>
+                    <input
+                      id="advWallRefl"
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      max="1"
+                      class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                      [ngModel]="store.wallReflectance()"
+                      (ngModelChange)="store.wallReflectance.set($event)"
+                    />
+                  </div>
+                  <div>
+                    <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advFloorRefl">
+                      Floor Reflectance (ρf)
+                    </label>
+                    <input
+                      id="advFloorRefl"
+                      type="number"
+                      step="0.05"
+                      min="0"
+                      max="1"
+                      class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                      [ngModel]="store.floorReflectance()"
+                      (ngModelChange)="store.floorReflectance.set($event)"
+                    />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advMF">
+                      Maintenance Factor (MF)
+                    </label>
+                    <input
+                      id="advMF"
+                      type="number"
+                      step="0.05"
+                      min="0.1"
+                      max="1"
+                      class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                      [ngModel]="store.maintenanceFactor()"
+                      (ngModelChange)="store.maintenanceFactor.set($event)"
+                    />
+                    <span class="block mt-1 font-mono text-[10px] text-muted">Clean interior default: 0.80</span>
+                  </div>
+                  <div>
+                    <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advBounces">
+                      Radiosity Bounces
+                    </label>
+                    <input
+                      id="advBounces"
+                      type="number"
+                      min="0"
+                      max="10"
+                      class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                      [ngModel]="store.bounces()"
+                      (ngModelChange)="store.bounces.set($event)"
+                    />
+                    <span class="block mt-1 font-mono text-[10px] text-muted">0 = Direct flux only, 3 = Full equilibrium</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Section II: Standards Compliance -->
+              <div>
+                <div class="flex items-center gap-2 mb-4 pl-3 border-l-2 border-primary">
+                  <span class="font-mono text-xs text-primary">II.</span>
+                  <span class="font-mono text-xs text-primary tracking-widest uppercase">EN 12464 Lighting Standard Criteria</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <app-searchable-select
+                    label="Standard Category"
+                    placeholder="Select category (e.g. Offices)"
+                    controlId="adv-std-cat"
+                    [options]="standardCategories()"
+                    [value]="store.standardCategory()"
+                    [loading]="categoriesLoading()"
+                    (valueChange)="onStandardSelect($event)"
+                  />
+                  <app-searchable-select
+                    label="Task or Activity"
+                    placeholder="Select task"
+                    controlId="adv-std-act"
+                    [options]="taskOrActivities()"
+                    [value]="store.taskOrActivity()"
+                    [disabled]="!store.standardCategory()"
+                    [loading]="tasksLoading()"
+                    (valueChange)="onTaskSelect($event)"
+                  />
+                </div>
+
+                @if (store.selectedStandard(); as std) {
+                  <div class="mt-4 p-4 rounded-xl border border-border bg-black flex items-center justify-between">
+                    <div>
+                      <span class="font-mono text-xs text-primary uppercase">Standard Target</span>
+                      <p class="font-body text-sm text-white font-semibold mt-0.5">{{ std.activity }}</p>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs font-mono text-muted">
+                      <span>Target Lux: <strong class="text-white">{{ (std.parameters.em_u_lx ?? std.parameters.em_r_lx) ?? '—' }} lx</strong></span>
+                      <span>Target Uniformity: <strong class="text-white">{{ std.parameters.uo ?? '—' }}</strong></span>
+                    </div>
+
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Submit Error Alert -->
+        @if (store.calculateError()) {
+          <div class="mb-4 p-4 rounded-xl border border-primary/40 bg-primary/10 flex items-start gap-3" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div>
+              <p class="font-mono text-xs text-primary font-bold uppercase">Simulation Error</p>
+              <p class="font-body text-sm text-white mt-0.5">{{ store.calculateError() }}</p>
+            </div>
+          </div>
+        }
+
+        <!-- Wizard Navigation Footer -->
+        <div class="flex items-center justify-between">
+          @if (store.currentStep() === 1) {
+            <a routerLink="/" class="text-muted font-mono text-xs tracking-widest uppercase hover:text-white transition-colors">
+              BACK TO HOME
+            </a>
+          } @else {
+            <button
+              type="button"
+              class="text-muted font-mono text-xs tracking-widest uppercase hover:text-white transition-colors bg-transparent border-none cursor-pointer"
+              (click)="store.prevStep()"
+            >
+              PREVIOUS
+            </button>
+          }
+
+          @if (store.currentStep() === 3) {
+            <button
+              type="button"
+              class="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-mono text-xs font-semibold tracking-widest uppercase transition-all duration-150 hover:bg-primary-dark cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              [disabled]="!store.canProceed() || store.isCalculating()"
+              (click)="runSimulation(false)"
+            >
+              @if (store.isCalculating()) {
+                CALCULATING RADIOSITY...
+              } @else {
+                RUN ADVANCED SIMULATION
+              }
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-mono text-xs font-semibold tracking-widest uppercase transition-all duration-150 hover:bg-primary-dark cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              [disabled]="!store.canProceed()"
+              (click)="store.nextStep()"
+            >
+              NEXT
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ========================================== -->
+    <!-- MODE B: INTERACTIVE RESULTS STUDIO         -->
+    <!-- ========================================== -->
+    @if (store.viewMode() === 'studio') {
+      <div class="space-y-6">
+        <!-- Studio Top Bar -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 rounded-xl border border-border bg-surface">
+          <div>
+            <div class="flex items-center gap-3">
+              <span class="font-mono text-xs text-primary font-bold uppercase tracking-wider">Advanced Study Studio</span>
+              @if (store.lastRequestId()) {
+                <span class="font-mono text-[11px] text-muted">ID: {{ store.lastRequestId() }}</span>
+              }
+            </div>
+            <h1 class="font-display text-2xl sm:text-3xl text-white uppercase mt-1">
+              {{ store.project().projectName || 'Advanced Radiosity Study' }}
+            </h1>
+            <p class="font-body text-xs text-muted mt-1">
+              {{ store.project().companyName }} · {{ store.roomLength() }}m × {{ store.roomWidth() }}m · Ceiling: {{ store.ceilingHeight() }}m · Mounting: {{ store.mountingHeight() }}m
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- Compliance Status Pill -->
+            @if (store.activeEvaluation(); as evalDto) {
+              <div class="flex items-center gap-3 bg-black px-4 py-2 rounded-xl border border-border">
+                <div class="flex flex-col">
+                  <span class="font-mono text-[10px] text-muted uppercase">Avg Lux</span>
+                  <span class="font-display text-lg text-white font-medium">
+                    {{ evalDto.average | number: '1.0-0' }} lx
+                  </span>
+                </div>
+                <div class="w-px h-6 bg-border"></div>
+                <div class="flex flex-col">
+                  <span class="font-mono text-[10px] text-muted uppercase">Uniformity</span>
+                  <span class="font-display text-lg text-white font-medium">
+                    {{ evalDto.uniformity | number: '1.2-2' }}
+                  </span>
+                </div>
+              </div>
+            }
+
+            <!-- Quick Action Buttons -->
+            <button
+              type="button"
+              class="h-11 px-4 rounded-xl border border-border font-mono text-xs tracking-wider text-muted hover:text-white hover:border-[#3A3A3A] transition-colors"
+              (click)="store.viewMode.set('wizard')"
+            >
+              EDIT SETUP
+            </button>
+            <button
+              type="button"
+              class="h-11 px-4 rounded-xl border border-border font-mono text-xs tracking-wider text-muted hover:text-white hover:border-[#3A3A3A] transition-colors"
+              (click)="store.reset()"
+            >
+              NEW STUDY
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Luminaire Bar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border bg-surface">
+          <div class="flex items-center gap-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-primary shrink-0"></span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] text-muted uppercase tracking-wider">Active Luminaire</span>
+                @if (store.activeVariantDetail(); as v) {
+                  @if (v.fixture.is_main_solution) {
+                    <span
+                      class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#1FA971]/20 text-[#1FA971] border border-[#1FA971]/30 font-mono text-[9px] font-semibold uppercase tracking-wider"
+                      title="Can be used as a main solution"
+                    >
+                      <span class="w-1 h-1 rounded-full bg-[#1FA971]"></span>
+                      Main Solution
+                    </span>
+                  }
+                  <span class="font-mono text-[11px] text-primary font-medium">
+                    {{ v.power }}W · {{ v.efficacy }} lm/W · CRI {{ v.cri }}
+                  </span>
+                }
+              </div>
+              <h2 class="font-mono text-sm text-white font-semibold tracking-wide">
+                {{ store.activeVariantName() }}
+              </h2>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            @if (store.activeVariantDetail(); as v) {
+              <button
+                type="button"
+                class="h-8 px-3 rounded-lg bg-black border border-border font-mono text-xs text-white hover:border-primary transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                (click)="store.openFixtureDetails(v)"
+                title="Open comprehensive optical, electrical, and dimensional datasheet for this luminaire"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>FIXTURE DETAILS</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Studio Navigation Tabs -->
+        <div class="flex items-center gap-2 border-b border-border pb-px">
+          <button
+            type="button"
+            class="h-12 px-5 font-mono text-xs font-semibold tracking-widest uppercase transition-colors relative cursor-pointer"
+            [class]="store.activeStudioTab() === 'plan' ? 'text-primary' : 'text-muted hover:text-white'"
+            (click)="store.setStudioTab('plan')"
+            title="Interactive 2D room floor plan with radiosity heatmap and luminaire placement"
+          >
+            2D PLAN STUDIO
+            @if (store.activeStudioTab() === 'plan') {
+              <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></span>
+            }
+          </button>
+          <button
+            type="button"
+            class="h-12 px-5 font-mono text-xs font-semibold tracking-widest uppercase transition-colors relative cursor-pointer"
+            [class]="store.activeStudioTab() === 'compliance' ? 'text-primary' : 'text-muted hover:text-white'"
+            (click)="store.setStudioTab('compliance')"
+            title="EN 12464 standard compliance audit and multi-variant catalog comparison"
+          >
+            COMPLIANCE & BENCHMARK
+            @if (store.activeStudioTab() === 'compliance') {
+              <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"></span>
+            }
+          </button>
+        </div>
+
+        <!-- Studio View Contents -->
+        @if (store.activeStudioTab() === 'plan') {
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Canvas Main Column -->
+            <div class="lg:col-span-2 space-y-4">
+              <app-plan-canvas />
+            </div>
+
+            <!-- Inspector & Controls Side Column -->
+            <div class="space-y-6">
+              <app-fixture-inspector (recalculate)="runSimulation(true)" />
+              <app-matrix-layers />
+            </div>
+          </div>
+        }
+
+        @if (store.activeStudioTab() === 'compliance') {
+          <app-variant-comparison />
+        }
+
+        <!-- Fixture Details Modal Dialog -->
+        @if (store.showFixtureDetailsModal()) {
+          <div
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Fixture Details"
+            (click)="store.closeFixtureDetails()"
+          >
+            <div
+              class="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-surface border border-border rounded-2xl p-6 sm:p-8 shadow-2xl"
+              (click)="$event.stopPropagation()"
+            >
+              <button
+                type="button"
+                class="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/60 border border-border text-muted hover:text-white hover:border-white transition-colors flex items-center justify-center cursor-pointer"
+                (click)="store.closeFixtureDetails()"
+                aria-label="Close fixture details modal"
+                title="Close"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+
+              @if (store.activeVariantDetail(); as v) {
+                <app-fixture-details [variant]="v" />
+              } @else {
+                <div class="py-12 text-center">
+                  <p class="font-mono text-sm text-white font-medium">Custom IES Photometric Distribution</p>
+                  <p class="font-body text-xs text-muted mt-1">Detailed catalog images and specifications are available for catalog fixtures.</p>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</section>
