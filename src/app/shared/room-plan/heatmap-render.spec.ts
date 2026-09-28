@@ -6,7 +6,17 @@ describe('luxFill', () => {
     expect(luxFill(40, 10, 40)).toBe('rgb(237, 235, 230)');
     expect(luxFill(25, 10, 40)).toBe('rgb(140, 139, 137)');
   });
+
+  it('supports false-color and brand palettes', () => {
+    import('./heatmap-render').then(({ luxFillWithPalette }) => {
+      expect(luxFillWithPalette(0, 0, 100, 'false-color')).toBe('rgb(11, 28, 51)');
+      expect(luxFillWithPalette(100, 0, 100, 'false-color')).toBe('rgb(255, 247, 204)');
+      expect(luxFillWithPalette(0, 0, 100, 'brand')).toBe('rgb(17, 17, 17)');
+      expect(luxFillWithPalette(100, 0, 100, 'brand')).toBe('rgb(255, 255, 255)');
+    });
+  });
 });
+
 
 describe('rotatePoint', () => {
   it('rotates a point around the origin', () => {

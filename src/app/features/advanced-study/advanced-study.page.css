@@ -1,0 +1,4 @@
+/* Advanced Study Page styles conforming to DESIGN.md */
+:host {
+  display: block;
+}

@@ -16,8 +16,15 @@ export const routes: Routes = [
       import('./features/cad-study/cad-study.page').then((m) => m.CadStudyPage),
   },
   {
+    path: 'advanced-study',
+    title: 'Advanced Study | LuxSCale AI',
+    loadComponent: () =>
+      import('./features/advanced-study/advanced-study.page').then((m) => m.AdvancedStudyPage),
+  },
+  {
     path: 'results',
     title: 'Results | LuxSCale AI',
     loadComponent: () => import('./features/results/results.page').then((m) => m.ResultsPage),
   },
 ];
+

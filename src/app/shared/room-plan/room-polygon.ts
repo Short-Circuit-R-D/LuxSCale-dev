@@ -273,3 +273,9 @@ export function svgPathFromRings(
   };
   return [ringPath(vertices), ...holes.map(ringPath)].filter(Boolean).join(' ');
 }
+
+export function snapToGrid(value: number, step: number): number {
+  if (step <= 0) return value;
+  return Math.round(value / step) * step;
+}
+

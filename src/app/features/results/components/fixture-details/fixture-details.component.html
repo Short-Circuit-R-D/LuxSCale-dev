@@ -119,7 +119,18 @@
           <span class="font-mono text-xs text-primary tracking-widest uppercase sm:text-xs">{{
             variant.fixture.manufacturer_name
           }}</span>
-          <h3 class="font-display text-xl text-white m-0 mt-1 sm:text-2xl">{{ variant.fixture.name }}</h3>
+          <div class="flex items-center gap-2 mt-1">
+            <h3 class="font-display text-xl text-white m-0 sm:text-2xl">{{ variant.fixture.name }}</h3>
+            @if (variant.fixture.is_main_solution) {
+              <span
+                class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#1FA971]/20 text-[#1FA971] border border-[#1FA971]/40 font-mono text-[10px] font-semibold uppercase tracking-wider"
+                title="Can be used as a main solution"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-[#1FA971]"></span>
+                Main Solution
+              </span>
+            }
+          </div>
           <span class="font-mono text-xs text-muted sm:text-sm">{{ variant.name }}</span>
         </div>
 
