@@ -28,6 +28,7 @@ import { MatrixLayersComponent } from './components/matrix-layers/matrix-layers.
 import { PlanCanvasComponent } from './components/plan-canvas/plan-canvas.component';
 import { VariantComparisonComponent } from './components/variant-comparison/variant-comparison.component';
 import { FixtureDetailsComponent } from '../results/components/fixture-details/fixture-details.component';
+import { PatternPreviewComponent } from './components/pattern-preview/pattern-preview.component';
 import { AdvancedStudyStore } from './stores/advanced-study.store';
 
 function toMetric(value: unknown): number | null {
@@ -65,6 +66,7 @@ export interface ApplicationGroup {
     FixtureInspectorComponent,
     FixtureDetailsComponent,
     VariantComparisonComponent,
+    PatternPreviewComponent,
   ],
   templateUrl: './advanced-study.page.html',
   styleUrl: './advanced-study.page.css',
@@ -279,6 +281,20 @@ export class AdvancedStudyPage implements OnInit {
   onFloorZoneInput(value: unknown) {
     const n = toMetric(value);
     this.store.floorZone.set(n != null && n >= 0 ? n : null);
+  }
+
+  onPatternChange(pattern: 'grid' | 'perimeter' | 'staggered') {
+    this.store.setFixturePattern(pattern);
+  }
+
+  onPerimeterWallOffsetInput(value: unknown) {
+    const n = toMetric(value);
+    if (n != null && n >= 0) this.store.setPerimeterWallOffset(n);
+  }
+
+  onPerimeterSpacingInput(value: unknown) {
+    const n = toMetric(value);
+    if (n != null && n > 0) this.store.setPerimeterSpacing(n);
   }
 
   onPhoneInput(value: string) {
