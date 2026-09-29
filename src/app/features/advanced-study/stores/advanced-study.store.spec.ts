@@ -37,7 +37,7 @@ describe('AdvancedStudyStore', () => {
     expect(store.roomLength()).toBe(8.0);
   });
 
-  it('builds CalculateRequest for count grid correctly', () => {
+  it('builds CalculateRequest for pattern layouts correctly with free placements', () => {
     store.updateProject({
       projectName: 'P1',
       companyName: 'C1',
@@ -47,6 +47,7 @@ describe('AdvancedStudyStore', () => {
     });
     store.roomLength.set(10.0);
     store.roomWidth.set(6.0);
+    store.fixturePattern.set('grid');
     store.gridType.set('count');
     store.countX.set(4);
     store.countY.set(2);
@@ -57,10 +58,45 @@ describe('AdvancedStudyStore', () => {
     expect(req.ceilingHeight).toBe(3.0);
     expect(req.mountingHeight).toBe(2.8);
     expect((req as unknown as Record<string, unknown>)['height']).toBeUndefined();
-    expect(req.grid?.count?.countX).toBe(4);
-    expect(req.grid?.count?.countY).toBe(2);
+    // In advanced study, fixtures are generated on the frontend as free placements and req.grid is omitted
+    expect(req.grid).toBeUndefined();
+    expect(req.fixtures).toBeDefined();
+    expect(req.fixtures?.length).toBe(8); // 4 x 2
+    expect(req.fixtures?.[0].variantId).toBe('v-panel-600');
+    expect(req.fixtures?.[0].z).toBe(2.8);
+    expect(req.fixtures?.[0].tiltAngle).toBe(0);
     expect(req.variantId).toBe('v-panel-600');
-    expect(req.fixtures).toBeUndefined();
+    expect(req.floorZone).toBeUndefined();
+
+    // Verify setting custom floorZone
+    store.floorZone.set(0.3);
+    const reqWithFz = store.buildCalculateRequest(false);
+    expect(reqWithFz.floorZone).toBe(0.3);
+
+    // Verify perimeter pattern layout
+    store.fixturePattern.set('perimeter');
+    store.perimeterWallOffset.set(1.0);
+    store.perimeterSpacing.set(2.5);
+    const perimReq = store.buildCalculateRequest(false);
+    expect(perimReq.grid).toBeUndefined();
+    expect(perimReq.fixtures?.length).toBeGreaterThan(0);
+    // Fixtures should be positioned inside the room bounds
+    for (const f of perimReq.fixtures ?? []) {
+      expect(f.x).toBeGreaterThan(0);
+      expect(f.x).toBeLessThan(10);
+      expect(f.y).toBeGreaterThan(0);
+      expect(f.y).toBeLessThan(6);
+    }
+
+    // Verify staggered pattern layout
+    store.fixturePattern.set('staggered');
+    const stagReq = store.buildCalculateRequest(false);
+    expect(stagReq.grid).toBeUndefined();
+    expect(stagReq.fixtures?.length).toBe(8);
+
+    // Verify clearing floorZone sends undefined so backend defaults it
+    store.floorZone.set(null);
+    expect(store.buildCalculateRequest(false).floorZone).toBeUndefined();
   });
 
   it('supports custom polygon mode and templates', () => {
@@ -142,11 +178,17 @@ describe('AdvancedStudyStore', () => {
     expect(store.freeFixtures()[1].variantId).toBe('custom-panel-id');
     expect(store.freeFixtures()[1].iesRef).toBeNull();
 
+    // Tilt fixture
+    store.updateFixture('F1', { tiltAngle: 30 });
+    expect(store.freeFixtures()[0].tiltAngle).toBe(30);
+
     // Build request with free fixtures
     const freeReq = store.buildCalculateRequest(true);
     expect(freeReq.fixtures?.length).toBe(2);
     expect(freeReq.fixtures?.[0].x).toBe(2.37);
+    expect(freeReq.fixtures?.[0].tiltAngle).toBe(30);
     expect(freeReq.fixtures?.[1].variantId).toBe('custom-panel-id');
+    expect(freeReq.fixtures?.[1].tiltAngle).toBe(0);
     expect(freeReq.includeWallCeilingMatrices).toBe(true);
     expect(freeReq.grid).toBeUndefined();
   });

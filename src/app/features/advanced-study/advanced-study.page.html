@@ -277,8 +277,8 @@
                     </div>
                   }
 
-                  <!-- Elevations (Common for both modes) -->
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                  <!-- Elevations & Calculation Grid (Common for both modes) -->
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
                     <div>
                       <label class="block font-mono text-[11px] text-muted tracking-widest uppercase mb-1" for="advCeilingHeight">Ceiling Height (m) *</label>
                       <input
@@ -319,13 +319,48 @@
                         (ngModelChange)="onWorkPlaneInput($event)"
                       />
                     </div>
+                    <div>
+                      <div class="flex items-center gap-1.5 mb-1">
+                        <label class="block font-mono text-[11px] text-muted tracking-widest uppercase" for="advFloorZone">
+                          Floor Zone (m)
+                        </label>
+                        <div class="relative group inline-flex items-center">
+                          <button
+                            type="button"
+                            class="w-4 h-4 rounded-full bg-border/60 hover:bg-border text-muted hover:text-white flex items-center justify-center font-mono text-[10px] cursor-help transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary"
+                            aria-label="Floor Zone Info: Distance between wall boundaries to the working plane"
+                            title="Distance between wall boundaries to the working plane (defaults to 0.5m if empty)"
+                          >
+                            ?
+                          </button>
+                          <div
+                            role="tooltip"
+                            class="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block group-focus-within:block w-56 p-2 rounded-lg bg-black border border-border shadow-xl font-body text-[11px] text-white/90 leading-tight z-30"
+                          >
+                            Distance between wall boundaries to the working plane (defaults to 0.5m if empty).
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-black"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <input
+                        id="advFloorZone"
+                        type="number"
+                        step="0.05"
+                        min="0"
+                        placeholder="0.5 (Default)"
+                        class="w-full px-3 py-2 bg-transparent border border-border rounded-lg text-white font-mono text-sm placeholder:text-muted/40 focus:border-primary focus:outline-none"
+                        [ngModel]="store.floorZone()"
+                        (ngModelChange)="onFloorZoneInput($event)"
+                        title="Boundary margin inset in meters (distance between wall boundaries to the working plane)"
+                      />
+                    </div>
                   </div>
 
                   @if (heightError()) {
                     <p class="mt-2 font-mono text-xs text-primary">{{ heightError() }}</p>
                   }
                   <p class="mt-3 font-body text-xs text-muted">
-                    Workplane: 0.0m for true floor, 0.75m–0.85m for standard office desks.
+                    Workplane: 0.0m for true floor, 0.75m–0.85m for standard office desks · Floor Zone: Distance between wall boundaries to the working plane (leave empty for 0.5m default).
                   </p>
                 </div>
               </div>
@@ -604,110 +639,242 @@
                 }
               </div>
 
-              <!-- Section II: Initial Placement Grid -->
+              <!-- Section II: Fixture Pattern & Distribution -->
               <div>
-                <div class="flex items-center justify-between mb-4 pb-2 border-b border-border">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-2 border-b border-border">
                   <div class="flex items-center gap-2 pl-3 border-l-2 border-primary">
                     <span class="font-mono text-xs text-primary">II.</span>
-                    <span class="font-mono text-xs text-primary tracking-widest uppercase">Initial Grid Distribution</span>
+                    <span class="font-mono text-xs text-primary tracking-widest uppercase">Fixture Pattern & Distribution</span>
                   </div>
 
-                  <div class="inline-flex items-center p-0.5 rounded-lg border border-border/70 bg-[#0d0d0d]">
+                  <!-- 3-Way Pattern Selector -->
+                  <div class="inline-flex items-center p-0.5 rounded-lg border border-border/70 bg-[#0d0d0d]" role="tablist" aria-label="Fixture Pattern Selection">
                     <button
                       type="button"
-                      class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150"
-                      [class]="store.gridType() === 'count' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
-                      (click)="store.gridType.set('count')"
+                      role="tab"
+                      [attr.aria-selected]="store.fixturePattern() === 'grid'"
+                      class="h-7 px-3 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150 cursor-pointer"
+                      [class]="store.fixturePattern() === 'grid' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                      (click)="onPatternChange('grid')"
                     >
-                      Count
+                      Grid
                     </button>
                     <button
                       type="button"
-                      class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150"
-                      [class]="store.gridType() === 'spacing' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
-                      (click)="store.gridType.set('spacing')"
+                      role="tab"
+                      [attr.aria-selected]="store.fixturePattern() === 'perimeter'"
+                      class="h-7 px-3 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150 cursor-pointer"
+                      [class]="store.fixturePattern() === 'perimeter' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                      (click)="onPatternChange('perimeter')"
                     >
-                      Spacing
+                      Perimeter
+                    </button>
+                    <button
+                      type="button"
+                      role="tab"
+                      [attr.aria-selected]="store.fixturePattern() === 'staggered'"
+                      class="h-7 px-3 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150 cursor-pointer"
+                      [class]="store.fixturePattern() === 'staggered' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                      (click)="onPatternChange('staggered')"
+                    >
+                      Staggered
                     </button>
                   </div>
                 </div>
 
-
-                @if (store.gridType() === 'count') {
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advCountX">Count X *</label>
-                      <input
-                        id="advCountX"
-                        type="number"
-                        min="1"
-                        max="30"
-                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
-                        [ngModel]="store.countX()"
-                        (ngModelChange)="store.countX.set($event)"
-                        required
-                      />
+                <!-- Perimeter Pattern Controls -->
+                @if (store.fixturePattern() === 'perimeter') {
+                  <div class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advPerimWallOffset">
+                          Wall Inset Offset (m) *
+                        </label>
+                        <input
+                          id="advPerimWallOffset"
+                          type="number"
+                          step="0.05"
+                          min="0.1"
+                          max="10"
+                          class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                          [ngModel]="store.perimeterWallOffset()"
+                          (ngModelChange)="onPerimeterWallOffsetInput($event)"
+                          required
+                        />
+                        <span class="block mt-1 font-mono text-[10px] text-muted">Distance from perimeter walls inwards (m)</span>
+                      </div>
+                      <div>
+                        <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advPerimSpacing">
+                          Perimeter Spacing (m) *
+                        </label>
+                        <input
+                          id="advPerimSpacing"
+                          type="number"
+                          step="0.1"
+                          min="0.3"
+                          max="20"
+                          class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                          [ngModel]="store.perimeterSpacing()"
+                          (ngModelChange)="onPerimeterSpacingInput($event)"
+                          required
+                        />
+                        <span class="block mt-1 font-mono text-[10px] text-muted">Linear spacing between luminaires along walls</span>
+                      </div>
                     </div>
-                    <div>
-                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advCountY">Count Y *</label>
-                      <input
-                        id="advCountY"
-                        type="number"
-                        min="1"
-                        max="30"
-                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
-                        [ngModel]="store.countY()"
-                        (ngModelChange)="store.countY.set($event)"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advOffsetFrac">Offset Fraction</label>
-                      <input
-                        id="advOffsetFrac"
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="1"
-                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
-                        [ngModel]="store.offsetFraction()"
-                        (ngModelChange)="store.offsetFraction.set($event)"
-                      />
-                      <span class="block mt-1 font-mono text-[10px] text-muted">0.5 = DIALux symmetric half-spacing</span>
-                    </div>
+                    <p class="font-mono text-xs text-muted/80 bg-surface/50 border border-border/40 p-2.5 rounded-lg flex items-center gap-2">
+                      <span class="text-primary font-bold">ℹ</span>
+                      Perimeter luminaires follow the contour of the room boundary and are automatically oriented parallel to each wall.
+                    </p>
                   </div>
                 }
 
-                @if (store.gridType() === 'spacing') {
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advSpacingX">Spacing X (m) *</label>
-                      <input
-                        id="advSpacingX"
-                        type="number"
-                        step="0.1"
-                        min="0.5"
-                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
-                        [ngModel]="store.spacingX()"
-                        (ngModelChange)="store.spacingX.set($event)"
-                        required
-                      />
+                <!-- Grid & Staggered Controls -->
+                @if (store.fixturePattern() === 'grid' || store.fixturePattern() === 'staggered') {
+                  <div class="space-y-4">
+                    <!-- Sub-bar: Count vs Spacing & Luminaire Rotation -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 p-2 rounded-lg bg-surface/40 border border-border/40">
+                      <div class="inline-flex items-center p-0.5 rounded-lg border border-border/70 bg-[#0d0d0d]">
+                        <button
+                          type="button"
+                          class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150 cursor-pointer"
+                          [class]="store.gridType() === 'count' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                          (click)="store.gridType.set('count')"
+                        >
+                          Count
+                        </button>
+                        <button
+                          type="button"
+                          class="h-6.5 px-2.5 rounded-[5px] font-mono text-[11px] tracking-wide transition-all duration-150 cursor-pointer"
+                          [class]="store.gridType() === 'spacing' ? 'bg-primary text-white font-medium shadow-xs' : 'text-muted hover:text-white'"
+                          (click)="store.gridType.set('spacing')"
+                        >
+                          Spacing
+                        </button>
+                      </div>
+
+                      <!-- Luminaire Azimuth Rotation with Presets -->
+                      <div class="flex items-center gap-2">
+                        <label class="font-mono text-xs text-muted tracking-widest uppercase whitespace-nowrap" for="advLumRotation">
+                          Rotation:
+                        </label>
+                        <input
+                          id="advLumRotation"
+                          type="number"
+                          min="0"
+                          max="360"
+                          step="15"
+                          class="w-18 px-2 py-1 bg-black border border-border rounded text-white font-mono text-xs focus:border-primary focus:outline-none"
+                          [ngModel]="store.luminaireRotation()"
+                          (ngModelChange)="store.luminaireRotation.set(toNum($event))"
+                        />
+                        <div class="flex items-center gap-1">
+                          @for (deg of [0, 90, 180, 270]; track deg) {
+                            <button
+                              type="button"
+                              class="px-2 py-0.5 rounded border font-mono text-[10px] transition-colors cursor-pointer"
+                              [class]="store.luminaireRotation() === deg ? 'border-primary bg-primary/20 text-primary font-bold' : 'border-border text-muted hover:text-white'"
+                              (click)="store.luminaireRotation.set(deg)"
+                              [title]="'Set azimuth rotation to ' + deg + '°'"
+                            >
+                              {{ deg }}°
+                            </button>
+                          }
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advSpacingY">Spacing Y (m) *</label>
-                      <input
-                        id="advSpacingY"
-                        type="number"
-                        step="0.1"
-                        min="0.5"
-                        class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
-                        [ngModel]="store.spacingY()"
-                        (ngModelChange)="store.spacingY.set($event)"
-                        required
-                      />
-                    </div>
+
+                    @if (store.gridType() === 'count') {
+                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advCountX">Count X *</label>
+                          <input
+                            id="advCountX"
+                            type="number"
+                            min="1"
+                            max="30"
+                            class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                            [ngModel]="store.countX()"
+                            (ngModelChange)="store.countX.set($event)"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advCountY">Count Y *</label>
+                          <input
+                            id="advCountY"
+                            type="number"
+                            min="1"
+                            max="30"
+                            class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                            [ngModel]="store.countY()"
+                            (ngModelChange)="store.countY.set($event)"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advOffsetFrac">Offset Fraction</label>
+                          <input
+                            id="advOffsetFrac"
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="1"
+                            class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                            [ngModel]="store.offsetFraction()"
+                            (ngModelChange)="store.offsetFraction.set($event)"
+                          />
+                          <span class="block mt-1 font-mono text-[10px] text-muted">0.5 = DIALux symmetric half-spacing</span>
+                        </div>
+                      </div>
+                    }
+
+                    @if (store.gridType() === 'spacing') {
+                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advSpacingX">Spacing X (m) *</label>
+                          <input
+                            id="advSpacingX"
+                            type="number"
+                            step="0.1"
+                            min="0.5"
+                            class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                            [ngModel]="store.spacingX()"
+                            (ngModelChange)="store.spacingX.set($event)"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label class="block font-mono text-xs text-muted tracking-widest uppercase mb-1.5" for="advSpacingY">Spacing Y (m) *</label>
+                          <input
+                            id="advSpacingY"
+                            type="number"
+                            step="0.1"
+                            min="0.5"
+                            class="w-full px-3.5 py-2.5 bg-black border border-border rounded-lg text-white font-mono text-sm focus:border-primary focus:outline-none"
+                            [ngModel]="store.spacingY()"
+                            (ngModelChange)="store.spacingY.set($event)"
+                            required
+                          />
+                        </div>
+                      </div>
+                    }
+
+                    @if (store.fixturePattern() === 'staggered') {
+                      <p class="font-mono text-xs text-muted/80 bg-surface/50 border border-border/40 p-2.5 rounded-lg flex items-center gap-2">
+                        <span class="text-primary font-bold">ℹ</span>
+                        Staggered layout shifts alternating rows by half the horizontal spacing (50% offset) to improve illuminance uniformity.
+                      </p>
+                    }
                   </div>
                 }
+
+                <!-- Live 2D Pattern Preview -->
+                <div class="mt-6">
+                  <app-pattern-preview
+                    [polygon]="store.polygon()"
+                    [fixtures]="store.generatedFixtures()"
+                  />
+                </div>
               </div>
             </div>
           }

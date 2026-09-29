@@ -14,6 +14,11 @@ import type { StandardResponseDto } from '../../../core/standards/dtos/standards
 import type { VariantDetailResponseDto } from '../../../core/variants/dtos/variants.dto';
 import type { HeatmapPalette } from '../../../shared/room-plan/heatmap-render';
 import { pointInPolygon, snapToGrid } from '../../../shared/room-plan/room-polygon';
+import {
+  generateOrthogonalGrid,
+  generatePerimeterLayout,
+  generateStaggeredGrid,
+} from '../utils/fixture-patterns';
 
 export interface AdvancedProjectInfo {
   projectName: string;
@@ -56,7 +61,7 @@ export class AdvancedStudyStore {
   readonly ceilingHeight = signal<number>(3.0);
   readonly mountingHeight = signal<number>(2.8);
   readonly workPlaneHeight = signal<number>(0.8);
-  readonly floorZone = signal<number | null>(0.5);
+  readonly floorZone = signal<number | null>(null);
   readonly wallZone = signal<number | null>(null);
 
 
@@ -70,6 +75,9 @@ export class AdvancedStudyStore {
   readonly iesFileName = signal<string>('');
   readonly extraIesFiles = signal<File[]>([]);
 
+  readonly fixturePattern = signal<'grid' | 'perimeter' | 'staggered'>('grid');
+  readonly perimeterWallOffset = signal<number>(0.8);
+  readonly perimeterSpacing = signal<number>(2.0);
   readonly gridType = signal<'count' | 'spacing'>('count');
   readonly countX = signal<number>(3);
   readonly countY = signal<number>(2);
@@ -165,6 +173,48 @@ export class AdvancedStudyStore {
     ];
   });
 
+  readonly generatedFixtures = computed<FreeFixtureDto[]>(() => {
+    const poly = this.polygon();
+    const pattern = this.fixturePattern();
+    const rot = this.luminaireRotation();
+    const mh = this.mountingHeight();
+    const vId = this.selectedVariantIds()[0] ?? null;
+    const meta = {
+      mountingHeight: mh,
+      rotation: rot,
+      tiltAngle: 0,
+      variantId: vId,
+      iesRef: null,
+    };
+
+    if (pattern === 'perimeter') {
+      return generatePerimeterLayout(
+        poly,
+        {
+          wallOffset: this.perimeterWallOffset(),
+          perimeterSpacing: this.perimeterSpacing(),
+        },
+        meta,
+      );
+    }
+
+    const gridParams = {
+      gridType: this.gridType(),
+      countX: this.countX(),
+      countY: this.countY(),
+      offsetFraction: this.offsetFraction(),
+      spacingX: this.spacingX(),
+      spacingY: this.spacingY(),
+      autoCenter: this.autoCenter(),
+    };
+
+    if (pattern === 'staggered') {
+      return generateStaggeredGrid(poly, gridParams, meta);
+    }
+
+    return generateOrthogonalGrid(poly, gridParams, meta);
+  });
+
   readonly isStep1Valid = computed(() => {
     const p = this.project();
     const ch = this.ceilingHeight();
@@ -195,12 +245,15 @@ export class AdvancedStudyStore {
     return Math.abs(area) > 0.05;
   });
 
-
   readonly isStep2Valid = computed(() => {
     if (this.photometryMode() === 'catalog') {
       if (this.selectedVariantIds().length === 0) return false;
     } else {
       if (!this.iesFile()) return false;
+    }
+
+    if (this.fixturePattern() === 'perimeter') {
+      return this.perimeterWallOffset() > 0 && this.perimeterSpacing() > 0;
     }
 
     if (this.gridType() === 'count') {
@@ -422,17 +475,34 @@ export class AdvancedStudyStore {
     const res = this.lastResult();
     const activeResultVarId = res?.results?.[this.selectedVariantIndex()]?.variantId;
     const defaultVariant = fallbackVariantId ?? activeResultVarId ?? this.selectedVariantIds()[0] ?? null;
-    const list: FreeFixtureDto[] = fixtures.map((f, i) => ({
-      id: f.id || `F${i + 1}`,
-      x: Math.round(f.position.x * 100) / 100,
-      y: Math.round(f.position.y * 100) / 100,
-      z: Math.round(f.position.z * 100) / 100,
-      rotation: f.rotation,
-      tiltAngle: 0,
-      aimDirection: f.aimDirection,
-      variantId: f.variantId ?? defaultVariant,
-      iesRef: f.iesRef ?? null,
-    }));
+    const existingMap = new Map(this.freeFixtures().map((f) => [f.id, f]));
+
+    const list: FreeFixtureDto[] = fixtures.map((f, i) => {
+      const id = f.id || `F${i + 1}`;
+      const existing = existingMap.get(id);
+
+      let tilt = existing?.tiltAngle ?? 0;
+      if (
+        existing?.tiltAngle == null &&
+        f.aimDirection &&
+        (f.aimDirection.z > -0.9999 || f.aimDirection.x !== 0 || f.aimDirection.y !== 0)
+      ) {
+        const clampedZ = Math.min(1, Math.max(-1, -f.aimDirection.z));
+        tilt = Math.round(Math.acos(clampedZ) * (180 / Math.PI));
+      }
+
+      return {
+        id,
+        x: Math.round(f.position.x * 100) / 100,
+        y: Math.round(f.position.y * 100) / 100,
+        z: Math.round(f.position.z * 100) / 100,
+        rotation: f.rotation,
+        tiltAngle: tilt,
+        aimDirection: f.aimDirection,
+        variantId: f.variantId ?? existing?.variantId ?? defaultVariant,
+        iesRef: f.iesRef ?? existing?.iesRef ?? null,
+      };
+    });
     this.freeFixtures.set(list);
     this.isDirty.set(false);
   }
@@ -579,6 +649,7 @@ export class AdvancedStudyStore {
     const mh = this.mountingHeight();
     const wh = this.workPlaneHeight();
     const fz = this.floorZone();
+    const floorZoneValue = fz != null && Number.isFinite(fz) && fz >= 0 ? fz : undefined;
     const wz = this.wallZone();
     const rot = this.luminaireRotation();
     const wr = this.wallReflectance();
@@ -610,7 +681,7 @@ export class AdvancedStudyStore {
       ceilingHeight: ch,
       mountingHeight: mh,
       workPlaneHeight: wh,
-      floorZone: fz,
+      floorZone: floorZoneValue,
       wallZone: wz,
       luminaireRotation: rot,
       wallReflectance: wr,
@@ -630,31 +701,31 @@ export class AdvancedStudyStore {
         y: f.y,
         z: f.z ?? mh,
         rotation: f.rotation ?? rot,
-        tiltAngle: 0,
+        tiltAngle: f.tiltAngle ?? 0,
         variantId: f.variantId || (!f.iesRef ? defaultVariant : null),
         iesRef: f.iesRef || null,
       }));
     } else {
-      if (this.gridType() === 'count') {
-        req.grid = {
-          count: {
-            countX: this.countX(),
-            countY: this.countY(),
-            offsetFraction: this.offsetFraction(),
-          },
-        };
-      } else {
-        req.grid = {
-          spacing: {
-            spacingX: this.spacingX(),
-            spacingY: this.spacingY(),
-            autoCenter: this.autoCenter(),
-          },
-        };
-      }
+      const generated = this.generatedFixtures();
+      req.fixtures = generated.map((f) => ({
+        ...f,
+        variantId: defaultVariant,
+      }));
     }
 
     return req;
+  }
+
+  setFixturePattern(pattern: 'grid' | 'perimeter' | 'staggered') {
+    this.fixturePattern.set(pattern);
+  }
+
+  setPerimeterWallOffset(offset: number) {
+    this.perimeterWallOffset.set(offset);
+  }
+
+  setPerimeterSpacing(spacing: number) {
+    this.perimeterSpacing.set(spacing);
   }
 
   setCalculationResult(res: CalculateResponse, requestId: string | null) {
@@ -681,6 +752,10 @@ export class AdvancedStudyStore {
         ceilingHeight: this.ceilingHeight(),
         mountingHeight: this.mountingHeight(),
         workPlaneHeight: this.workPlaneHeight(),
+        floorZone: this.floorZone(),
+        fixturePattern: this.fixturePattern(),
+        perimeterWallOffset: this.perimeterWallOffset(),
+        perimeterSpacing: this.perimeterSpacing(),
         gridType: this.gridType(),
         countX: this.countX(),
         countY: this.countY(),
@@ -709,6 +784,10 @@ export class AdvancedStudyStore {
       else if (data.height) this.ceilingHeight.set(data.height);
       if (data.mountingHeight !== undefined) this.mountingHeight.set(data.mountingHeight);
       if (data.workPlaneHeight !== undefined) this.workPlaneHeight.set(data.workPlaneHeight);
+      if (data.floorZone !== undefined) this.floorZone.set(data.floorZone);
+      if (data.fixturePattern) this.fixturePattern.set(data.fixturePattern);
+      if (data.perimeterWallOffset !== undefined) this.perimeterWallOffset.set(data.perimeterWallOffset);
+      if (data.perimeterSpacing !== undefined) this.perimeterSpacing.set(data.perimeterSpacing);
       if (data.countX) this.countX.set(data.countX);
       if (data.countY) this.countY.set(data.countY);
       if (data.selectedVariantIds) this.selectedVariantIds.set(data.selectedVariantIds);
@@ -723,6 +802,10 @@ export class AdvancedStudyStore {
     this.ceilingHeight.set(3.0);
     this.mountingHeight.set(2.8);
     this.workPlaneHeight.set(0.8);
+    this.floorZone.set(null);
+    this.fixturePattern.set('grid');
+    this.perimeterWallOffset.set(0.8);
+    this.perimeterSpacing.set(2.0);
     this.lastResult.set(null);
     this.freeFixtures.set([]);
     this.selectedFixtureId.set(null);

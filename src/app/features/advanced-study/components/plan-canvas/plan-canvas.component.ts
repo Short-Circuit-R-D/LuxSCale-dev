@@ -33,6 +33,12 @@ interface ScreenFixture {
   hasAim: boolean;
   aimEndX: number;
   aimEndY: number;
+  rotEndX: number;
+  rotEndY: number;
+  rotArrowLeftX: number;
+  rotArrowLeftY: number;
+  rotArrowRightX: number;
+  rotArrowRightY: number;
   isSelected: boolean;
 }
 
@@ -200,6 +206,23 @@ interface ScreenFixture {
                 fill="#FFFFFF"
                 stroke="#000000"
                 stroke-width="1"
+              />
+
+              <!-- Azimuth Rotation Indicator (C0 optical axis pointer, distinctive even when tilt is 0°) -->
+              <line
+                [attr.x1]="f.cx"
+                [attr.y1]="f.cy"
+                [attr.x2]="f.rotEndX"
+                [attr.y2]="f.rotEndY"
+                stroke="#38BDF8"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+              <polygon
+                [attr.points]="f.rotEndX + ',' + f.rotEndY + ' ' + f.rotArrowLeftX + ',' + f.rotArrowLeftY + ' ' + f.rotArrowRightX + ',' + f.rotArrowRightY"
+                fill="#38BDF8"
+                stroke="#000000"
+                stroke-width="0.5"
               />
 
               <!-- Aim direction arrow if tilted -->
@@ -439,8 +462,13 @@ export class PlanCanvasComponent {
     return list.map((f, i) => {
       const { sx: cx, sy: cy } = this.worldToScreen(f.x, f.y);
 
-      // Look up detailed corners if calculated, else construct a default 0.6x0.6m opening
+      // Look up detailed corners if calculated, else construct a rotated 0.6x0.6m opening
       const dto = resFixtures.find((rf) => rf.id === f.id) ?? resFixtures[i];
+      const rot = f.rotation ?? 0;
+      const rotRad = rot * (Math.PI / 180);
+      const cosR = Math.cos(rotRad);
+      const sinR = Math.sin(rotRad);
+
       let cornersStr = '';
       if (dto && dto.corners && dto.corners.length >= 4) {
         cornersStr = dto.corners
@@ -451,16 +479,51 @@ export class PlanCanvasComponent {
           .join(' ');
       } else {
         const half = 0.3 * S;
-        cornersStr = `${cx - half},${cy - half} ${cx + half},${cy - half} ${cx + half},${cy + half} ${cx - half},${cy + half}`;
+        const localCorners = [
+          { x: -half, y: -half },
+          { x: half, y: -half },
+          { x: half, y: half },
+          { x: -half, y: half },
+        ];
+        cornersStr = localCorners
+          .map((c) => {
+            const rx = c.x * cosR - c.y * sinR;
+            const ry = c.x * sinR + c.y * cosR;
+            return `${cx + rx},${cy - ry}`;
+          })
+          .join(' ');
       }
 
-      // Aim direction
+      // Rotation indicator (azimuth orientation pointer)
+      const rotLen = Math.max(16, 0.3 * S + 6);
+      const arrowW = 3.5;
+      const rdx = Math.cos(rotRad);
+      const rdy = Math.sin(rotRad);
+      const rotEndX = cx + rdx * rotLen;
+      const rotEndY = cy - rdy * rotLen;
+      const rBaseDist = rotLen - 5;
+      const rBaseX = cx + rdx * rBaseDist;
+      const rBaseY = cy - rdy * rBaseDist;
+      const rPerpX = -rdy * arrowW;
+      const rPerpY = rdx * arrowW;
+      const rotArrowLeftX = rBaseX + rPerpX;
+      const rotArrowLeftY = rBaseY - rPerpY;
+      const rotArrowRightX = rBaseX - rPerpX;
+      const rotArrowRightY = rBaseY + rPerpY;
+
+      // Aim direction (if tilted)
       const tilt = f.tiltAngle ?? 0;
-      const rot = (f.rotation ?? 0) * (Math.PI / 180);
       const hasAim = tilt > 0;
       const aimLen = 24;
-      const dx = Math.cos(rot);
-      const dy = Math.sin(rot);
+      let dx = rdx;
+      let dy = rdy;
+      if (f.aimDirection && (f.aimDirection.x !== 0 || f.aimDirection.y !== 0)) {
+        const mag = Math.hypot(f.aimDirection.x, f.aimDirection.y);
+        if (mag > 0.001) {
+          dx = f.aimDirection.x / mag;
+          dy = f.aimDirection.y / mag;
+        }
+      }
       const aimEndX = cx + dx * aimLen;
       const aimEndY = cy - dy * aimLen;
 
@@ -472,6 +535,12 @@ export class PlanCanvasComponent {
         hasAim,
         aimEndX,
         aimEndY,
+        rotEndX,
+        rotEndY,
+        rotArrowLeftX,
+        rotArrowLeftY,
+        rotArrowRightX,
+        rotArrowRightY,
         isSelected: f.id === selectedId,
       };
     });
