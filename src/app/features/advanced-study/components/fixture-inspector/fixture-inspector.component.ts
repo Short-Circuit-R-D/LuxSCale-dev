@@ -191,7 +191,43 @@ import type { VariantDetailResponseDto } from '../../../../core/variants/dtos/va
             </div>
           </div>
 
-          <!-- Section 4: Position (X, Y) -->
+          <!-- Section 4: Tilt Angle (°) -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-mono text-[11px] text-muted tracking-widest uppercase" for="fix-tilt" title="Tilt from straight down in degrees (0° = nadir downlight; >0° = wall wash or accent spotlight)">
+                Tilt Angle (°)
+              </label>
+              <span class="font-mono text-[10px] text-muted">
+                {{ f.tiltAngle ?? 0 }}°{{ (f.tiltAngle ?? 0) === 0 ? ' (Nadir)' : '' }}
+              </span>
+            </div>
+            <input
+              id="fix-tilt"
+              type="number"
+              min="0"
+              max="90"
+              step="5"
+              class="w-full px-2.5 py-1.5 bg-black border border-border rounded text-xs text-white font-mono focus:border-primary focus:outline-none"
+              [ngModel]="f.tiltAngle ?? 0"
+              (ngModelChange)="store.updateFixture(f.id!, { tiltAngle: toNum($event) })"
+              title="Tilt angle from vertical downlight (0° to 90°)"
+            />
+            <div class="flex items-center gap-1 mt-1.5">
+              @for (deg of [0, 15, 30, 45, 60]; track deg) {
+                <button
+                  type="button"
+                  class="flex-1 py-1 rounded bg-black/60 border border-border/60 font-mono text-[10px] text-muted hover:text-white transition-colors"
+                  [class.border-primary]="(f.tiltAngle ?? 0) === deg"
+                  (click)="store.updateFixture(f.id!, { tiltAngle: deg })"
+                  [title]="'Set tilt angle to ' + deg + '°'"
+                >
+                  {{ deg }}°
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Section 5: Position (X, Y) -->
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block font-mono text-[11px] text-muted tracking-widest uppercase mb-1" for="fix-x" title="Distance from room origin along X-axis (m)">

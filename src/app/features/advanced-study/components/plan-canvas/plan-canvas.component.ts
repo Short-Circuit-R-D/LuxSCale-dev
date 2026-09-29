@@ -456,11 +456,17 @@ export class PlanCanvasComponent {
 
       // Aim direction
       const tilt = f.tiltAngle ?? 0;
-      const rot = (f.rotation ?? 0) * (Math.PI / 180);
       const hasAim = tilt > 0;
       const aimLen = 24;
-      const dx = Math.cos(rot);
-      const dy = Math.sin(rot);
+      let dx = Math.cos((f.rotation ?? 0) * (Math.PI / 180));
+      let dy = Math.sin((f.rotation ?? 0) * (Math.PI / 180));
+      if (f.aimDirection && (f.aimDirection.x !== 0 || f.aimDirection.y !== 0)) {
+        const mag = Math.hypot(f.aimDirection.x, f.aimDirection.y);
+        if (mag > 0.001) {
+          dx = f.aimDirection.x / mag;
+          dy = f.aimDirection.y / mag;
+        }
+      }
       const aimEndX = cx + dx * aimLen;
       const aimEndY = cy - dy * aimLen;
 

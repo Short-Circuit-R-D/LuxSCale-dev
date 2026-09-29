@@ -422,17 +422,34 @@ export class AdvancedStudyStore {
     const res = this.lastResult();
     const activeResultVarId = res?.results?.[this.selectedVariantIndex()]?.variantId;
     const defaultVariant = fallbackVariantId ?? activeResultVarId ?? this.selectedVariantIds()[0] ?? null;
-    const list: FreeFixtureDto[] = fixtures.map((f, i) => ({
-      id: f.id || `F${i + 1}`,
-      x: Math.round(f.position.x * 100) / 100,
-      y: Math.round(f.position.y * 100) / 100,
-      z: Math.round(f.position.z * 100) / 100,
-      rotation: f.rotation,
-      tiltAngle: 0,
-      aimDirection: f.aimDirection,
-      variantId: f.variantId ?? defaultVariant,
-      iesRef: f.iesRef ?? null,
-    }));
+    const existingMap = new Map(this.freeFixtures().map((f) => [f.id, f]));
+
+    const list: FreeFixtureDto[] = fixtures.map((f, i) => {
+      const id = f.id || `F${i + 1}`;
+      const existing = existingMap.get(id);
+
+      let tilt = existing?.tiltAngle ?? 0;
+      if (
+        existing?.tiltAngle == null &&
+        f.aimDirection &&
+        (f.aimDirection.z > -0.9999 || f.aimDirection.x !== 0 || f.aimDirection.y !== 0)
+      ) {
+        const clampedZ = Math.min(1, Math.max(-1, -f.aimDirection.z));
+        tilt = Math.round(Math.acos(clampedZ) * (180 / Math.PI));
+      }
+
+      return {
+        id,
+        x: Math.round(f.position.x * 100) / 100,
+        y: Math.round(f.position.y * 100) / 100,
+        z: Math.round(f.position.z * 100) / 100,
+        rotation: f.rotation,
+        tiltAngle: tilt,
+        aimDirection: f.aimDirection,
+        variantId: f.variantId ?? existing?.variantId ?? defaultVariant,
+        iesRef: f.iesRef ?? existing?.iesRef ?? null,
+      };
+    });
     this.freeFixtures.set(list);
     this.isDirty.set(false);
   }
@@ -630,7 +647,7 @@ export class AdvancedStudyStore {
         y: f.y,
         z: f.z ?? mh,
         rotation: f.rotation ?? rot,
-        tiltAngle: 0,
+        tiltAngle: f.tiltAngle ?? 0,
         variantId: f.variantId || (!f.iesRef ? defaultVariant : null),
         iesRef: f.iesRef || null,
       }));

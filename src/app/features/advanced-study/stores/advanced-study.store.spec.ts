@@ -142,11 +142,17 @@ describe('AdvancedStudyStore', () => {
     expect(store.freeFixtures()[1].variantId).toBe('custom-panel-id');
     expect(store.freeFixtures()[1].iesRef).toBeNull();
 
+    // Tilt fixture
+    store.updateFixture('F1', { tiltAngle: 30 });
+    expect(store.freeFixtures()[0].tiltAngle).toBe(30);
+
     // Build request with free fixtures
     const freeReq = store.buildCalculateRequest(true);
     expect(freeReq.fixtures?.length).toBe(2);
     expect(freeReq.fixtures?.[0].x).toBe(2.37);
+    expect(freeReq.fixtures?.[0].tiltAngle).toBe(30);
     expect(freeReq.fixtures?.[1].variantId).toBe('custom-panel-id');
+    expect(freeReq.fixtures?.[1].tiltAngle).toBe(0);
     expect(freeReq.includeWallCeilingMatrices).toBe(true);
     expect(freeReq.grid).toBeUndefined();
   });
