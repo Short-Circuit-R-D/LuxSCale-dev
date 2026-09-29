@@ -276,6 +276,11 @@ export class AdvancedStudyPage implements OnInit {
     if (n != null && n >= 0) this.store.workPlaneHeight.set(n);
   }
 
+  onFloorZoneInput(value: unknown) {
+    const n = toMetric(value);
+    this.store.floorZone.set(n != null && n >= 0 ? n : null);
+  }
+
   onPhoneInput(value: string) {
     this.store.updateProject({ clientPhone: value });
     if (value) {

@@ -56,7 +56,7 @@ export class AdvancedStudyStore {
   readonly ceilingHeight = signal<number>(3.0);
   readonly mountingHeight = signal<number>(2.8);
   readonly workPlaneHeight = signal<number>(0.8);
-  readonly floorZone = signal<number | null>(0.5);
+  readonly floorZone = signal<number | null>(null);
   readonly wallZone = signal<number | null>(null);
 
 
@@ -596,6 +596,7 @@ export class AdvancedStudyStore {
     const mh = this.mountingHeight();
     const wh = this.workPlaneHeight();
     const fz = this.floorZone();
+    const floorZoneValue = fz != null && Number.isFinite(fz) && fz >= 0 ? fz : undefined;
     const wz = this.wallZone();
     const rot = this.luminaireRotation();
     const wr = this.wallReflectance();
@@ -627,7 +628,7 @@ export class AdvancedStudyStore {
       ceilingHeight: ch,
       mountingHeight: mh,
       workPlaneHeight: wh,
-      floorZone: fz,
+      floorZone: floorZoneValue,
       wallZone: wz,
       luminaireRotation: rot,
       wallReflectance: wr,
@@ -698,6 +699,7 @@ export class AdvancedStudyStore {
         ceilingHeight: this.ceilingHeight(),
         mountingHeight: this.mountingHeight(),
         workPlaneHeight: this.workPlaneHeight(),
+        floorZone: this.floorZone(),
         gridType: this.gridType(),
         countX: this.countX(),
         countY: this.countY(),
@@ -726,6 +728,7 @@ export class AdvancedStudyStore {
       else if (data.height) this.ceilingHeight.set(data.height);
       if (data.mountingHeight !== undefined) this.mountingHeight.set(data.mountingHeight);
       if (data.workPlaneHeight !== undefined) this.workPlaneHeight.set(data.workPlaneHeight);
+      if (data.floorZone !== undefined) this.floorZone.set(data.floorZone);
       if (data.countX) this.countX.set(data.countX);
       if (data.countY) this.countY.set(data.countY);
       if (data.selectedVariantIds) this.selectedVariantIds.set(data.selectedVariantIds);
@@ -740,6 +743,7 @@ export class AdvancedStudyStore {
     this.ceilingHeight.set(3.0);
     this.mountingHeight.set(2.8);
     this.workPlaneHeight.set(0.8);
+    this.floorZone.set(null);
     this.lastResult.set(null);
     this.freeFixtures.set([]);
     this.selectedFixtureId.set(null);

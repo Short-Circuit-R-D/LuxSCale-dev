@@ -61,6 +61,16 @@ describe('AdvancedStudyStore', () => {
     expect(req.grid?.count?.countY).toBe(2);
     expect(req.variantId).toBe('v-panel-600');
     expect(req.fixtures).toBeUndefined();
+    expect(req.floorZone).toBeUndefined();
+
+    // Verify setting custom floorZone
+    store.floorZone.set(0.3);
+    const reqWithFz = store.buildCalculateRequest(false);
+    expect(reqWithFz.floorZone).toBe(0.3);
+
+    // Verify clearing floorZone sends undefined so backend defaults it
+    store.floorZone.set(null);
+    expect(store.buildCalculateRequest(false).floorZone).toBeUndefined();
   });
 
   it('supports custom polygon mode and templates', () => {
